@@ -6,13 +6,14 @@ import ProgressIndicator from './components/ProgressIndicator';
 import NarrativeArcButton from './components/NarrativeArcButton';
 import StoryboardAssistant from './components/StoryboardAssistant';
 import PresentationViewer from './components/PresentationViewer';
+import LandingPage from './components/LandingPage';
 import { api } from './services/api';
 import { Storyboard } from './types';
 
-type Stage = 'input' | 'scraping' | 'storyboard' | 'generating' | 'presentation' | 'complete';
+type Stage = 'landing' | 'input' | 'scraping' | 'storyboard' | 'generating' | 'presentation' | 'complete';
 
 export default function App() {
-  const [stage, setStage] = useState<Stage>('input');
+  const [stage, setStage] = useState<Stage>('landing');
   const [url, setUrl] = useState('');
   const [storyboard, setStoryboard] = useState<Storyboard | null>(null);
   const [style, setStyle] = useState<'YC' | 'Finance'>('YC');
@@ -24,8 +25,10 @@ export default function App() {
   const [backendConnected, setBackendConnected] = useState<boolean | null>(null);
   const [assistantOpen, setAssistantOpen] = useState(false);
 
-  // Test backend connection on mount
+  // Test backend connection on mount (only if not on landing page)
   useEffect(() => {
+    if (stage === 'landing') return; // Don't test on landing page
+    
     const testConnection = async () => {
       try {
         await api.testConnection();
@@ -34,11 +37,14 @@ export default function App() {
       } catch (error: any) {
         setBackendConnected(false);
         console.error('❌ Backend connection failed:', error);
-        setError(`Cannot connect to backend: ${error.message}`);
+        // Don't set error on landing page
+        if (stage !== 'landing') {
+          setError(`Cannot connect to backend: ${error.message}`);
+        }
       }
     };
     testConnection();
-  }, []);
+  }, [stage]);
 
   const handleScrape = async () => {
     setStage('scraping');
@@ -102,7 +108,7 @@ export default function App() {
   };
 
   const handleReset = () => {
-    setStage('input');
+    setStage('landing');
     setUrl('');
     setStoryboard(null);
     setPresentationUrl('');
@@ -110,6 +116,19 @@ export default function App() {
     setDownloadUrl(undefined);
     setSlideCount(0);
     setError(null);
+  };
+
+  const handleStoryboardGenerated = (newStoryboard: Storyboard, outputType: 'video' | 'slides', style?: string) => {
+    setStoryboard(newStoryboard);
+    setStage('storyboard');
+    // If style was provided from landing page, map it to YC/Finance
+    if (style) {
+      if (style === 'vc-pitch') {
+        setStyle('YC');
+      } else {
+        setStyle('Finance');
+      }
+    }
   };
 
   const handleClosePresentation = () => {
@@ -193,14 +212,13 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm px-6 py-4">
-        <h1 className="text-2xl font-bold">AI Product Storyteller</h1>
-        <p className="text-gray-600">Transform websites into compelling presentations</p>
-      </header>
+      {/* Landing Page Stage */}
+      {stage === 'landing' && (
+        <LandingPage onStoryboardGenerated={handleStoryboardGenerated} />
+      )}
 
       {/* Backend Connection Status */}
-      {backendConnected === false && (
+      {stage !== 'landing' && backendConnected === false && (
         <div className="max-w-2xl mx-auto mt-4 px-4">
           <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
             <strong>⚠️ Warning: </strong>Cannot connect to backend server. Make sure it's running on port 3000.
@@ -209,7 +227,7 @@ export default function App() {
       )}
 
       {/* Error Message */}
-      {error && (
+      {stage !== 'landing' && error && (
         <div className="max-w-2xl mx-auto mt-4 px-4">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             <strong>Error: </strong>{error}
@@ -253,7 +271,7 @@ export default function App() {
           <div className="bg-white shadow-sm px-6 py-4 flex items-center justify-between border-b z-10">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => setStage('input')}
+                onClick={() => setStage('landing')}
                 className="text-gray-600 hover:text-gray-800 text-sm font-medium px-3 py-1 rounded hover:bg-gray-100 transition-colors"
               >
                 ← Back

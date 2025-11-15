@@ -22,70 +22,41 @@ export class SlideGenerator {
       console.log(`   Input length: ${gammaInput.length} characters`);
       console.log(`   Style: ${style}`);
       
-      // Try different Gamma API endpoints (they may have changed)
-      const endpoints = [
-        'https://api.gamma.app/v1/generations',
-        'https://api.gamma.app/v1.0/generations',
-        'https://public-api.gamma.app/v1/generations',
-        'https://public-api.gamma.app/v1.0/generations',
-        'https://api.gamma.app/api/v1/generations',
-        'https://api.gamma.app/generations',
-      ];
+      // Use the correct Gamma API endpoint and format based on documentation
+      const endpoint = 'https://public-api.gamma.app/v1.0/generations';
       
-      let response;
-      let lastError: any = null;
+      console.log(`   Using endpoint: ${endpoint}`);
       
-      for (const endpoint of endpoints) {
-        try {
-          console.log(`   Trying endpoint: ${endpoint}`);
-          response = await axios.post(
-            endpoint,
-            {
-              inputText: gammaInput,
-              contentType: 'presentation',
-              theme: style === 'YC' ? 'minimal' : 'professional',
-              language: 'en',
-              detailLevel: 'standard'
-            },
-            {
-              headers: {
-                'Authorization': `Bearer ${this.apiKey}`,
-                'X-API-KEY': this.apiKey,
-                'Content-Type': 'application/json'
-              },
-              validateStatus: (status) => status < 500,
-            }
-          );
-          
-          // If we got a response (even if error), check if it's a 404
-          if (response.status === 404) {
-            console.log(`   ❌ Endpoint ${endpoint} returned 404, trying next...`);
-            lastError = new Error(`Endpoint not found: ${endpoint}`);
-            continue; // Try next endpoint
-          }
-          
-          // If we got a non-404 error, this might be the right endpoint but with wrong params
-          if (response.status >= 400 && response.status !== 404) {
-            console.log(`   ⚠️ Endpoint ${endpoint} returned ${response.status}, but might be correct endpoint`);
-            break; // Use this response, might be auth/param issue
-          }
-          
-          // Success!
-          if (response.status < 400) {
-            console.log(`   ✅ Success with endpoint: ${endpoint}`);
-            break;
-          }
-        } catch (apiError: any) {
-          console.log(`   ❌ Endpoint ${endpoint} failed: ${apiError.message}`);
-          lastError = apiError;
-          continue; // Try next endpoint
+      // Build request body according to Gamma API documentation
+      const requestBody = {
+        inputText: gammaInput,
+        textMode: 'generate', // Required: 'generate', 'condense', or 'preserve'
+        format: 'presentation',
+        numCards: storyboard.nodes.length,
+        cardSplit: 'inputTextBreaks', // Use --- breaks in inputText
+        additionalInstructions: style === 'YC' 
+          ? 'Use YC-style bold statements, clean visuals, and data-driven insights. Make it compelling for investors.'
+          : 'Use a professional, finance-style presentation with detailed analysis and formal tone.',
+        textOptions: {
+          amount: 'medium',
+          tone: style === 'YC' ? 'startup pitch' : 'professional',
+          audience: style === 'YC' ? 'investors, VCs' : 'stakeholders, executives',
+          language: 'en'
+        },
+        // Optional: imageOptions, cardOptions, sharingOptions can be added later
+      };
+      
+      const response = await axios.post(
+        endpoint,
+        requestBody,
+        {
+          headers: {
+            'X-API-KEY': this.apiKey, // Gamma uses X-API-KEY, not Authorization Bearer
+            'Content-Type': 'application/json'
+          },
+          validateStatus: (status) => status < 500,
         }
-      }
-      
-      // If we tried all endpoints and none worked
-      if (!response) {
-        throw new Error(`All Gamma API endpoints failed. Last error: ${lastError?.message || 'Unknown'}`);
-      }
+      );
       
       // Check for error responses
       if (response.status >= 400) {
@@ -107,7 +78,8 @@ export class SlideGenerator {
         throw new Error(errorMessage);
       }
       
-      const generationId = response.data.id || response.data.generationId;
+      // Gamma API returns generationId (not id)
+      const generationId = response.data.generationId || response.data.id;
       if (!generationId) {
         console.error('❌ No generation ID in response:', response.data);
         throw new Error('Gamma API did not return a generation ID');
@@ -118,10 +90,10 @@ export class SlideGenerator {
       // Poll for completion
       const result = await this.pollStatus(generationId);
       
-      // Gamma API returns different URL formats - try to get the presentation URL
-      const presentationUrl = result.presentationUrl || result.url || result.viewUrl || result.exportUrl || result.presentation?.url;
-      const embedUrl = result.embedUrl || result.iframeUrl || result.presentation?.embedUrl;
-      const downloadUrl = result.downloadUrl || result.exportUrl || result.presentation?.downloadUrl;
+      // Gamma API returns gammaUrl when completed (according to docs)
+      const presentationUrl = result.gammaUrl || result.presentationUrl || result.url || result.viewUrl;
+      const embedUrl = result.embedUrl || result.iframeUrl;
+      const downloadUrl = result.downloadUrl || result.exportUrl;
       
       if (!presentationUrl) {
         console.warn('⚠️ No presentation URL found in Gamma response:', JSON.stringify(result, null, 2));
@@ -162,22 +134,17 @@ export class SlideGenerator {
   }
 
   private formatForGamma(storyboard: Storyboard, style: 'YC' | 'Finance'): string {
-    const stylePrefix = style === 'YC' 
-      ? 'Create a minimalist, YC-style pitch deck with bold statements and data-driven insights.'
-      : 'Create a professional, finance-style presentation with detailed analysis and formal tone.';
-    
+    // Format for Gamma API with cardSplit: "inputTextBreaks"
+    // Use \n---\n to separate slides (cards)
     const slides = storyboard.nodes.map((node) => {
-      return `
-# ${node.title}
+      return `# ${node.title}
 
 ${node.content}
 
-${node.speakerNotes ? `\n**Speaker Notes:** ${node.speakerNotes}` : ''}
-
----`;
-    }).join('\n\n');
+${node.speakerNotes ? `\n**Speaker Notes:** ${node.speakerNotes}` : ''}`;
+    }).join('\n\n---\n\n'); // Use --- to separate cards as per Gamma API docs
     
-    return `${stylePrefix}\n\n${slides}`;
+    return slides;
   }
 
   private async pollStatus(generationId: string): Promise<any> {
@@ -188,45 +155,17 @@ ${node.speakerNotes ? `\n**Speaker Notes:** ${node.speakerNotes}` : ''}
     
     for (let i = 0; i < maxAttempts; i++) {
       try {
-        // Try different endpoint variations
-        const baseUrls = [
-          'https://api.gamma.app/v1',
-          'https://api.gamma.app/v1.0',
-          'https://public-api.gamma.app/v1',
-          'https://public-api.gamma.app/v1.0',
-          'https://api.gamma.app/api/v1',
-          'https://api.gamma.app',
-        ];
-        
-        let response;
-        let lastPollError: any = null;
-        
-        for (const baseUrl of baseUrls) {
-          try {
-            const pollUrl = `${baseUrl}/generations/${generationId}`;
-            response = await axios.get(
-              pollUrl,
-              {
-                headers: { 
-                  'Authorization': `Bearer ${this.apiKey}`,
-                  'X-API-KEY': this.apiKey
-                },
-                validateStatus: (status) => status < 500,
-              }
-            );
-            
-            if (response.status !== 404) {
-              break; // Found working endpoint
-            }
-          } catch (pollError: any) {
-            lastPollError = pollError;
-            continue; // Try next endpoint
+        // Use the correct polling endpoint
+        const pollUrl = `https://public-api.gamma.app/v1.0/generations/${generationId}`;
+        const response = await axios.get(
+          pollUrl,
+          {
+            headers: { 
+              'X-API-KEY': this.apiKey // Gamma uses X-API-KEY
+            },
+            validateStatus: (status) => status < 500,
           }
-        }
-        
-        if (!response) {
-          throw new Error(`All polling endpoints failed. Last error: ${lastPollError?.message || 'Unknown'}`);
-        }
+        );
         
         if (response.status >= 400) {
           if (response.status === 404) {

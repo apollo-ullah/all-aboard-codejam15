@@ -37,13 +37,13 @@ export default function StoryboardCanvas({ initialNodes, onNodesChange }: Storyb
         : { x: index * 350, y: 0 };
       
       return {
-        id: node.id,
-        type: 'storyNode',
+      id: node.id,
+      type: 'storyNode',
         position,
-        data: {
-          ...node,
+      data: {
+        ...node,
           position, // Store position in data too
-        }
+      }
       };
     });
     console.log('✅ Created flow nodes:', flowNodes.length, flowNodes);
@@ -69,7 +69,7 @@ export default function StoryboardCanvas({ initialNodes, onNodesChange }: Storyb
           id: `edge-${i}-${sourceId}-${targetId}`,
           source: sourceId,
           target: targetId,
-          animated: true,
+      animated: true,
         });
       }
     }
@@ -98,7 +98,7 @@ export default function StoryboardCanvas({ initialNodes, onNodesChange }: Storyb
 
   // Track previous nodeIdsString to detect actual changes
   const prevNodeIdsStringRef = useRef<string>('');
-  
+
   // Update nodes when initialNodes actually change (using stable reference)
   useEffect(() => {
     // Only update if the node IDs string actually changed
@@ -239,17 +239,17 @@ export default function StoryboardCanvas({ initialNodes, onNodesChange }: Storyb
       clearTimeout(syncTimeoutRef.current);
     }
     syncTimeoutRef.current = setTimeout(() => {
-      const storyNodes = nodes.map(n => ({
-        ...n.data,
-        position: n.position
-      } as StoryNodeType));
+    const storyNodes = nodes.map(n => ({
+      ...n.data,
+      position: n.position
+    } as StoryNodeType));
       
       // Only call if nodes actually changed (compare IDs and positions)
       const currentNodesStr = JSON.stringify(storyNodes.map(n => ({ id: n.id, position: n.position })));
       if (currentNodesStr !== lastSyncedNodes.current) {
         console.log('🔄 Syncing node changes to parent');
         lastSyncedNodes.current = currentNodesStr;
-        onNodesChange(storyNodes);
+    onNodesChange(storyNodes);
       }
     }, 500); // Increased debounce time to reduce sync frequency
     
@@ -407,7 +407,7 @@ export default function StoryboardCanvas({ initialNodes, onNodesChange }: Storyb
   }, [nodes, setNodes, setEdges, handleNodeEdit, handleNodeDelete, onNodesChange]);
 
   console.log('🎨 Rendering canvas with', nodes.length, 'nodes and', edges.length, 'edges');
-  
+
   return (
     <div className="h-full w-full relative" style={{ minHeight: '600px' }}>
       {/* Add Node Button */}

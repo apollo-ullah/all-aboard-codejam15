@@ -274,12 +274,12 @@ router.post('/scrape', async (req, res) => {
     
     // Ensure response hasn't been sent yet
     if (!res.headersSent) {
-      res.status(500).json({ 
-        error: userFriendlyMessage,
-        message: errorMessage,
-        details: 'Using Browser.cash Agent API for web scraping',
-        requestId: requestId,
-        timestamp: new Date().toISOString()
+    res.status(500).json({ 
+      error: userFriendlyMessage,
+      message: errorMessage,
+      details: 'Using Browser.cash Agent API for web scraping',
+      requestId: requestId,
+      timestamp: new Date().toISOString()
       });
     } else {
       console.error(`   ⚠️ [${requestId}] Response already sent, cannot send error response`);
@@ -356,7 +356,7 @@ router.post('/generate-slides', async (req, res) => {
     
     console.log(`📊 Generating ${style} style slides...`);
     const result = await slideGenerator.generate(storyboard, style as 'YC' | 'Finance');
-
+    
     res.json({
       success: true,
       presentationUrl: result.presentationUrl,

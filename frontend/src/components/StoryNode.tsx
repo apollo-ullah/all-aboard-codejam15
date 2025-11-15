@@ -64,7 +64,7 @@ export default function StoryNode({ data }: StoryNodeProps) {
           {data.type}
         </span>
         <div className="flex gap-1">
-          {!isEditing ? (
+        {!isEditing ? (
             <>
               <button 
                 onClick={() => setShowNotes(!showNotes)} 
@@ -74,12 +74,12 @@ export default function StoryNode({ data }: StoryNodeProps) {
               >
                 <FileText size={14} />
               </button>
-              <button 
-                onClick={() => setIsEditing(true)} 
+          <button 
+            onClick={() => setIsEditing(true)} 
                 className="text-gray-500 hover:text-gray-700 p-1"
-                aria-label="Edit node"
+            aria-label="Edit node"
                 title="Edit"
-              >
+          >
                 <Edit2 size={14} />
               </button>
               {data.onDelete && (
@@ -90,29 +90,29 @@ export default function StoryNode({ data }: StoryNodeProps) {
                   title="Delete"
                 >
                   <Trash2 size={14} />
-                </button>
+          </button>
               )}
             </>
-          ) : (
-            <div className="flex gap-1">
-              <button 
-                onClick={handleSave} 
+        ) : (
+          <div className="flex gap-1">
+            <button 
+              onClick={handleSave} 
                 className="text-green-600 hover:text-green-800 p-1"
-                aria-label="Save changes"
+              aria-label="Save changes"
                 title="Save"
-              >
-                <Check size={16} />
-              </button>
-              <button 
-                onClick={handleCancel} 
+            >
+              <Check size={16} />
+            </button>
+            <button 
+              onClick={handleCancel} 
                 className="text-red-600 hover:text-red-800 p-1"
-                aria-label="Cancel editing"
+              aria-label="Cancel editing"
                 title="Cancel"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          )}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
         </div>
       </div>
 

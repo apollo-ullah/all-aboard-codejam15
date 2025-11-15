@@ -82,14 +82,14 @@ export class BrowserCashService {
         console.log(`   📄 Step 2: Scraping up to 5 adjacent pages...`);
         for (let i = 0; i < Math.min(5, relevantLinks.length); i++) {
           const link = relevantLinks[i];
-          try {
+        try {
             console.log(`   📄 Scraping adjacent page ${i + 1}/5: ${link}`);
-            const page = await this.scrapePage(link);
-            adjacentPages.push(page);
+          const page = await this.scrapePage(link);
+          adjacentPages.push(page);
             console.log(`   ✅ Scraped: ${link} - "${page.title}"`);
-          } catch (error: any) {
+        } catch (error: any) {
             console.warn(`   ⚠️ Failed to scrape ${link}: ${error.message}`);
-            // Continue with other pages
+          // Continue with other pages
           }
         }
       }
@@ -125,18 +125,18 @@ LINKS: [List all links found on the page, one per line, with full URLs]
 Please be comprehensive and include all important information from the page.`;
 
     try {
-      // Create scraping task
-      const taskId = await this.createTask(prompt);
-      
-      // Poll for completion
-      const result = await this.pollTask(taskId);
+    // Create scraping task
+    const taskId = await this.createTask(prompt);
+    
+    // Poll for completion
+    const result = await this.pollTask(taskId);
       
       // Validate that we got a result
       if (!result || result.trim().length === 0) {
         throw new Error('Task completed but returned empty result');
       }
-      
-      // Parse the result into structured data
+    
+    // Parse the result into structured data
       const parsed = this.parseScrapeResult(url, result);
       
       // Validate parsed result
