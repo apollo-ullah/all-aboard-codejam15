@@ -24,7 +24,9 @@ export interface ScrapeResponse {
 
 export interface GenerateSlidesResponse {
   success: boolean;
-  downloadUrl: string;
+  presentationUrl: string;
+  embedUrl?: string;
+  downloadUrl?: string;
   slideCount: number;
 }
 

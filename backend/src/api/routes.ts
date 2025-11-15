@@ -3,6 +3,7 @@ import axios from 'axios';
 import { BrowserCashService } from '../services/BrowserCashService';
 import { LLMService } from '../services/LLMService';
 import { SlideGenerator } from '../services/SlideGenerator';
+import { StoryboardAssistantService } from '../services/StoryboardAssistantService';
 import { isValidUrl, normalizeUrl, validateStoryboard } from '../utils/validation';
 
 const router = express.Router();
@@ -286,6 +287,45 @@ router.post('/scrape', async (req, res) => {
   }
 });
 
+// POST /api/improve-storyboard - Chat with AI assistant about storyboard
+router.post('/improve-storyboard', async (req, res) => {
+  try {
+    const { storyboard, style, message } = req.body;
+    
+    if (!storyboard || !style || !message) {
+      return res.status(400).json({ error: 'Missing storyboard, style, or message' });
+    }
+    
+    if (!['YC', 'Finance'].includes(style)) {
+      return res.status(400).json({ error: 'Style must be "YC" or "Finance"' });
+    }
+    
+    if (!process.env.OPENAI_KEY) {
+      return res.status(500).json({ error: 'OpenAI API key not configured' });
+    }
+    
+    const assistant = new StoryboardAssistantService({
+      apiKey: process.env.OPENAI_KEY,
+    });
+    
+    console.log(`💬 AI Assistant request: ${message.substring(0, 50)}...`);
+    const result = await assistant.chatAboutStoryboard(storyboard, style, message);
+    
+    res.json({
+      success: true,
+      response: result.response,
+      updatedStoryboard: result.updatedStoryboard,
+    });
+    
+  } catch (error: any) {
+    console.error('Error in /improve-storyboard:', error);
+    res.status(500).json({ 
+      error: 'Failed to get AI response',
+      message: error.message 
+    });
+  }
+});
+
 // POST /api/generate-slides - Generate slides from edited storyboard
 router.post('/generate-slides', async (req, res) => {
   try {
@@ -316,9 +356,11 @@ router.post('/generate-slides', async (req, res) => {
     
     console.log(`📊 Generating ${style} style slides...`);
     const result = await slideGenerator.generate(storyboard, style as 'YC' | 'Finance');
-    
+
     res.json({
       success: true,
+      presentationUrl: result.presentationUrl,
+      embedUrl: result.embedUrl,
       downloadUrl: result.downloadUrl,
       slideCount: result.slideCount
     });
