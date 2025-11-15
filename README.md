@@ -6,7 +6,7 @@ Transform website URLs into professional slide decks with an interactive storybo
 
 This AI-powered hackathon project automatically:
 
-1. Scrapes websites using Browser.cash API
+1. Scrapes websites using Browser.cash Agent API
 2. Generates editable storyboards using OpenAI GPT
 3. Creates professional presentations using GAMMA API
 
@@ -24,7 +24,7 @@ This AI-powered hackathon project automatically:
 
 - **Frontend**: React + TypeScript, React Flow, Tailwind CSS
 - **Backend**: Node.js + Express + TypeScript
-- **Web Scraping**: Browser.cash API
+- **Web Scraping**: Browser.cash Agent API
 - **LLM**: OpenAI GPT-4o
 - **Slide Generation**: GAMMA API v1.0
 
@@ -34,9 +34,9 @@ This AI-powered hackathon project automatically:
 
 - Node.js 20+ and npm
 - API keys for:
-  - Browser.cash (https://dash.browser.cash) - Agent API and Browser API keys
-  - OpenAI (https://platform.openai.com)
-  - GAMMA API
+  - Browser.cash Agent API (https://browser.cash) - For web scraping
+  - OpenAI (https://platform.openai.com) - For storyboard generation
+  - GAMMA API - For slide generation
 
 ### Backend Setup
 
@@ -154,7 +154,7 @@ Generates slides from an edited storyboard.
 
 ## Notes
 
-- Browser.cash API format may need adjustment based on their actual documentation
+- Browser.cash Agent API is used for intelligent web scraping with AI agents
 - GAMMA API v1.0 endpoints may need verification
 - Currently supports website URLs only (GitHub support coming later)
 

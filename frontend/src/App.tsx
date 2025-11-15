@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StoryboardCanvas from './components/StoryboardCanvas';
 import StyleSelector from './components/StyleSelector';
 import UrlInput from './components/UrlInput';
@@ -15,18 +15,61 @@ export default function App() {
   const [style, setStyle] = useState<'YC' | 'Finance'>('YC');
   const [downloadUrl, setDownloadUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [backendConnected, setBackendConnected] = useState<boolean | null>(null);
+
+  // Test backend connection on mount
+  useEffect(() => {
+    const testConnection = async () => {
+      try {
+        await api.testConnection();
+        setBackendConnected(true);
+        console.log('✅ Backend connection verified');
+      } catch (error: any) {
+        setBackendConnected(false);
+        console.error('❌ Backend connection failed:', error);
+        setError(`Cannot connect to backend: ${error.message}`);
+      }
+    };
+    testConnection();
+  }, []);
 
   const handleScrape = async () => {
     setStage('scraping');
     setError(null);
     
+    // Test connection first
+    try {
+      await api.testConnection();
+      setBackendConnected(true);
+    } catch (error: any) {
+      setBackendConnected(false);
+      setError(`Cannot connect to backend: ${error.message}`);
+      setStage('input');
+      return;
+    }
+    
     try {
       const response = await api.scrapeWebsite(url);
+      console.log('📦 Received storyboard response:', response);
+      console.log('📊 Storyboard nodes:', response.storyboard?.nodes);
+      console.log('📊 Number of nodes:', response.storyboard?.nodes?.length);
+      if (response.storyboard?.nodes) {
+        response.storyboard.nodes.forEach((node, idx) => {
+          console.log(`   Node ${idx}:`, {
+            id: node.id,
+            type: node.type,
+            title: node.title,
+            position: node.position
+          });
+        });
+      }
       setStoryboard(response.storyboard);
       setStage('storyboard');
     } catch (error: any) {
       console.error('Scrape error:', error);
-      setError(error.response?.data?.error || error.message || 'Failed to scrape website');
+      // Use the detailed error message from the API client
+      const errorMsg = error.message || error.response?.data?.error || 'Failed to scrape website';
+      setError(errorMsg);
       setStage('input');
     }
   };
@@ -56,6 +99,76 @@ export default function App() {
     setError(null);
   };
 
+  // Test function to load dummy storyboard data
+  const handleLoadTestData = () => {
+    const dummyStoryboard: Storyboard = {
+      title: 'Test Product',
+      tagline: 'A test product for debugging',
+      nodes: [
+        {
+          id: 'node-1',
+          type: 'title',
+          title: 'Test Product',
+          content: 'This is a test title node',
+          speakerNotes: 'Welcome to our test product presentation',
+          position: { x: 0, y: 0 }
+        },
+        {
+          id: 'node-2',
+          type: 'problem',
+          title: 'The Problem',
+          content: 'Users struggle with complex workflows',
+          speakerNotes: 'Many users find it difficult to manage complex workflows',
+          position: { x: 350, y: 0 }
+        },
+        {
+          id: 'node-3',
+          type: 'solution',
+          title: 'Our Solution',
+          content: 'A simple, intuitive platform',
+          speakerNotes: 'We provide a simple and intuitive platform',
+          position: { x: 700, y: 0 }
+        },
+        {
+          id: 'node-4',
+          type: 'feature',
+          title: 'Feature 1',
+          content: 'Easy to use interface',
+          speakerNotes: 'Our interface is designed to be easy to use',
+          position: { x: 1050, y: 0 }
+        },
+        {
+          id: 'node-5',
+          type: 'feature',
+          title: 'Feature 2',
+          content: 'Powerful automation',
+          speakerNotes: 'Automate your workflows with powerful tools',
+          position: { x: 1400, y: 0 }
+        },
+        {
+          id: 'node-6',
+          type: 'benefit',
+          title: 'Key Benefits',
+          content: 'Save time and increase productivity',
+          speakerNotes: 'Users save time and increase productivity',
+          position: { x: 1750, y: 0 }
+        },
+        {
+          id: 'node-7',
+          type: 'cta',
+          title: 'Get Started',
+          content: 'Sign up today and get started',
+          speakerNotes: 'Sign up today to get started with our platform',
+          position: { x: 2100, y: 0 }
+        }
+      ]
+    };
+    console.log('🧪 Loading test storyboard:', dummyStoryboard);
+    setStoryboard(dummyStoryboard);
+    setStage('storyboard');
+    setError(null);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -63,6 +176,15 @@ export default function App() {
         <h1 className="text-2xl font-bold">AI Product Storyteller</h1>
         <p className="text-gray-600">Transform websites into compelling presentations</p>
       </header>
+
+      {/* Backend Connection Status */}
+      {backendConnected === false && (
+        <div className="max-w-2xl mx-auto mt-4 px-4">
+          <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+            <strong>⚠️ Warning: </strong>Cannot connect to backend server. Make sure it's running on port 3000.
+          </div>
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (
@@ -75,12 +197,23 @@ export default function App() {
 
       {/* Input Stage */}
       {stage === 'input' && (
-        <UrlInput
-          url={url}
-          onUrlChange={setUrl}
-          onScrape={handleScrape}
-          isLoading={false}
-        />
+        <div className="max-w-2xl mx-auto mt-20">
+          <UrlInput
+            url={url}
+            onUrlChange={setUrl}
+            onScrape={handleScrape}
+            isLoading={false}
+          />
+          {/* Test button for dummy data */}
+          <div className="mt-4 text-center">
+            <button
+              onClick={handleLoadTestData}
+              className="text-sm text-blue-600 hover:text-blue-800 underline"
+            >
+              🧪 Load Test Data (Debug: Display dummy nodes)
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Scraping Stage */}

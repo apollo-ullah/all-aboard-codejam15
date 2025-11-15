@@ -12,6 +12,11 @@ export class LLMService {
     const prompt = this.buildPrompt(scrapedData);
     
     try {
+      console.log('🤖 Calling OpenAI API to generate storyboard...');
+      console.log(`   Prompt length: ${prompt.length} characters`);
+      console.log(`   Main page content: ${scrapedData.mainPage.content.length} chars`);
+      console.log(`   Adjacent pages: ${scrapedData.adjacentPages.length}`);
+      
       const response = await this.client.chat.completions.create({
         model: 'gpt-4o', // Using GPT-4o, can be changed to gpt-4-turbo or gpt-3.5-turbo
         messages: [
@@ -29,16 +34,26 @@ export class LLMService {
         max_tokens: 4096,
       });
       
+      console.log('✅ OpenAI API response received');
+      
       const text = response.choices[0]?.message?.content || '';
       if (!text) {
+        console.error('❌ Empty response from OpenAI');
         throw new Error('Empty response from OpenAI');
       }
       
+      console.log(`   Response length: ${text.length} characters`);
       const storyboard = this.parseStoryboard(text);
+      console.log(`✅ Storyboard parsed successfully: ${storyboard.nodes.length} nodes`);
       
       return storyboard;
     } catch (error: any) {
-      console.error('Error generating storyboard:', error);
+      console.error('❌ Error generating storyboard:', error);
+      console.error('   Error type:', error.constructor.name);
+      console.error('   Error message:', error.message);
+      if (error.response) {
+        console.error('   OpenAI API error:', error.response.status, error.response.data);
+      }
       throw new Error(`Failed to generate storyboard: ${error.message}`);
     }
   }
