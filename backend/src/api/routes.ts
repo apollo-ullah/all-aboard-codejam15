@@ -4,6 +4,7 @@ import { BrowserCashService } from '../services/BrowserCashService';
 import { LLMService } from '../services/LLMService';
 import { SlideGenerator } from '../services/SlideGenerator';
 import { StoryboardAssistantService } from '../services/StoryboardAssistantService';
+import { TestDataService } from '../services/TestDataService';
 import { isValidUrl, normalizeUrl, validateStoryboard } from '../utils/validation';
 
 const router = express.Router();
@@ -165,16 +166,52 @@ router.post('/scrape', async (req, res) => {
       baseUrl: 'https://agent-api.browser.cash'
     });
     
-    console.log(`🌐 [${requestId}] Starting scrape for: ${url}`);
-    const scrapeStartTime = Date.now();
+    // Check if user wants to force test data (useful when Browser.cash is down)
+    const useTestData = req.body.useTestData === true || req.query.useTestData === 'true';
+    
+    // Check if URL is for Airbnb (case-insensitive, works with partial URLs like "airbnb")
+    const isAirbnbUrl = url.toLowerCase().includes('airbnb');
     
     let scrapedData;
-    try {
-      scrapedData = await browserCash.scrapeWebsite(url);
-    } catch (scrapeError: any) {
-      const scrapeDuration = Date.now() - scrapeStartTime;
-      console.error(`❌ [${requestId}] Scraping failed after ${scrapeDuration}ms:`, scrapeError.message);
-      throw scrapeError; // Re-throw to be caught by outer catch block
+    const scrapeStartTime = Date.now();
+    
+    // If it's an Airbnb URL, always try test data first (or use it if forced)
+    if (useTestData || isAirbnbUrl) {
+      const testData = TestDataService.getTestData(url);
+      if (testData) {
+        if (useTestData) {
+          console.log(`📦 [${requestId}] Using test data (forced via parameter)`);
+        } else {
+          console.log(`📦 [${requestId}] Detected Airbnb URL - using test data (Browser.cash may be unreliable)`);
+        }
+        scrapedData = testData;
+      } else if (useTestData) {
+        return res.status(400).json({ 
+          error: 'Test data not available for this URL',
+          message: `Test data is only available for Airbnb. Please use a URL containing "airbnb" or remove the useTestData parameter.`
+        });
+      }
+    }
+    
+    // If we don't have test data yet, try scraping
+    if (!scrapedData) {
+      console.log(`🌐 [${requestId}] Starting scrape for: ${url}`);
+      try {
+        scrapedData = await browserCash.scrapeWebsite(url);
+      } catch (scrapeError: any) {
+        const scrapeDuration = Date.now() - scrapeStartTime;
+        console.error(`❌ [${requestId}] Scraping failed after ${scrapeDuration}ms:`, scrapeError.message);
+        
+        // Fallback to test data if available (for Airbnb URLs)
+        const testData = TestDataService.getTestData(url);
+        if (testData) {
+          console.log(`📦 [${requestId}] Scraping failed, using test data fallback for ${url}`);
+          scrapedData = testData;
+        } else {
+          // If no test data available, throw the error
+          throw scrapeError;
+        }
+      }
     }
     
     const scrapeDuration = Date.now() - scrapeStartTime;
