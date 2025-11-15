@@ -319,6 +319,14 @@ export async function extractRepoContext(repoUrl) {
   const browser = await createBrowser();
   const page = (await browser.pages())[0] || (await browser.newPage());
 
+  const client = await page.target().createCDPSession();
+
+  // Disable noisy domains that cause corrupt JSON frames
+  await client.send("Network.disable");
+  await client.send("Log.disable");
+  await client.send("Runtime.disable");
+  await client.send("Debugger.disable");
+
   console.log(`🔍 Loading repo: ${normalizedUrl}`);
   await page.goto(normalizedUrl, {
     waitUntil: "domcontentloaded",
@@ -371,7 +379,7 @@ export async function extractRepoContext(repoUrl) {
 // -----------------------------------------
 
 // ⚠️ Change this to any repo you want to test
-const TEST_REPO = "https://github.com/wlsf82/frontend-and-backend";
+const TEST_REPO = "https://github.com/kevinhe04/picky-eats";
 
 async function run() {
   try {
