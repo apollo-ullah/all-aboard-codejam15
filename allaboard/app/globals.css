@@ -1,0 +1,218 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated color palette to match STORYTEX purple design system */
+  --background: 249 247 252; /* #F9F7FC - off-white with slight purple tint */
+  --foreground: 62 56 117; /* #3E3875 - deep purple */
+  --card: 255 255 255 / 0.7; /* translucent white for glass effect */
+  --card-foreground: 62 56 117;
+  --popover: 255 255 255;
+  --popover-foreground: 62 56 117;
+  --primary: 107 91 149; /* #6B5B95 - medium purple */
+  --primary-foreground: 250 249 247;
+  --secondary: 197 187 227; /* #C5BBE3 - light lavender */
+  --secondary-foreground: 62 56 117;
+  --muted: 197 187 227 / 0.3;
+  --muted-foreground: 107 91 149;
+  --accent: 107 91 149 / 0.1;
+  --accent-foreground: 62 56 117;
+  --destructive: 239 68 68;
+  --destructive-foreground: 255 255 255;
+  --border: 197 187 227 / 0.4;
+  --input: 197 187 227 / 0.5;
+  --ring: 107 91 149;
+  --chart-1: 107 91 149;
+  --chart-2: 197 187 227;
+  --chart-3: 62 56 117;
+  --chart-4: 184 172 213;
+  --chart-5: 143 129 179;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: 24 21 42;
+  --foreground: 250 249 247;
+  --card: 62 56 117 / 0.3;
+  --card-foreground: 250 249 247;
+  --popover: 62 56 117;
+  --popover-foreground: 250 249 247;
+  --primary: 197 187 227;
+  --primary-foreground: 62 56 117;
+  --secondary: 107 91 149;
+  --secondary-foreground: 250 249 247;
+  --muted: 107 91 149 / 0.3;
+  --muted-foreground: 197 187 227;
+  --accent: 197 187 227 / 0.1;
+  --accent-foreground: 250 249 247;
+  --destructive: 220 38 38;
+  --destructive-foreground: 250 249 247;
+  --border: 107 91 149 / 0.4;
+  --input: 107 91 149 / 0.5;
+  --ring: 197 187 227;
+}
+
+@theme inline {
+  --font-sans: 'Inter', ui-sans-serif, system-ui;
+  --color-background: rgb(var(--background));
+  --color-foreground: rgb(var(--foreground));
+  --color-card: rgb(var(--card));
+  --color-card-foreground: rgb(var(--card-foreground));
+  --color-popover: rgb(var(--popover));
+  --color-popover-foreground: rgb(var(--popover-foreground));
+  --color-primary: rgb(var(--primary));
+  --color-primary-foreground: rgb(var(--primary-foreground));
+  --color-secondary: rgb(var(--secondary));
+  --color-secondary-foreground: rgb(var(--secondary-foreground));
+  --color-muted: rgb(var(--muted));
+  --color-muted-foreground: rgb(var(--muted-foreground));
+  --color-accent: rgb(var(--accent));
+  --color-accent-foreground: rgb(var(--accent-foreground));
+  --color-destructive: rgb(var(--destructive));
+  --color-destructive-foreground: rgb(var(--destructive-foreground));
+  --color-border: rgb(var(--border));
+  --color-input: rgb(var(--input));
+  --color-ring: rgb(var(--ring));
+  --color-chart-1: rgb(var(--chart-1));
+  --color-chart-2: rgb(var(--chart-2));
+  --color-chart-3: rgb(var(--chart-3));
+  --color-chart-4: rgb(var(--chart-4));
+  --color-chart-5: rgb(var(--chart-5));
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Enhanced glass effect with better backdrop blur */
+.glass {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(197, 187, 227, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass:hover {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(197, 187, 227, 0.3);
+}
+
+.dark .glass {
+  background: rgba(62, 56, 117, 0.25);
+  border: 1px solid rgba(107, 91, 149, 0.25);
+}
+
+.dark .glass:hover {
+  background: rgba(62, 56, 117, 0.35);
+  border: 1px solid rgba(107, 91, 149, 0.35);
+}
+
+/* Smooth expand animation for menus */
+@keyframes menuEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.mode-menu-enter {
+  animation: menuEnter 0.15s ease-out;
+}
+
+.advanced-options-enter {
+  animation: menuEnter 0.2s ease-out;
+}
+
+/* Smooth glow effect for interactive elements */
+@keyframes glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(107, 91, 149, 0.3),
+                0 0 40px rgba(107, 91, 149, 0.1);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(107, 91, 149, 0.5),
+                0 0 60px rgba(107, 91, 149, 0.2);
+  }
+}
+
+.glow-subtle {
+  animation: glow 3s ease-in-out infinite;
+}
+
+/* Shimmer effect for primary actions */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgb(107, 91, 149) 0%,
+    rgb(197, 187, 227) 50%,
+    rgb(107, 91, 149) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Network pattern animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Adding blur-in animation for character-by-character placeholder text reveal */
+@keyframes blurIn {
+  0% {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateX(-2px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateX(0);
+  }
+}
+
+.animate-blur-in {
+  animation: blurIn 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+/* Adding slow pulse animation for glowing orbs */
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 4s ease-in-out infinite;
+}
