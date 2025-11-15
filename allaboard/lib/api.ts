@@ -136,18 +136,24 @@ export const api = {
     }
   },
 
-  async improveStoryboard(storyboard: Storyboard, style: 'YC' | 'Finance', message: string): Promise<{ storyboard: Storyboard }> {
+  async improveStoryboard(storyboard: Storyboard, style: 'YC' | 'Finance', message: string): Promise<{ response: string; updatedStoryboard?: Storyboard }> {
     console.log('💬 Requesting storyboard improvement...');
     try {
-      const response = await apiClient.post('/api/improve-storyboard', {
+      const response = await apiClient.post<{ success: boolean; response: string; updatedStoryboard?: Storyboard }>('/api/improve-storyboard', {
         storyboard,
         style,
         message,
       });
-      console.log('✅ Storyboard improvement successful');
-      return response.data;
+      console.log('✅ Storyboard improvement successful:', response.data);
+      return {
+        response: response.data.response,
+        updatedStoryboard: response.data.updatedStoryboard,
+      };
     } catch (error: any) {
       console.error('❌ Storyboard improvement failed:', error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
       throw error;
     }
   },

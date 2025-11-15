@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Sparkles, Loader2 } from 'lucide-react';
 import { Storyboard } from '../types';
+import { api } from '../lib/api';
 
 interface Message {
   id: string;
@@ -71,23 +72,7 @@ export default function StoryboardAssistant({
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/improve-storyboard', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          storyboard,
-          style,
-          message: userMessage.content,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get AI response');
-      }
-
-      const data = await response.json();
+      const data = await api.improveStoryboard(storyboard, style, userMessage.content);
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -113,10 +98,11 @@ export default function StoryboardAssistant({
         setMessages(prev => [...prev, updateMessage]);
       }
     } catch (error: any) {
+      console.error('❌ AI Assistant error:', error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `Sorry, I encountered an error: ${error.message}. Please try again.`,
+        content: `Sorry, I encountered an error: ${error.message || 'Failed to get AI response'}. Please try again.`,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);

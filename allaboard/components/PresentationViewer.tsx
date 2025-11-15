@@ -2,7 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Maximize, Download, X, Play, Pause, AlertCircle } from 'lucide-react';
 
 // Component to handle Gamma embedding with multiple fallback methods
-function GammaEmbedViewer({ presentationUrl, embedUrl }: { presentationUrl: string; embedUrl?: string }) {
+const GammaEmbedViewer = React.forwardRef<HTMLIFrameElement, { 
+  presentationUrl: string; 
+  embedUrl?: string;
+}>(({ presentationUrl, embedUrl }, ref) => {
   const [embedMethod, setEmbedMethod] = useState<'iframe' | 'object' | 'new-window'>('iframe');
   const [embedError, setEmbedError] = useState(false);
   
@@ -57,12 +60,14 @@ function GammaEmbedViewer({ presentationUrl, embedUrl }: { presentationUrl: stri
     };
   }, [currentUrl]);
   
+
   // Show iframe with fallback option
   return (
     <div className="relative w-full h-full">
       {/* Try iframe first */}
       {embedMethod === 'iframe' && !embedError && (
         <iframe
+          ref={ref}
           data-gamma-embed
           src={currentUrl}
           className="w-full h-full border-0"
@@ -118,7 +123,9 @@ function GammaEmbedViewer({ presentationUrl, embedUrl }: { presentationUrl: stri
       )}
     </div>
   );
-}
+});
+
+GammaEmbedViewer.displayName = 'GammaEmbedViewer';
 
 interface PresentationViewerProps {
   presentationUrl: string;
@@ -165,13 +172,57 @@ export default function PresentationViewer({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [currentSlide, isFullscreen, isPresenting]);
 
+  const iframeRef = React.useRef<HTMLIFrameElement>(null);
+
   const handleNext = useCallback(() => {
-    setCurrentSlide(prev => Math.min(prev + 1, slideCount - 1));
-  }, [slideCount]);
+    const newSlide = Math.min(currentSlide + 1, slideCount - 1);
+    setCurrentSlide(newSlide);
+    
+    // Focus the iframe so keyboard navigation works
+    // Note: Due to cross-origin restrictions, we can't programmatically control
+    // the Gamma iframe, but focusing it allows the user to use arrow keys
+    if (iframeRef.current) {
+      iframeRef.current.focus();
+      
+      // Try postMessage (may not work due to CORS, but worth trying)
+      try {
+        if (iframeRef.current.contentWindow) {
+          iframeRef.current.contentWindow.postMessage({ 
+            type: 'navigate', 
+            direction: 'next',
+            slide: newSlide 
+          }, '*');
+        }
+      } catch (e) {
+        // Expected to fail due to CORS - this is normal
+      }
+    }
+  }, [currentSlide, slideCount]);
 
   const handlePrevious = useCallback(() => {
-    setCurrentSlide(prev => Math.max(prev - 1, 0));
-  }, []);
+    const newSlide = Math.max(currentSlide - 1, 0);
+    setCurrentSlide(newSlide);
+    
+    // Focus the iframe so keyboard navigation works
+    // Note: Due to cross-origin restrictions, we can't programmatically control
+    // the Gamma iframe, but focusing it allows the user to use arrow keys
+    if (iframeRef.current) {
+      iframeRef.current.focus();
+      
+      // Try postMessage (may not work due to CORS, but worth trying)
+      try {
+        if (iframeRef.current.contentWindow) {
+          iframeRef.current.contentWindow.postMessage({ 
+            type: 'navigate', 
+            direction: 'previous',
+            slide: newSlide 
+          }, '*');
+        }
+      } catch (e) {
+        // Expected to fail due to CORS - this is normal
+      }
+    }
+  }, [currentSlide]);
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -280,7 +331,8 @@ export default function PresentationViewer({
           />
         ) : embedUrl || presentationUrl ? (
           // Try multiple embedding methods due to CSP restrictions
-          <GammaEmbedViewer 
+          <GammaEmbedViewer
+            ref={iframeRef}
             presentationUrl={presentationUrl}
             embedUrl={embedUrl}
           />
@@ -323,48 +375,6 @@ export default function PresentationViewer({
           </div>
         )}
 
-        {/* Navigation Overlay (only visible when not presenting and we have embeddable content) */}
-        {!isPresenting && (pdfUrl || downloadUrl?.includes('.pdf') || downloadUrl?.includes('pdf') || embedUrl || presentationUrl) && (
-          <>
-            {/* Previous Button */}
-            {currentSlide > 0 && (
-              <button
-                onClick={handlePrevious}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all backdrop-blur-sm"
-                title="Previous slide (←)"
-              >
-                <ChevronLeft size={24} />
-              </button>
-            )}
-
-            {/* Next Button */}
-            {currentSlide < slideCount - 1 && (
-              <button
-                onClick={handleNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all backdrop-blur-sm"
-                title="Next slide (→)"
-              >
-                <ChevronRight size={24} />
-              </button>
-            )}
-
-            {/* Slide Indicator Dots */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 bg-black/50 backdrop-blur-sm px-4 py-2 rounded-full">
-              {Array.from({ length: slideCount }).map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    index === currentSlide
-                      ? 'bg-white w-8'
-                      : 'bg-white/40 hover:bg-white/60'
-                  }`}
-                  title={`Go to slide ${index + 1}`}
-                />
-              ))}
-            </div>
-          </>
-        )}
 
         {/* Presentation Mode Overlay */}
         {isPresenting && (

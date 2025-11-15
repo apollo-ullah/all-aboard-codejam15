@@ -264,8 +264,8 @@ router.post('/scrape', async (req, res) => {
     } else if (error.message?.includes('AGENT_API_KEY')) {
       userFriendlyMessage = 'Browser.cash API key not configured.';
       errorMessage = error.message;
-    } else if (error.message?.includes('Network Error') || error.message?.includes('ECONNREFUSED')) {
-      userFriendlyMessage = 'Cannot connect to Browser.cash API. Check your network connection and API configuration.';
+    } else if (error.message?.includes('Network Error') || error.message?.includes('ECONNREFUSED') || error.message?.includes('SSL/TLS') || error.message?.includes('No response from server')) {
+      userFriendlyMessage = error.message || 'Cannot connect to Browser.cash API. Check your network connection and API configuration.';
       errorMessage = error.message;
     } else if (error.message?.includes('OpenAI') || error.message?.includes('storyboard')) {
       userFriendlyMessage = 'Failed to generate storyboard. The scraping succeeded but storyboard generation failed.';

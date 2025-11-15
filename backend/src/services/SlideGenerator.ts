@@ -187,22 +187,114 @@ export class SlideGenerator {
   }
 
   private formatForGamma(storyboard: Storyboard, style: 'YC' | 'Finance'): string {
-    const stylePrefix = style === 'YC' 
-      ? 'Create a minimalist, YC-style pitch deck with bold statements and data-driven insights.'
-      : 'Create a professional, finance-style presentation with detailed analysis and formal tone.';
-    
-    const slides = storyboard.nodes.map((node) => {
-      return `
-# ${node.title}
+    // Style-specific instructions
+    const styleInstructions = style === 'YC' 
+      ? `STYLE: Y Combinator (YC) Pitch Deck Style
+- Minimalist, clean design with lots of white space
+- Bold, impactful typography with large headlines
+- High-quality, modern images that are relevant and visually striking
+- Use vibrant colors sparingly for emphasis (blues, oranges, greens)
+- Data visualizations should be simple and clear (charts, graphs, metrics)
+- Keep text minimal - let visuals tell the story
+- Use smooth, professional animations and transitions between slides
+- Modern tech startup aesthetic with professional photography
+- Focus on clarity and impact over decoration
+- Each slide should have one clear message
+- Use icons and illustrations that are modern and clean`
+      : `STYLE: Professional Finance/Investment Presentation
+- Formal, sophisticated design with professional color palette (navy, gray, gold accents)
+- Clean, readable typography with structured layouts
+- High-quality business imagery: corporate settings, financial charts, professional headshots
+- Professional data visualizations: detailed charts, graphs, financial metrics, trend lines
+- Subtle, elegant animations that enhance understanding without distraction
+- Corporate aesthetic with polished, trustworthy imagery
+- Detailed information presented clearly with proper hierarchy
+- Use professional icons and graphics that convey authority
+- Color scheme: deep blues, grays, with gold/amber accents for emphasis
+- Each slide should be information-rich but well-organized`;
 
+    // Build the prompt with comprehensive instructions
+    const prompt = `Create a professional presentation deck with the following specifications:
+
+${styleInstructions}
+
+PRESENTATION REQUIREMENTS:
+- Use high-quality, relevant images on every slide that enhance the message
+- Include smooth, professional animations and transitions throughout
+- Ensure visual consistency across all slides
+- Make each slide visually engaging while maintaining readability
+- Use appropriate visual hierarchy to guide the viewer's attention
+- Include data visualizations where metrics or numbers are mentioned
+- Ensure all images are professional, modern, and contextually relevant
+
+SLIDE STRUCTURE:
+Each slide should have:
+- A clear, prominent headline
+- Supporting content that's easy to read
+- High-quality imagery that relates to the content
+- Smooth animations when appropriate
+- Visual elements that enhance understanding
+
+PRESENTATION CONTENT:
+
+Title: ${storyboard.title}
+Tagline: ${storyboard.tagline}
+
+${storyboard.nodes.map((node, index) => {
+      const slideNumber = index + 1;
+      const nodeType = node.type;
+      
+      // Add type-specific visual guidance
+      let visualGuidance = '';
+      switch (nodeType) {
+        case 'title':
+          visualGuidance = 'Use a bold, impactful design with high-quality hero imagery. Make it memorable and set the tone.';
+          break;
+        case 'problem':
+          visualGuidance = 'Include imagery that illustrates the problem - use visuals that evoke the pain point or challenge.';
+          break;
+        case 'solution':
+          visualGuidance = 'Show the solution visually - use imagery that represents innovation, technology, or the product/service.';
+          break;
+        case 'feature':
+          visualGuidance = 'Include product screenshots, diagrams, or visual representations of the feature.';
+          break;
+        case 'benefit':
+          visualGuidance = 'Use imagery that shows positive outcomes, happy users, or success metrics.';
+          break;
+        case 'cta':
+          visualGuidance = 'Create a compelling call-to-action with strong visuals and clear messaging.';
+          break;
+        default:
+          visualGuidance = 'Include relevant, high-quality imagery that supports the content.';
+      }
+      
+      return `
+SLIDE ${slideNumber} - ${node.type.toUpperCase()}:
+Title: ${node.title}
+
+Content:
 ${node.content}
 
-${node.speakerNotes ? `\n**Speaker Notes:** ${node.speakerNotes}` : ''}
+${node.speakerNotes ? `Speaker Notes: ${node.speakerNotes}` : ''}
+
+Visual Requirements:
+- ${visualGuidance}
+- Ensure the image is high-quality and professionally relevant
+- Use smooth animations for any transitions or reveals
+- Maintain visual consistency with the overall ${style} style
 
 ---`;
-    }).join('\n\n');
-    
-    return `${stylePrefix}\n\n${slides}`;
+    }).join('\n\n')}
+
+FINAL INSTRUCTIONS:
+- Generate a visually stunning presentation that follows the ${style} style guidelines
+- Ensure every slide has appropriate, high-quality imagery
+- Include smooth, professional animations throughout
+- Make the presentation engaging, professional, and visually cohesive
+- The presentation should be ready for a live audience presentation`;
+
+    return prompt;
   }
 
   private async pollStatus(generationId: string): Promise<any> {

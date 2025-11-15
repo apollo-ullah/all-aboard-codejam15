@@ -25,8 +25,8 @@ interface StoryboardCanvasProps {
 }
 
 export default function StoryboardCanvas({ initialNodes, onNodesChange }: StoryboardCanvasProps) {
-  // Convert storyboard nodes to React Flow nodes
-  const createFlowNodes = useCallback((storyNodes: StoryNodeType[]): Node[] => {
+  // Convert storyboard nodes to React Flow nodes (without handlers initially)
+  const createFlowNodesBase = useCallback((storyNodes: StoryNodeType[]): Node[] => {
     console.log('📊 Creating flow nodes from:', storyNodes);
     const flowNodes = storyNodes.map((node, index) => {
       // Ensure position is valid, default to horizontal layout if missing
@@ -90,48 +90,13 @@ export default function StoryboardCanvas({ initialNodes, onNodesChange }: Storyb
   }, [initialNodes]);
 
   // Initialize nodes and edges from initialNodes (only recalculate when nodes actually change)
-  const initialFlowNodes = useMemo(() => createFlowNodes(initialNodes), [nodeIdsString, createFlowNodes]);
+  const initialFlowNodes = useMemo(() => createFlowNodesBase(initialNodes), [nodeIdsString, createFlowNodesBase]);
   const initialFlowEdges = useMemo(() => createFlowEdges(initialNodes), [nodeIdsString, createFlowEdges]);
 
   const [nodes, setNodes, onNodesChangeInternal] = useNodesState(initialFlowNodes);
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(initialFlowEdges);
 
-  // Track previous nodeIdsString to detect actual changes
-  const prevNodeIdsStringRef = useRef<string>('');
-  
-  // Update nodes when initialNodes actually change (using stable reference)
-  useEffect(() => {
-    // Only update if the node IDs string actually changed
-    if (prevNodeIdsStringRef.current === nodeIdsString) {
-      return;
-    }
-    
-    prevNodeIdsStringRef.current = nodeIdsString;
-    
-    console.log('🔄 Initial nodes changed:', initialNodes);
-    if (!initialNodes || initialNodes.length === 0) {
-      console.warn('⚠️ No initial nodes provided');
-      setNodes([]);
-      setEdges([]);
-      return;
-    }
-    
-    const updatedNodes = createFlowNodes(initialNodes);
-    const updatedEdges = createFlowEdges(initialNodes);
-    
-    // Remove any duplicate edges before setting
-    const uniqueEdges = updatedEdges.filter((edge, index, self) =>
-      index === self.findIndex(e => 
-        e.source === edge.source && e.target === edge.target
-      )
-    );
-    
-    console.log('📝 Setting nodes:', updatedNodes.length, 'edges:', uniqueEdges.length);
-    setNodes(updatedNodes);
-    setEdges(uniqueEdges);
-    hasFittedView.current = false; // Reset fit view flag when nodes change
-  }, [nodeIdsString, initialNodes, createFlowNodes, createFlowEdges]);
-
+  // Define handlers after setNodes and setEdges are available
   const handleNodeEdit = useCallback((nodeId: string, updates: Partial<StoryNodeType>) => {
     setNodes(nds => {
       const updated = nds.map(node => {
@@ -204,16 +169,77 @@ export default function StoryboardCanvas({ initialNodes, onNodesChange }: Storyb
     });
   }, [onNodesChange, setNodes, setEdges]);
 
-  // Attach onEdit and onDelete handlers to nodes (only when handlers change)
-  useEffect(() => {
-    setNodes(nds => nds.map(node => ({
+  // Create flow nodes with handlers
+  const createFlowNodes = useCallback((storyNodes: StoryNodeType[]): Node[] => {
+    return createFlowNodesBase(storyNodes).map(node => ({
       ...node,
       data: {
         ...node.data,
         onEdit: handleNodeEdit,
-        onDelete: handleNodeDelete
+        onDelete: handleNodeDelete,
       }
-    })));
+    }));
+  }, [createFlowNodesBase, handleNodeEdit, handleNodeDelete]);
+
+  // Track previous nodeIdsString to detect actual changes
+  const prevNodeIdsStringRef = useRef<string>('');
+  
+  // Update nodes when initialNodes actually change (using stable reference)
+  useEffect(() => {
+    // Only update if the node IDs string actually changed
+    if (prevNodeIdsStringRef.current === nodeIdsString) {
+      return;
+    }
+    
+    prevNodeIdsStringRef.current = nodeIdsString;
+    
+    console.log('🔄 Initial nodes changed:', initialNodes);
+    if (!initialNodes || initialNodes.length === 0) {
+      console.warn('⚠️ No initial nodes provided');
+      setNodes([]);
+      setEdges([]);
+      return;
+    }
+    
+    const baseNodes = createFlowNodesBase(initialNodes);
+    const updatedNodes = baseNodes.map(node => ({
+      ...node,
+      data: {
+        ...node.data,
+        onEdit: handleNodeEdit,
+        onDelete: handleNodeDelete,
+      }
+    }));
+    const updatedEdges = createFlowEdges(initialNodes);
+    
+    // Remove any duplicate edges before setting
+    const uniqueEdges = updatedEdges.filter((edge, index, self) =>
+      index === self.findIndex(e => 
+        e.source === edge.source && e.target === edge.target
+      )
+    );
+    
+    console.log('📝 Setting nodes:', updatedNodes.length, 'edges:', uniqueEdges.length);
+    setNodes(updatedNodes);
+    setEdges(uniqueEdges);
+    hasFittedView.current = false; // Reset fit view flag when nodes change
+  }, [nodeIdsString, initialNodes, createFlowNodesBase, createFlowEdges, handleNodeEdit, handleNodeDelete]);
+
+  // Ensure all nodes have handlers attached (for initial nodes and any nodes that might be missing handlers)
+  useEffect(() => {
+    setNodes(nds => {
+      const needsUpdate = nds.some(node => !node.data.onEdit || !node.data.onDelete);
+      if (!needsUpdate) return nds;
+      
+      return nds.map(node => ({
+        ...node,
+        data: {
+          ...node.data,
+          onEdit: handleNodeEdit,
+          onDelete: handleNodeDelete,
+        }
+      }));
+    });
   }, [handleNodeEdit, handleNodeDelete, setNodes]);
 
   const onNodesChangeHandler = useCallback((changes: NodeChange[]) => {

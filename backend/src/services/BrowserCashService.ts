@@ -154,77 +154,128 @@ Please be comprehensive and include all important information from the page.`;
   }
 
   /**
-   * Create a task with the Agent API
+   * Create a task with the Agent API with retry logic
    */
-  private async createTask(prompt: string): Promise<string> {
-    try {
-      console.log(`   📤 Creating task with Browser.cash Agent API...`);
-      console.log(`   📡 Endpoint: ${this.baseUrl}/v1/task/create`);
-      
-      const response = await axios.post<TaskResponse>(
-        `${this.baseUrl}/v1/task/create`,
-        {
-          agent: 'gemini',
-          prompt: prompt,
-          mode: 'text',
-          stepLimit: 20, // Higher limit for comprehensive scraping
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${this.agentApiKey}`,
-            'Content-Type': 'application/json',
+  private async createTask(prompt: string, retries: number = 3): Promise<string> {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        console.log(`   📤 Creating task with Browser.cash Agent API... (attempt ${attempt}/${retries})`);
+        console.log(`   📡 Endpoint: ${this.baseUrl}/v1/task/create`);
+        
+        const response = await axios.post<TaskResponse>(
+          `${this.baseUrl}/v1/task/create`,
+          {
+            agent: 'gemini',
+            prompt: prompt,
+            mode: 'text',
+            stepLimit: 20, // Higher limit for comprehensive scraping
           },
-          timeout: 60000, // Increased to 60 seconds for task creation
-          validateStatus: (status) => status < 500, // Don't throw on 4xx errors
-        }
-      );
+          {
+            headers: {
+              'Authorization': `Bearer ${this.agentApiKey}`,
+              'Content-Type': 'application/json',
+            },
+            timeout: 60000, // Increased to 60 seconds for task creation
+            validateStatus: (status) => status < 500, // Don't throw on 4xx errors
+            // Add HTTPS agent configuration for better SSL handling
+            httpsAgent: new (require('https').Agent)({
+              rejectUnauthorized: true,
+              keepAlive: true,
+              keepAliveMsecs: 1000,
+            }),
+          }
+        );
 
-      // Check for error responses
-      if (response.status >= 400) {
-        const errorData: any = response.data;
-        let errorMsg = `HTTP ${response.status}`;
-        if (errorData && typeof errorData === 'object') {
-          errorMsg += `: ${JSON.stringify(errorData)}`;
-        } else if (typeof errorData === 'string') {
-          errorMsg += `: ${errorData.substring(0, 200)}`;
+        // Check for error responses
+        if (response.status >= 400) {
+          const errorData: any = response.data;
+          let errorMsg = `HTTP ${response.status}`;
+          if (errorData && typeof errorData === 'object') {
+            errorMsg += `: ${JSON.stringify(errorData)}`;
+          } else if (typeof errorData === 'string') {
+            errorMsg += `: ${errorData.substring(0, 200)}`;
+          }
+          throw new Error(`Failed to create task: ${errorMsg}`);
         }
-        throw new Error(`Failed to create task: ${errorMsg}`);
-      }
 
-      if (!response.data || !response.data.taskId) {
-        console.error('   ❌ Invalid response structure:', JSON.stringify(response.data, null, 2));
-        throw new Error('No taskId in response: ' + JSON.stringify(response.data));
-      }
+        if (!response.data || !response.data.taskId) {
+          console.error('   ❌ Invalid response structure:', JSON.stringify(response.data, null, 2));
+          throw new Error('No taskId in response: ' + JSON.stringify(response.data));
+        }
 
-      console.log(`   ✅ Task created successfully: ${response.data.taskId}`);
-      return response.data.taskId;
-    } catch (error: any) {
-      console.error('   ❌ Task creation failed:', error.message);
-      
-      if (error.response) {
-        const status = error.response.status;
-        const data = error.response.data;
+        console.log(`   ✅ Task created successfully: ${response.data.taskId}`);
+        return response.data.taskId;
+      } catch (error: any) {
+        console.error(`   ❌ Task creation failed (attempt ${attempt}/${retries}):`, error.message);
+        console.error('   Error code:', error.code);
         
-        // If we get HTML back, it's likely a 404 from wrong endpoint
-        if (typeof data === 'string' && data.includes('<!DOCTYPE html>')) {
-          throw new Error(`Failed to create task: Endpoint not found (404). Check that base URL is correct: ${this.baseUrl}/v1/task/create`);
+        // If this is the last attempt, throw the error
+        if (attempt === retries) {
+          console.error('   Error details:', {
+            code: error.code,
+            message: error.message,
+            response: error.response ? {
+              status: error.response.status,
+              data: error.response.data
+            } : null,
+            request: error.request ? 'Request made but no response' : null
+          });
+          
+          // Handle SSL/TLS errors
+          if (error.code === 'SSL_ERROR_SYSCALL' || error.code === 'ECONNRESET' || error.message?.includes('SSL') || error.message?.includes('TLS')) {
+            throw new Error(`SSL/TLS connection error: Cannot establish secure connection to Browser.cash API after ${retries} attempts. This may indicate: 1) The API endpoint is incorrect, 2) Network/firewall issues, 3) The API service may be temporarily unavailable. Please check https://browser.cash for API status and correct endpoint.`);
+          }
+          
+          // Handle network errors
+          if (error.code === 'ENOTFOUND' || error.code === 'EAI_AGAIN') {
+            throw new Error(`DNS resolution failed: Cannot resolve hostname 'agent-api.browser.cash'. Check your internet connection and DNS settings.`);
+          }
+          
+          if (error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
+            throw new Error(`Connection timeout: The Browser.cash API did not respond within the timeout period. The service may be slow or unavailable.`);
+          }
+          
+          if (error.response) {
+            const status = error.response.status;
+            const data = error.response.data;
+            
+            // If we get HTML back, it's likely a 404 from wrong endpoint
+            if (typeof data === 'string' && data.includes('<!DOCTYPE html>')) {
+              throw new Error(`Failed to create task: Endpoint not found (404). The API endpoint may be incorrect. Expected: ${this.baseUrl}/v1/task/create. Please verify the correct endpoint in Browser.cash documentation.`);
+            }
+            
+            // Handle authentication errors
+            if (status === 401 || status === 403) {
+              throw new Error(`Authentication failed (HTTP ${status}): Invalid or expired API key. Please check your AGENT_API_KEY in the .env file.`);
+            }
+            
+            // Try to extract error message from response
+            let errorMsg = `HTTP ${status}`;
+            if (typeof data === 'string') {
+              errorMsg += `: ${data.substring(0, 200)}`;
+            } else if (data && typeof data === 'object') {
+              errorMsg += `: ${JSON.stringify(data).substring(0, 200)}`;
+            }
+            
+            throw new Error(`Failed to create task: ${errorMsg}`);
+          }
+          
+          if (error.request) {
+            throw new Error(`No response from server: The Browser.cash API at ${this.baseUrl} did not respond after ${retries} attempts. Possible causes: 1) API endpoint is incorrect, 2) Service is down, 3) Network/firewall blocking the connection. Please verify the API endpoint and check https://browser.cash for service status.`);
+          }
+          
+          throw new Error(`Failed to create task after ${retries} attempts: ${error.message || 'Unknown error'}`);
         }
         
-        // Try to extract error message from response
-        let errorMsg = `HTTP ${status}`;
-        if (typeof data === 'string') {
-          errorMsg += `: ${data.substring(0, 200)}`;
-        } else if (data && typeof data === 'object') {
-          errorMsg += `: ${JSON.stringify(data).substring(0, 200)}`;
-        }
-        
-        throw new Error(`Failed to create task: ${errorMsg}`);
+        // Wait before retrying (exponential backoff)
+        const waitTime = Math.min(1000 * Math.pow(2, attempt - 1), 10000); // Max 10 seconds
+        console.log(`   ⏳ Waiting ${waitTime}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, waitTime));
       }
-      if (error.request) {
-        throw new Error(`Failed to create task: No response from server. Check network connection and base URL: ${this.baseUrl}`);
-      }
-      throw new Error(`Failed to create task: ${error.message}`);
     }
+    
+    // This should never be reached, but TypeScript needs it
+    throw new Error('Failed to create task: All retry attempts exhausted');
   }
 
   /**
