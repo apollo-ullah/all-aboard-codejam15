@@ -1,0 +1,25 @@
+{
+  "type": "module",
+  "name": "all-aboard-codejam15",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apollo-ullah/all-aboard-codejam15.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/apollo-ullah/all-aboard-codejam15/issues"
+  },
+  "homepage": "https://github.com/apollo-ullah/all-aboard-codejam15#readme",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "puppeteer": "^24.30.0"
+  }
+}
