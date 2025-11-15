@@ -1,0 +1,33 @@
+{
+  "content": "DoorDash: Revolutionizing Local Delivery - A logistics platform connecting customers with local restaurants through independent delivery drivers, building the last-mile infrastructure for local commerce.",
+  "slides_markdown": [
+    "# DoorDash\n## Revolutionizing Local Delivery\n*Last-mile logistics infrastructure for local commerce*\n\n**Y Combinator Winter 2013**",
+    "# The Problem\n\n## Restaurants Can't Afford Delivery\n\n- Most restaurants lack delivery infrastructure\n- Customers want convenient food delivery from favorite local spots\n- Existing options are slow, unreliable, and fragmented\n- **Only 5% of restaurant orders are currently delivered**\n\n### Market Pain Points:\n- High upfront costs for delivery fleets\n- Complex logistics and driver management\n- Customer satisfaction: **2.3/5** with current options",
+    "# Our Solution\n\n## Three-Sided Marketplace Platform\n\nDoorDash connects **customers**, **restaurants**, and **Dashers** (independent drivers) through one seamless platform.\n\n### We Handle Everything:\n- Order management system\n- Real-time driver dispatch\n- Live GPS tracking\n- Customer support 24/7\n- Restaurant analytics dashboard\n\n**Result:** Restaurants get delivery capability without infrastructure investment",
+    "# Market Opportunity\n\n## $86 Billion and Growing\n\n### US Restaurant Delivery Market:\n- **$86B** total market size\n- **15%** annual growth rate\n- **5%** current penetration (massive upside)\n- **$200B+** total addressable market including groceries, convenience, retail\n\n### Expansion Opportunities:\n- Groceries and convenience stores\n- Alcohol delivery\n- Pharmaceuticals\n- Any local commerce",
+    "# Business Model\n\n## Three Revenue Streams\n\n### Revenue Sources:\n1. **Restaurant Commission:** 15-30% per order\n2. **Delivery Fees:** $3-7 per order from customers\n3. **Premium Services:** Analytics, marketing tools\n\n### Unit Economics:\n- Improve with density (network effects)\n- More orders per square mile = more efficient routing\n- **30% efficiency gain** with optimal density\n- Current gross margins: **8%** → Target: **15%** at scale",
+    "# Traction\n\n## Explosive Growth in 18 Months\n\n### Key Metrics:\n- **50,000** orders per month\n- **40% MoM** growth rate\n- **15 cities** across California\n- **5,000+** restaurant partners\n- **10,000+** active Dashers\n- **65%** customer retention (30-day)\n- **$2M** annual run rate\n\n### Expansion:\n- Launched in Palo Alto 18 months ago\n- Expanding to **25 new cities** this quarter",
+    "# Competitive Advantage\n\n## Why We Win\n\n### 1. Proprietary Logistics Algorithm\n- **30% faster** delivery times vs competitors\n- Machine learning-powered routing\n- Real-time optimization\n\n### 2. Restaurant Relationships\n- Analytics dashboards\n- Marketing tools\n- Menu optimization insights\n\n### 3. Superior Dasher Experience\n- Flexible scheduling\n- Transparent earnings\n- **92% driver satisfaction** (industry-leading)\n\n### 4. Network Effects\n- City-by-city monopolies\n- Density creates insurmountable moats",
+    "# Go-to-Market Strategy\n\n## Hyper-Local Domination\n\n### Phase 1: City Conquest\n- Dominate one city before moving to next\n- Target high-density urban areas first\n- Partner with **80%** of popular restaurants\n\n### Phase 2: Viral Growth Loops\n- **20%** of customers from referrals\n- Restaurant-to-restaurant referrals\n- College campus strategy for youth adoption\n\n### Phase 3: Market Leadership\n- Become default delivery option\n- Lock in supply (restaurants) and demand (customers)\n- Build brand recognition",
+    "# Team\n\n## Stanford Mafia Meets Logistics\n\n### Founders:\n\n**Tony Xu** - CEO\n- Stanford MBA\n- Ex-Bain Consultant\n- Operations & Strategy Expert\n\n**Stanley Tang** - CTO\n- Stanford CS\n- Ex-Square (Recommendation Systems)\n- Technical Architecture Lead\n\n**Andy Fang** - Engineering Lead\n- Stanford CS\n- Ex-eBay Mobile\n- Product Development\n\n**Evan Moore** - Head of Operations\n- Stanford\n- Supply Chain Optimization\n- Logistics Expert\n\n**Combined 15 years** in tech and logistics",
+    "# Financials\n\n## Path to Profitability\n\n### Current State:\n- **$2M** ARR (Annual Run Rate)\n- **$200K/month** burn rate\n- **18 months** runway\n\n### Projections:\n- **$15M** ARR next year (**7.5x** growth)\n- Profitability in **3-4 years**\n- LTV:CAC ratio: **2:1** → **4:1** at scale\n\n### Key Drivers:\n- Density economics improve margins\n- Fixed costs amortized across more orders\n- Brand reduces customer acquisition costs",
+    "# Vision\n\n## The AWS of Local Logistics\n\n### Short-term (1-2 years):\n- Expand to 100+ cities nationwide\n- 50,000+ restaurant partners\n- $50M+ ARR\n\n### Mid-term (3-5 years):\n- Groceries, alcohol, pharmaceuticals\n- International expansion\n- B2B logistics API\n\n### Long-term Vision:\n**Enable any local business to offer same-day delivery**\n\nBecome the infrastructure layer that powers local commerce - the delivery equivalent of AWS for cloud computing.",
+    "# The Ask\n\n## $2.5M Seed Round\n\n### Use of Funds:\n- **$1.2M** - Expand to 50 cities (40% of raise)\n- **$800K** - Engineering team: 5 senior hires (32%)\n- **$500K** - Driver acquisition & marketing (28%)\n\n### What This Gets Us:\n- **$8M ARR** (4x current)\n- **Series A ready** in 12-18 months\n- Market leadership in key metros\n\n### What We Need From YC:\n- Network for restaurant partnerships\n- Growth and scaling tactics\n- Introductions to follow-on investors\n\n---\n\n**Ask: $2.5M | Valuation: TBD | Contact: tony@doordash.com**"
+  ],
+  "instructions": "Create a high-impact Y Combinator pitch deck with bold visuals and clear data hierarchy. Emphasize traction metrics, market opportunity, and network effects. Use modern, professional design with strong typography. Include relevant charts and graphs for financial data and growth metrics. Make the competitive advantages crystal clear. End with a compelling vision and specific funding ask. Target audience is venture capitalists who make quick decisions based on growth potential and market size.",
+  "tone": "professional",
+  "verbosity": "concise",
+  "markdown_emphasis": true,
+  "web_search": false,
+  "image_type": "stock",
+  "theme": "professional-blue",
+  "n_slides": 12,
+  "language": "English",
+  "template": "modern",
+  "include_table_of_contents": false,
+  "include_title_slide": true,
+  "allow_access_to_user_info": true,
+  "files": [],
+  "export_as": "pdf",
+  "trigger_webhook": false
+}
