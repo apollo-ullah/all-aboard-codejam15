@@ -24,7 +24,7 @@ async function scrape() {
   const page = pages[0] || (await browser.newPage());
 
   console.log("Navigating to example.com...");
-  await page.goto("https://www.scrapethissite.com", {
+  await page.goto("https://huggingface.co/datasets/builddotai/Egocentric-10K", {
     waitUntil: "networkidle0",
     timeout: 60000,
   });
