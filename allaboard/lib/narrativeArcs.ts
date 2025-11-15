@@ -141,11 +141,11 @@ export function analyzeStoryboard(
 } {
   const arc = getNarrativeArc(style);
   const nodeTypes = storyboard.nodes.map(n => n.type);
-  
+
   const missingSteps: NarrativeArcStep[] = [];
   const extraNodes: StoryNode[] = [];
   const suggestions: string[] = [];
-  
+
   // Find missing required steps
   arc.forEach(step => {
     if (step.required && !nodeTypes.includes(step.type)) {
@@ -153,7 +153,7 @@ export function analyzeStoryboard(
       suggestions.push(`Missing required ${step.label.toLowerCase()} slide`);
     }
   });
-  
+
   // Find nodes that don't fit the arc
   storyboard.nodes.forEach(node => {
     const arcHasType = arc.some(step => step.type === node.type);
@@ -161,16 +161,16 @@ export function analyzeStoryboard(
       extraNodes.push(node);
     }
   });
-  
+
   // Check order
   const orderedTypes = arc.map(s => s.type);
   const currentOrder = storyboard.nodes.map(n => n.type);
   const isOutOfOrder = !arraysMatchOrder(currentOrder, orderedTypes);
-  
+
   if (isOutOfOrder) {
     suggestions.push('Slides are not in the optimal order for this style');
   }
-  
+
   return { missingSteps, extraNodes, suggestions };
 }
 
@@ -183,7 +183,7 @@ export function applyNarrativeArc(
 ): Storyboard {
   const arc = getNarrativeArc(style);
   const reorderedNodes: StoryNode[] = [];
-  
+
   // Group nodes by type
   const nodesByType = new Map<StoryNode['type'], StoryNode[]>();
   storyboard.nodes.forEach(node => {
@@ -192,22 +192,22 @@ export function applyNarrativeArc(
     }
     nodesByType.get(node.type)!.push(node);
   });
-  
+
   // Track which nodes we've used
   const usedNodeIds = new Set<string>();
-  
+
   // Build reordered list following arc
   let xPosition = 0;
   const SPACING = 320; // Reduced spacing for better fit
-  
+
   arc.forEach((step, index) => {
     const nodesOfType = nodesByType.get(step.type) || [];
-    
+
     if (nodesOfType.length > 0) {
       // Use existing nodes of this type (take first one, mark others as unused for now)
       const nodeToUse = nodesOfType[0];
       usedNodeIds.add(nodeToUse.id);
-      
+
       reorderedNodes.push({
         ...nodeToUse,
         position: { x: xPosition, y: 0 },
@@ -216,7 +216,7 @@ export function applyNarrativeArc(
     }
     // Don't create placeholders - just skip missing steps
   });
-  
+
   // Add remaining nodes of used types (if multiple of same type)
   arc.forEach((step) => {
     const nodesOfType = nodesByType.get(step.type) || [];
@@ -235,7 +235,7 @@ export function applyNarrativeArc(
       }
     }
   });
-  
+
   // Add any extra nodes that don't match arc at the end
   storyboard.nodes.forEach(node => {
     if (!usedNodeIds.has(node.id)) {
@@ -246,7 +246,7 @@ export function applyNarrativeArc(
       xPosition += SPACING;
     }
   });
-  
+
   return {
     ...storyboard,
     nodes: reorderedNodes,
@@ -259,7 +259,7 @@ export function applyNarrativeArc(
 function arraysMatchOrder(arr1: string[], arr2: string[]): boolean {
   let arr1Index = 0;
   let arr2Index = 0;
-  
+
   while (arr1Index < arr1.length && arr2Index < arr2.length) {
     if (arr1[arr1Index] === arr2[arr2Index]) {
       arr1Index++;
@@ -268,7 +268,6 @@ function arraysMatchOrder(arr1: string[], arr2: string[]): boolean {
       arr2Index++;
     }
   }
-  
+
   return arr1Index === arr1.length;
 }
-

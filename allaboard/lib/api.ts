@@ -1,18 +1,15 @@
 import axios, { AxiosError } from 'axios';
 import { Storyboard, ScrapeResponse, GenerateSlidesResponse } from '../types';
 
-// Use relative URLs to leverage Vite proxy
-// Vite proxy in vite.config.ts forwards /api/* to http://localhost:3000
-// This avoids cross-origin issues in development
-const API_BASE_URL = ''; // Empty = relative URLs, uses Vite proxy
+// Use environment variable or default to localhost:3000
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 console.log('🔧 API Client Configuration:');
-console.log('   Using relative URLs (Vite proxy enabled)');
-console.log('   Environment:', import.meta.env.MODE);
-console.log('   Proxy target: http://localhost:3000 (via vite.config.ts)');
+console.log('   API Base URL:', API_BASE_URL);
+console.log('   Environment:', process.env.NODE_ENV);
 
 const apiClient = axios.create({
-  // No baseURL - use relative paths to leverage Vite proxy
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -23,13 +20,13 @@ const apiClient = axios.create({
 // Add request interceptor for debugging
 apiClient.interceptors.request.use(
   (config) => {
-    const fullURL = config.baseURL 
-      ? `${config.baseURL}${config.url}` 
+    const fullURL = config.baseURL
+      ? `${config.baseURL}${config.url}`
       : config.url || 'N/A';
     console.log('📤 API Request:', {
       method: config.method?.toUpperCase(),
       url: config.url,
-      baseURL: config.baseURL || '(relative - using Vite proxy)',
+      baseURL: config.baseURL,
       fullURL: fullURL,
       data: config.data,
       timeout: config.timeout,
@@ -62,9 +59,9 @@ apiClient.interceptors.response.use(
         method: error.config?.method?.toUpperCase(),
         url: error.config?.url,
         baseURL: error.config?.baseURL,
-        fullURL: error.config 
-          ? (error.config.baseURL 
-              ? `${error.config.baseURL}${error.config.url}` 
+        fullURL: error.config
+          ? (error.config.baseURL
+              ? `${error.config.baseURL}${error.config.url}`
               : error.config.url || 'N/A')
           : 'N/A',
         timeout: error.config?.timeout,
@@ -96,7 +93,7 @@ export const api = {
       return { success: true, message: 'Connected to backend' };
     } catch (error: any) {
       console.error('❌ Backend connection test failed:', error);
-      throw new Error(`Cannot connect to backend via Vite proxy. Make sure both frontend and backend servers are running.`);
+      throw new Error(`Cannot connect to backend at ${API_BASE_URL}. Make sure the backend server is running.`);
     }
   },
 
@@ -108,10 +105,10 @@ export const api = {
       return response.data;
     } catch (error: any) {
       console.error('❌ Scrape failed:', error);
-      
+
       // Provide detailed error message
       if (error.code === 'ERR_NETWORK') {
-        throw new Error(`Network Error: Cannot connect to backend via Vite proxy. Make sure both frontend (port 5173) and backend (port 3000) servers are running.`);
+        throw new Error(`Network Error: Cannot connect to backend at ${API_BASE_URL}. Make sure the backend server is running on port 3000.`);
       } else if (error.code === 'ECONNREFUSED') {
         throw new Error(`Connection Refused: Backend server is not running on port 3000. Start it with: cd backend && npm run dev`);
       } else if (error.code === 'ETIMEDOUT' || error.message?.includes('timeout')) {
@@ -138,5 +135,20 @@ export const api = {
       throw error;
     }
   },
-};
 
+  async improveStoryboard(storyboard: Storyboard, style: 'YC' | 'Finance', message: string): Promise<{ storyboard: Storyboard }> {
+    console.log('💬 Requesting storyboard improvement...');
+    try {
+      const response = await apiClient.post('/api/improve-storyboard', {
+        storyboard,
+        style,
+        message,
+      });
+      console.log('✅ Storyboard improvement successful');
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Storyboard improvement failed:', error);
+      throw error;
+    }
+  },
+};

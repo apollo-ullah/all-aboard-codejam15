@@ -5,7 +5,7 @@ export function isValidUrl(urlString: string): boolean {
   if (!urlString || typeof urlString !== 'string') {
     return false;
   }
-  
+
   try {
     const url = new URL(urlString);
     return url.protocol === 'http:' || url.protocol === 'https:';
@@ -30,4 +30,3 @@ export function normalizeUrlForDisplay(urlString: string): string {
   }
   return `https://${trimmed}`;
 }
-

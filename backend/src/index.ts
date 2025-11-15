@@ -10,15 +10,29 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
 // Middleware
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:3001', // Allaboard (Next.js)
+  'http://localhost:5173', // Old frontend (Vite) - for backwards compatibility
+  'http://localhost:3001',
+];
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`⚠️ CORS blocked origin: ${origin}`);
+      callback(null, false);
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Length', 'X-Request-Id'],
   maxAge: 86400 // 24 hours
 };
-console.log('🔧 CORS Configuration:', corsOptions);
+console.log('🔧 CORS Allowed Origins:', allowedOrigins);
 app.use(cors(corsOptions));
 
 // Handle preflight requests explicitly (Express 5 compatible)

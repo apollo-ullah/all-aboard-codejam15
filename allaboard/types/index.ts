@@ -29,4 +29,3 @@ export interface GenerateSlidesResponse {
   downloadUrl?: string;
   slideCount: number;
 }
-
