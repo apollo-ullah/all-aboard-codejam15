@@ -12,6 +12,7 @@ export class SlideGenerator {
     presentationUrl: string;
     embedUrl?: string;
     downloadUrl?: string;
+    pdfUrl?: string;
     slideCount: number;
   }> {
     // Format storyboard for GAMMA API with style-specific instructions
@@ -22,70 +23,25 @@ export class SlideGenerator {
       console.log(`   Input length: ${gammaInput.length} characters`);
       console.log(`   Style: ${style}`);
       
-      // Try different Gamma API endpoints (they may have changed)
-      const endpoints = [
-        'https://api.gamma.app/v1/generations',
-        'https://api.gamma.app/v1.0/generations',
-        'https://public-api.gamma.app/v1/generations',
-        'https://public-api.gamma.app/v1.0/generations',
-        'https://api.gamma.app/api/v1/generations',
-        'https://api.gamma.app/generations',
-      ];
+      // Use the correct Gamma API endpoint
+      const endpoint = 'https://public-api.gamma.app/v1.0/generations';
+      console.log(`   Using endpoint: ${endpoint}`);
       
-      let response;
-      let lastError: any = null;
-      
-      for (const endpoint of endpoints) {
-        try {
-          console.log(`   Trying endpoint: ${endpoint}`);
-          response = await axios.post(
-            endpoint,
-            {
-              inputText: gammaInput,
-              contentType: 'presentation',
-              theme: style === 'YC' ? 'minimal' : 'professional',
-              language: 'en',
-              detailLevel: 'standard'
-            },
-            {
-              headers: {
-                'Authorization': `Bearer ${this.apiKey}`,
-                'X-API-KEY': this.apiKey,
-                'Content-Type': 'application/json'
-              },
-              validateStatus: (status) => status < 500,
-            }
-          );
-          
-          // If we got a response (even if error), check if it's a 404
-          if (response.status === 404) {
-            console.log(`   ❌ Endpoint ${endpoint} returned 404, trying next...`);
-            lastError = new Error(`Endpoint not found: ${endpoint}`);
-            continue; // Try next endpoint
-          }
-          
-          // If we got a non-404 error, this might be the right endpoint but with wrong params
-          if (response.status >= 400 && response.status !== 404) {
-            console.log(`   ⚠️ Endpoint ${endpoint} returned ${response.status}, but might be correct endpoint`);
-            break; // Use this response, might be auth/param issue
-          }
-          
-          // Success!
-          if (response.status < 400) {
-            console.log(`   ✅ Success with endpoint: ${endpoint}`);
-            break;
-          }
-        } catch (apiError: any) {
-          console.log(`   ❌ Endpoint ${endpoint} failed: ${apiError.message}`);
-          lastError = apiError;
-          continue; // Try next endpoint
+      const response = await axios.post(
+        endpoint,
+        {
+          inputText: gammaInput,
+          textMode: 'generate'
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${this.apiKey}`,
+            'X-API-KEY': this.apiKey,
+            'Content-Type': 'application/json'
+          },
+          validateStatus: (status) => status < 500,
         }
-      }
-      
-      // If we tried all endpoints and none worked
-      if (!response) {
-        throw new Error(`All Gamma API endpoints failed. Last error: ${lastError?.message || 'Unknown'}`);
-      }
+      );
       
       // Check for error responses
       if (response.status >= 400) {
@@ -118,10 +74,24 @@ export class SlideGenerator {
       // Poll for completion
       const result = await this.pollStatus(generationId);
       
+      // Extract file URLs from polling response (they should be included)
+      console.log(`🔍 Looking for file URLs in polling response...`);
+      console.log(`📄 Full polling response:`, JSON.stringify(result, null, 2));
+      
+      let pdfUrl = result.pdfUrl || result.pdf || result.files?.pdf || result.exportUrls?.pdf;
+      
+      // Prioritize embed URL from API response (this is what we want!)
+      let embedUrl = result.embedUrl || result.embed || result.embedUrl || result.iframeUrl || 
+                     result.files?.embed || result.presentation?.embedUrl || result.embedLink;
+      
       // Gamma API returns different URL formats - try to get the presentation URL
-      const presentationUrl = result.presentationUrl || result.url || result.viewUrl || result.exportUrl || result.presentation?.url;
-      const embedUrl = result.embedUrl || result.iframeUrl || result.presentation?.embedUrl;
-      const downloadUrl = result.downloadUrl || result.exportUrl || result.presentation?.downloadUrl;
+      let presentationUrl = result.gammaUrl || result.presentationUrl || result.url || result.viewUrl || 
+                           result.exportUrl || result.presentation?.url || result.link;
+      
+      // If we still don't have a presentation URL, try to extract it from the result
+      if (!presentationUrl && result.data?.url) {
+        presentationUrl = result.data.url;
+      }
       
       if (!presentationUrl) {
         console.warn('⚠️ No presentation URL found in Gamma response:', JSON.stringify(result, null, 2));
@@ -129,11 +99,66 @@ export class SlideGenerator {
       }
       
       console.log(`✅ Gamma presentation ready: ${presentationUrl}`);
+      if (embedUrl) {
+        console.log(`✅ Embed URL from API: ${embedUrl}`);
+      }
+      
+      // Construct embed URL from presentation URL if not provided by API
+      // Gamma embed URLs typically follow: https://gamma.app/embed/[id]
+      let finalEmbedUrl = embedUrl;
+      
+      // If no embed URL from API, construct it from presentation URL
+      if (!finalEmbedUrl && presentationUrl) {
+        try {
+          // Extract presentation ID from URL (e.g., https://gamma.app/docs/[id] -> [id])
+          // Try multiple URL patterns
+          let presentationId: string | null = null;
+          
+          // Pattern 1: https://gamma.app/docs/[id]
+          let urlMatch = presentationUrl.match(/gamma\.app\/docs\/([a-zA-Z0-9_-]+)/);
+          if (urlMatch && urlMatch[1]) {
+            presentationId = urlMatch[1];
+          }
+          
+          // Pattern 2: https://gamma.app/presentation/[id]
+          if (!presentationId) {
+            urlMatch = presentationUrl.match(/gamma\.app\/presentation\/([a-zA-Z0-9_-]+)/);
+            if (urlMatch && urlMatch[1]) {
+              presentationId = urlMatch[1];
+            }
+          }
+          
+          // Pattern 3: Extract from any gamma.app URL
+          if (!presentationId) {
+            urlMatch = presentationUrl.match(/gamma\.app\/[^\/]+\/([a-zA-Z0-9_-]+)/);
+            if (urlMatch && urlMatch[1]) {
+              presentationId = urlMatch[1];
+            }
+          }
+          
+          if (presentationId) {
+            // Construct embed URL - this is the format that works!
+            finalEmbedUrl = `https://gamma.app/embed/${presentationId}`;
+            console.log(`🔗 Constructed embed URL from presentation ID: ${finalEmbedUrl}`);
+          } else {
+            console.warn('⚠️ Could not extract presentation ID from URL:', presentationUrl);
+            // Fallback: use presentation URL directly
+            finalEmbedUrl = presentationUrl;
+          }
+        } catch (error) {
+          console.warn('⚠️ Could not construct embed URL, using presentation URL:', error);
+          finalEmbedUrl = presentationUrl;
+        }
+      }
+      
+      // Use the pdfUrl from file URLs API first, then fallback to response  
+      const downloadUrl = pdfUrl || result.downloadUrl || result.exportUrl || result.presentation?.downloadUrl || result.gammaUrl;
       
       return {
         presentationUrl,
-        embedUrl,
+        embedUrl: finalEmbedUrl,
         downloadUrl,
+        pdfUrl,
         slideCount: storyboard.nodes.length
       };
     } catch (error: any) {
@@ -186,47 +211,21 @@ ${node.speakerNotes ? `\n**Speaker Notes:** ${node.speakerNotes}` : ''}
     
     console.log(`🔄 Polling Gamma generation status: ${generationId}`);
     
+    // Use the correct polling endpoint
+    const pollEndpoint = `https://public-api.gamma.app/v1.0/generations/${generationId}`;
+    
     for (let i = 0; i < maxAttempts; i++) {
       try {
-        // Try different endpoint variations
-        const baseUrls = [
-          'https://api.gamma.app/v1',
-          'https://api.gamma.app/v1.0',
-          'https://public-api.gamma.app/v1',
-          'https://public-api.gamma.app/v1.0',
-          'https://api.gamma.app/api/v1',
-          'https://api.gamma.app',
-        ];
-        
-        let response;
-        let lastPollError: any = null;
-        
-        for (const baseUrl of baseUrls) {
-          try {
-            const pollUrl = `${baseUrl}/generations/${generationId}`;
-            response = await axios.get(
-              pollUrl,
-              {
-                headers: { 
-                  'Authorization': `Bearer ${this.apiKey}`,
-                  'X-API-KEY': this.apiKey
-                },
-                validateStatus: (status) => status < 500,
-              }
-            );
-            
-            if (response.status !== 404) {
-              break; // Found working endpoint
-            }
-          } catch (pollError: any) {
-            lastPollError = pollError;
-            continue; // Try next endpoint
+        const response = await axios.get(
+          pollEndpoint,
+          {
+            headers: { 
+              'Authorization': `Bearer ${this.apiKey}`,
+              'X-API-KEY': this.apiKey
+            },
+            validateStatus: (status) => status < 500,
           }
-        }
-        
-        if (!response) {
-          throw new Error(`All polling endpoints failed. Last error: ${lastPollError?.message || 'Unknown'}`);
-        }
+        );
         
         if (response.status >= 400) {
           if (response.status === 404) {
@@ -245,6 +244,7 @@ ${node.speakerNotes ? `\n**Speaker Notes:** ${node.speakerNotes}` : ''}
         
         if (status === 'completed' || status === 'done') {
           console.log(`✅ Generation completed!`);
+          console.log(`📄 Full response data:`, JSON.stringify(response.data, null, 2));
           return response.data;
         }
         

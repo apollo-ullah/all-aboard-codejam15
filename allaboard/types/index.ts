@@ -27,5 +27,6 @@ export interface GenerateSlidesResponse {
   presentationUrl: string;
   embedUrl?: string;
   downloadUrl?: string;
+  pdfUrl?: string;
   slideCount: number;
 }

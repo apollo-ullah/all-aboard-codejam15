@@ -26,18 +26,18 @@ npm run dev
 
 ### 3️⃣ Start Frontend (Terminal 2)
 ```bash
-cd frontend
+cd allaboard
 npm run dev
 ```
 **Expected output:**
 ```
-VITE v6.0.5  ready in XXX ms
-➜  Local:   http://localhost:5173/
+▲ Next.js 15.x.x
+- Local:        http://localhost:3001
 ```
 
 ### 4️⃣ Open Browser
 ```
-http://localhost:5173
+http://localhost:3001
 ```
 
 ---

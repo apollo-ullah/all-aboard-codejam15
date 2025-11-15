@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AI Product Storyteller (STORYTEX) is a hackathon project that transforms website URLs into professional slide decks with an interactive storyboard editor. The application consists of two main components:
+**All Aboard** (formerly STORYTEX) is a hackathon project that transforms website URLs into professional slide decks with an interactive storyboard editor. The application consists of two main components:
 
-- **Allaboard** (Next.js + React + TypeScript): Full-featured frontend with beautiful glass-morphism UI, interactive storyboard canvas editor using React Flow, and AI-powered editing assistant
-- **Backend** (Node.js + Express + TypeScript): API server handling web scraping and AI generation
+- **Allaboard** (Next.js 15 + React + TypeScript): Full-featured frontend with beautiful glass-morphism UI, interactive storyboard canvas editor using React Flow, AI-powered editing assistant, and embedded Gamma presentation viewer
+- **Backend** (Node.js + Express + TypeScript): API server handling web scraping (Browser.cash), storyboard generation (OpenAI GPT-4o), and slide generation (Gamma API)
 
 ## Development Commands
 
@@ -44,8 +44,7 @@ npm start           # Start production server (requires build first)
 - **StoryboardCanvas**: Main editing interface using React Flow for drag-and-drop storyboard editing
 - **StoryNode**: Individual editable storyboard nodes with inline editing
 - **StoryboardAssistant**: AI-powered editing assistant with chat interface
-- **PresentationViewer**: Embedded presentation viewer with download functionality
-- **NarrativeArcButton**: Apply narrative structure to storyboards (YC or Finance style)
+- **PresentationViewer**: Embedded Gamma presentation viewer with full-screen and keyboard navigation
 - **Background**: Parallax background with animated elements
 - **UI Components**: Radix UI components (button, input, select, textarea, etc.)
 
@@ -60,17 +59,18 @@ npm start           # Start production server (requires build first)
 
 ### Backend Services (`backend/src/services/`)
 - **LLMService**: OpenAI GPT-4o integration for storyboard generation from scraped content
-- **BrowserCashService**: Web scraping using Browser.cash Agent API
-- **SlideGenerator**: GAMMA API integration for presentation generation
+- **BrowserCashService**: Web scraping using Browser.cash Agent API (`https://agent-api.browser.cash`)
+- **SlideGenerator**: Gamma API integration for presentation generation (`https://public-api.gamma.app/v1.0/generations`)
 - **StoryboardAssistantService**: AI assistant for storyboard editing
 
 ### Data Flow
 1. URL input → BrowserCash scraping (main page + up to 5 adjacent pages)
 2. Scraped content → OpenAI GPT-4o → structured storyboard JSON
 3. Interactive editing via React Flow canvas with drag-and-drop nodes
-4. Optional: Apply narrative arc templates (YC or Finance style)
+4. Optional: Apply narrative arc templates (YC or Finance style) via `applyNarrativeArc()`
 5. Optional: AI assistant for storyboard improvements
-6. Final storyboard → GAMMA API → downloadable PPTX presentation
+6. Final storyboard → Gamma API → presentation with embed URL
+7. Presentation embedded directly in app using `https://gamma.app/embed/{id}`
 
 ### API Endpoints
 - `GET /health`: Health check endpoint
@@ -82,10 +82,10 @@ npm start           # Start production server (requires build first)
 ## External Dependencies & APIs
 
 **Required API Keys** (configured in `backend/.env`):
-- `AGENT_API_KEY` or `BROWSER_CASH_API_KEY`: Browser.cash Agent API for web scraping
-- `OPENAI_KEY` or `OPENAI_API_KEY`: OpenAI GPT-4o for storyboard generation
-- `GAMMA_API_KEY`: GAMMA API v1.0 for slide generation
-- `FRONTEND_URL`: Frontend origin for CORS (default: http://localhost:3001)
+- `AGENT_API_KEY`: Browser.cash Agent API for web scraping (`https://agent-api.browser.cash`)
+- `OPENAI_KEY`: OpenAI GPT-4o for storyboard generation
+- `GAMMA_API_KEY`: Gamma API for slide generation (`https://public-api.gamma.app/v1.0/generations`)
+- `CORS_ORIGINS`: Frontend origins for CORS (default: http://localhost:3001,http://localhost:5173)
 - `PORT`: Backend port (default: 3000)
 
 **Frontend Environment** (configured in `allaboard/.env.local`):

@@ -53,6 +53,7 @@ export default function Home() {
   const [presentationUrl, setPresentationUrl] = useState('')
   const [embedUrl, setEmbedUrl] = useState<string | undefined>(undefined)
   const [downloadUrl, setDownloadUrl] = useState<string | undefined>(undefined)
+  const [pdfUrl, setPdfUrl] = useState<string | undefined>(undefined)
   const [slideCount, setSlideCount] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [assistantOpen, setAssistantOpen] = useState(false)
@@ -129,6 +130,7 @@ export default function Home() {
       setPresentationUrl(response.presentationUrl)
       setEmbedUrl(response.embedUrl)
       setDownloadUrl(response.downloadUrl)
+      setPdfUrl(response.pdfUrl)
       setSlideCount(response.slideCount)
       setStage('presentation')
     } catch (error: any) {
@@ -138,6 +140,84 @@ export default function Home() {
     }
   }
 
+  const handleLoadTestData = () => {
+    const testStoryboard: Storyboard = {
+      title: 'STORYTEX AI Platform',
+      tagline: 'Transforming websites into compelling presentations',
+      nodes: [
+        {
+          id: 'node-1',
+          type: 'title',
+          title: 'STORYTEX',
+          content: 'AI-powered website-to-presentation platform',
+          speakerNotes: 'Welcome to STORYTEX, the revolutionary platform that transforms any website into a professional presentation using AI-powered web scraping and intelligent content analysis.',
+          position: { x: 0, y: 0 }
+        },
+        {
+          id: 'node-2',
+          type: 'problem',
+          title: 'The Problem',
+          content: '• Manual presentation creation is time-consuming\n• Extracting key information from websites is tedious\n• Maintaining consistent narrative flow is challenging',
+          speakerNotes: 'Creating presentations from web content typically requires hours of manual work, copying and pasting information, and struggling to maintain a coherent narrative structure.',
+          position: { x: 350, y: 0 }
+        },
+        {
+          id: 'node-3',
+          type: 'solution',
+          title: 'Our Solution',
+          content: '• AI agentic web scraping with Browser.cash\n• GPT-4o powered storyboard generation\n• Interactive drag-and-drop editing canvas\n• GAMMA API slide generation',
+          speakerNotes: 'STORYTEX uses cutting-edge AI to automatically scrape websites, analyze content, and generate structured storyboards that can be edited interactively before converting to professional slides.',
+          position: { x: 700, y: 0 }
+        },
+        {
+          id: 'node-4',
+          type: 'feature',
+          title: 'Smart Web Scraping',
+          content: '• Browser.cash AI agents for intelligent content extraction\n• Multi-page analysis (main + adjacent pages)\n• Context-aware content filtering',
+          speakerNotes: 'Our platform leverages Browser.cash AI agents to intelligently navigate and extract meaningful content from websites, analyzing not just the main page but relevant adjacent pages for comprehensive understanding.',
+          position: { x: 1050, y: 0 }
+        },
+        {
+          id: 'node-5',
+          type: 'feature',
+          title: 'AI Storyboard Generation',
+          content: '• OpenAI GPT-4o for content analysis\n• Narrative arc templates (YC, Finance)\n• Structured presentation flow\n• Speaker notes generation',
+          speakerNotes: 'Using OpenAI GPT-4o, we transform raw web content into structured storyboards with proper narrative flow, complete with speaker notes and optimized for different presentation styles.',
+          position: { x: 1400, y: 0 }
+        },
+        {
+          id: 'node-6',
+          type: 'feature',
+          title: 'Interactive Canvas',
+          content: '• React Flow-based drag-and-drop editing\n• Real-time node manipulation\n• AI assistant for improvements\n• Narrative arc application',
+          speakerNotes: 'The interactive canvas allows users to fine-tune their presentations with drag-and-drop editing, AI-powered suggestions, and the ability to apply different narrative structures.',
+          position: { x: 1750, y: 0 }
+        },
+        {
+          id: 'node-7',
+          type: 'benefit',
+          title: 'Key Benefits',
+          content: '• 90% reduction in presentation creation time\n• Professional, consistent narrative structure\n• Seamless integration with existing workflows\n• Multiple output formats (slides, video)',
+          speakerNotes: 'Users experience dramatic time savings while producing higher-quality presentations with professional narrative structure and multiple export options.',
+          position: { x: 2100, y: 0 }
+        },
+        {
+          id: 'node-8',
+          type: 'cta',
+          title: 'Try STORYTEX Today',
+          content: '🚀 Transform any website into a compelling presentation\n• Enter a URL\n• Get AI-generated storyboard\n• Edit interactively\n• Export professional slides',
+          speakerNotes: 'Ready to revolutionize your presentation workflow? Try STORYTEX today and experience the power of AI-driven content transformation.',
+          position: { x: 2450, y: 0 }
+        }
+      ]
+    }
+
+    console.log('🧪 Loading test storyboard data')
+    setStoryboard(testStoryboard)
+    setStage('storyboard')
+    setError(null)
+  }
+
   const handleReset = () => {
     setStage('input')
     setUrl('')
@@ -145,6 +225,7 @@ export default function Home() {
     setPresentationUrl('')
     setEmbedUrl(undefined)
     setDownloadUrl(undefined)
+    setPdfUrl(undefined)
     setSlideCount(0)
     setError(null)
     setDescription('')
@@ -280,6 +361,7 @@ export default function Home() {
         presentationUrl={presentationUrl}
         embedUrl={embedUrl}
         downloadUrl={downloadUrl}
+        pdfUrl={pdfUrl}
         slideCount={slideCount}
         onClose={handleClosePresentation}
       />
@@ -537,6 +619,40 @@ export default function Home() {
                   <Sparkles className="w-4 h-4 mr-2" strokeWidth={2} />
                   Generate
                 </Button>
+              </div>
+              
+              {/* Test Data Button */}
+              <div className="mt-3 text-center space-y-2">
+                <Button
+                  onClick={handleLoadTestData}
+                  variant="outline"
+                  size="sm"
+                  className="text-xs bg-background/50 backdrop-blur border-border/40 hover:bg-accent/50"
+                >
+                  🧪 Load Test Data
+                </Button>
+                <div>
+                  <Button
+                    onClick={() => {
+                      // Test with a hardcoded Gamma presentation URL
+                      // Replace this with an actual Gamma presentation URL you want to test
+                      const testUrl = prompt('Enter a Gamma presentation URL to test:', 'https://gamma.app/docs/your-presentation-id');
+                      if (testUrl) {
+                        setPresentationUrl(testUrl);
+                        setEmbedUrl(undefined);
+                        setDownloadUrl(undefined);
+                        setPdfUrl(undefined);
+                        setSlideCount(10); // Default slide count for testing
+                        setStage('presentation');
+                      }
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs bg-background/50 backdrop-blur border-border/40 hover:bg-accent/50"
+                  >
+                    🧪 Test Presentation Viewer
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

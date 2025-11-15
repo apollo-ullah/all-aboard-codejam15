@@ -1,4 +1,4 @@
-# AI Product Storyteller
+# All Aboard - AI Product Storyteller
 
 Transform website URLs into professional slide decks with an interactive storyboard editor.
 
@@ -7,8 +7,9 @@ Transform website URLs into professional slide decks with an interactive storybo
 This AI-powered hackathon project automatically:
 
 1. Scrapes websites using Browser.cash Agent API
-2. Generates editable storyboards using OpenAI GPT
-3. Creates professional presentations using GAMMA API
+2. Generates editable storyboards using OpenAI GPT-4o
+3. Creates professional presentations using Gamma API
+4. Embeds presentations directly in the app for seamless viewing
 
 ## Features
 
@@ -53,36 +54,34 @@ The backend will run on `http://localhost:3000`
 ### Frontend Setup
 
 ```bash
-cd frontend
+cd allaboard
 npm install
 npm run dev
 ```
 
-The frontend will run on `http://localhost:5173`
+The frontend will run on `http://localhost:3001`
 
 ## Project Structure
 
 ```
-ai-product-storyteller/
-├── frontend/                    # React app
-│   ├── src/
-│   │   ├── components/         # React components
-│   │   ├── services/           # API client
-│   │   ├── types/              # TypeScript types
-│   │   └── App.tsx
-│   └── package.json
+all-aboard-codejam15/
+├── allaboard/                   # Next.js frontend (MAIN APP)
+│   ├── app/                     # Next.js app directory
+│   ├── components/              # React components
+│   ├── lib/                     # Utilities and API client
+│   └── types/                   # TypeScript types
 │
 ├── backend/                     # Express API
 │   ├── src/
-│   │   ├── api/                # API routes
-│   │   ├── services/           # Business logic
-│   │   ├── types/              # TypeScript types
-│   │   └── index.ts
-│   └── package.json
+│   │   ├── api/                 # API routes
+│   │   ├── services/            # Business logic
+│   │   └── utils/               # Utilities
+│   └── .env                     # Environment variables
 │
-├── .env.example
-└── README.md
+└── README.md                    # This file
 ```
+
+For detailed documentation, see `PROJECT_SUMMARY.md`.
 
 ## API Endpoints
 
@@ -152,11 +151,18 @@ Generates slides from an edited storyboard.
 - `npm run build` - Build for production
 - `npm run preview` - Preview production build
 
+## Documentation
+
+- **`PROJECT_SUMMARY.md`** - Comprehensive project overview and technical details
+- **`QUICK_START.md`** - Quick setup guide
+- **`START_SERVERS.md`** - Server management commands
+
 ## Notes
 
 - Browser.cash Agent API is used for intelligent web scraping with AI agents
-- GAMMA API v1.0 endpoints may need verification
-- Currently supports website URLs only (GitHub support coming later)
+- Gamma API endpoint: `https://public-api.gamma.app/v1.0/generations`
+- Presentations are embedded using Gamma embed URLs: `https://gamma.app/embed/{id}`
+- Currently supports website URLs only
 
 ## License
 

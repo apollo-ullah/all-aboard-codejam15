@@ -362,6 +362,7 @@ router.post('/generate-slides', async (req, res) => {
       presentationUrl: result.presentationUrl,
       embedUrl: result.embedUrl,
       downloadUrl: result.downloadUrl,
+      pdfUrl: result.pdfUrl,
       slideCount: result.slideCount
     });
     
