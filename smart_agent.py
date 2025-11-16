@@ -132,6 +132,64 @@ class SmartDemoAgent:
         """)
         
         print(f"🚀 Browser started in fullscreen for {self.company_data['company_name']}")
+    
+    def close_popups(self):
+        """Close cookie banners and other popups automatically."""
+        try:
+            # Common cookie acceptance buttons
+            cookie_selectors = [
+                'button:has-text("Accept")',
+                'button:has-text("Accept all")',
+                'button:has-text("Accept cookies")',
+                'button:has-text("Allow")',
+                'button:has-text("Allow all")',
+                'button:has-text("I accept")',
+                'button:has-text("Agree")',
+                'button:has-text("Got it")',
+                'button:has-text("OK")',
+                '[id*="accept"][role="button"]',
+                '[class*="accept"][role="button"]',
+                '[aria-label*="Accept"]',
+                '[aria-label*="accept"]'
+            ]
+            
+            # Try to accept cookies
+            for selector in cookie_selectors:
+                try:
+                    if self.page.locator(selector).first.is_visible(timeout=1000):
+                        self.page.locator(selector).first.click(timeout=2000)
+                        print("   ✓ Accepted cookies")
+                        time.sleep(0.5)
+                        break
+                except:
+                    pass
+            
+            # Close other popups (X buttons, close buttons)
+            close_selectors = [
+                'button[aria-label*="Close"]',
+                'button[aria-label*="close"]',
+                'button:has-text("×")',
+                'button:has-text("✕")',
+                '[aria-label*="Dismiss"]',
+                '[aria-label*="dismiss"]',
+                '.close-button',
+                '[class*="close"][role="button"]',
+                'button:has-text("No thanks")',
+                'button:has-text("Maybe later")',
+                'button:has-text("Skip")'
+            ]
+            
+            for selector in close_selectors:
+                try:
+                    if self.page.locator(selector).first.is_visible(timeout=1000):
+                        self.page.locator(selector).first.click(timeout=2000)
+                        print("   ✓ Closed popup")
+                        time.sleep(0.3)
+                except:
+                    pass
+                    
+        except Exception as e:
+            pass  # Silently continue if no popups found
         
     def inject_cursor(self):
         """Inject custom cursor overlay."""
@@ -268,16 +326,23 @@ Current Page:
 
 Actions Already Taken: {self.actions_taken}
 
+Key Features to Demo: {', '.join(self.company_data['key_features'][:3])}
+
+Navigation Plan: {self.company_data.get('demo_instructions', {}).get('navigation_plan', [])}
+
 As a salesman, decide the NEXT BEST action to showcase this website's value. Be DYNAMIC and INTERACTIVE:
-- Search for products/features
+- Use search bars to search for RELEVANT topics (e.g., for Airbnb: "Paris", "Tokyo", "cooking class", "food tour")
 - Click on items to show details
 - Navigate to different sections
 - Keep each section brief (5-10 seconds)
+- Prioritize using search features when available
+
+If there's a search input visible, strongly consider using it with relevant search terms!
 
 Respond in JSON:
 {{
     "action_type": "search|click_link|click_button|scroll|wait",
-    "target": "what to click or search term",
+    "target": "what to click or search term (for search, use specific relevant terms)",
     "reason": "why this showcases value",
     "narration": "one sentence explaining this to viewer (max 20 words)"
 }}
@@ -365,6 +430,9 @@ Respond in JSON:
             
             element.click()
             time.sleep(0.6)
+            
+            # Close any popups that appeared after click
+            self.close_popups()
             
             # Re-inject cursor after navigation
             self.inject_cursor()
@@ -454,6 +522,10 @@ Respond in JSON:
             
             time.sleep(2)
             
+            # Close popups and accept cookies first
+            self.close_popups()
+            time.sleep(1)
+            
             # Inject cursor overlay
             self.inject_cursor()
             
@@ -461,54 +533,17 @@ Respond in JSON:
             self.move_cursor_to(400, 300, steps=20)
             self.idle_cursor_movement(1.0)
             
-            # Main demo loop
-            while True:
-                elapsed = time.time() - self.start_time
-                
-                if elapsed > 115:
-                    break
-                
-                # AI decides next action
-                decision = self.ai_decide_next_action(elapsed)
-                
-                if not decision:
-                    break
-                
-                # Narrate (cursor moves naturally during narration)
-                self.narrate(decision.get('narration', 'Continuing demo'), decision.get('action_type', 'action'))
-                
-                # Execute action
-                action_type = decision.get('action_type', 'scroll')
-                target = decision.get('target', '')
-                
-                if action_type == 'search' and target:
-                    self.perform_search(target)
-                    self.actions_taken.append(f"searched:{target}")
-                    
-                elif action_type == 'click_link' and target:
-                    success = self.smooth_click(f"text={target}", target)
-                    if success:
-                        self.actions_taken.append(f"clicked:{target}")
-                    else:
-                        self.smooth_scroll(300)
-                        
-                elif action_type == 'click_button' and target:
-                    success = self.smooth_click(f"button:has-text('{target}')", target)
-                    if success:
-                        self.actions_taken.append(f"clicked:{target}")
-                    else:
-                        self.smooth_scroll(300)
-                        
-                elif action_type == 'scroll':
-                    pixels = int(target) if target.isdigit() else 400
-                    self.smooth_scroll(pixels)
-                    self.actions_taken.append("scrolled")
-                    
-                elif action_type == 'wait':
-                    self.idle_cursor_movement(2.0)
-                
-                # Small idle movement between actions
-                self.idle_cursor_movement(0.8)
+            # Check if there's a scripted navigation plan
+            navigation_plan = self.company_data.get('demo_instructions', {}).get('navigation_plan', [])
+            
+            if navigation_plan and isinstance(navigation_plan, list) and len(navigation_plan) > 0:
+                # Follow the scripted plan
+                print("\n📋 Following scripted navigation plan...")
+                self.follow_scripted_plan(navigation_plan)
+            else:
+                # Fall back to AI-driven demo
+                print("\n🤖 Using AI-driven navigation...")
+                self.ai_driven_demo()
             
             # Closing with cursor movement
             self.narrate(
@@ -521,6 +556,243 @@ Respond in JSON:
             
         finally:
             self._cleanup()
+    
+    def follow_scripted_plan(self, navigation_plan):
+        """Follow a predefined step-by-step navigation plan using AI to interpret each step."""
+        for idx, step_data in enumerate(navigation_plan):
+            elapsed = time.time() - self.start_time
+            if elapsed > 115:
+                break
+            
+            # Handle both dict format (new) and string format (old)
+            if isinstance(step_data, dict):
+                step_num = step_data.get('step', idx + 1)
+                narration = step_data.get('narration', '')
+                action = step_data.get('action', '').lower()
+                description = step_data.get('description', '')
+            else:
+                step_num = idx + 1
+                narration = str(step_data)
+                action = ""
+                description = ""
+            
+            print(f"\n📍 Step {step_num}: {action}")
+            
+            # Narrate first
+            if narration:
+                self.narrate(narration, f"step_{step_num}")
+            
+            # Use AI to execute the step dynamically based on current page state
+            ai_action = self.ai_execute_scripted_step(step_num, action, description)
+            
+            if ai_action:
+                self.execute_action(ai_action)
+            
+            # Idle movement between steps
+            self.idle_cursor_movement(0.8)
+    
+    def ai_execute_scripted_step(self, step_num: int, action: str, description: str) -> Optional[Dict]:
+        """Use AI to figure out how to execute the scripted step on the current page."""
+        screenshot_b64 = self.get_screenshot_base64()
+        
+        page_info = self.page.evaluate("""
+            () => {
+                const info = {
+                    url: window.location.href,
+                    title: document.title,
+                    searchInputs: [],
+                    buttons: [],
+                    links: []
+                };
+                
+                // Find search inputs
+                document.querySelectorAll('input[type="search"], input[type="text"]').forEach((input, i) => {
+                    if (i < 3) {
+                        const rect = input.getBoundingClientRect();
+                        if (rect.width > 0 && rect.height > 0) {
+                            info.searchInputs.push({
+                                placeholder: input.placeholder || input.name || 'search',
+                                visible: true
+                            });
+                        }
+                    }
+                });
+                
+                // Find clickable buttons
+                document.querySelectorAll('button, [role="button"]').forEach((btn, i) => {
+                    if (i < 5) {
+                        const text = btn.innerText.trim();
+                        const rect = btn.getBoundingClientRect();
+                        if (text && rect.width > 0 && rect.height > 0) {
+                            info.buttons.push(text);
+                        }
+                    }
+                });
+                
+                // Find interesting links
+                document.querySelectorAll('a[href]').forEach((link, i) => {
+                    if (i < 10) {
+                        const text = link.innerText.trim();
+                        const rect = link.getBoundingClientRect();
+                        if (text && text.length > 2 && text.length < 50 && rect.width > 0) {
+                            info.links.push(text);
+                        }
+                    }
+                });
+                
+                return info;
+            }
+        """)
+        
+        prompt = f"""You are executing Step {step_num} of a scripted demo for {self.company_data['company_name']}.
+
+REQUIRED STEP ACTION: {action}
+STEP DESCRIPTION: {description}
+
+Current Page State:
+- URL: {page_info['url']}
+- Title: {page_info['title']}
+- Search Inputs: {page_info['searchInputs']}
+- Buttons: {page_info['buttons'][:3]}
+- Links: {page_info['links'][:5]}
+
+YOUR TASK: Execute EXACTLY what the step requires. Look at the screenshot and determine the precise action needed.
+
+Examples:
+- If step says "search Montreal" → action_type: "search", target: "Montreal"
+- If step says "click property" → action_type: "click_link", target: name of a property/listing visible
+- If step says "scroll" → action_type: "scroll", target: "400"
+- If step says "click experiences nav" → action_type: "click_link", target: "Experiences"
+
+Respond in JSON:
+{{
+    "action_type": "search|click_link|click_button|scroll",
+    "target": "specific term to search OR element text to click OR scroll pixels",
+    "reason": "how this fulfills the step requirement"
+}}
+"""
+
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/png;base64,{screenshot_b64}",
+                                    "detail": "low"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                max_tokens=150,
+                temperature=0.3
+            )
+            
+            result_text = response.choices[0].message.content.strip()
+            if "```json" in result_text:
+                result_text = result_text.split("```json")[1].split("```")[0]
+            elif "```" in result_text:
+                result_text = result_text.split("```")[1].split("```")[0]
+            
+            decision = json.loads(result_text)
+            print(f"   AI Decision: {decision.get('action_type')} → {decision.get('target')}")
+            return decision
+            
+        except Exception as e:
+            print(f"⚠️  AI step execution failed: {e}")
+            # Fallback based on action keyword
+            if 'search' in action:
+                return {"action_type": "search", "target": "Montreal", "reason": "fallback"}
+            elif 'scroll' in action:
+                return {"action_type": "scroll", "target": "400", "reason": "fallback"}
+            return None
+    
+    def execute_action(self, decision: Dict):
+        """Execute an action decision from AI."""
+        action_type = decision.get('action_type', 'scroll')
+        target = decision.get('target', '')
+        
+        if action_type == 'search' and target:
+            self.perform_search(target)
+            self.actions_taken.append(f"searched:{target}")
+            
+        elif action_type == 'click_link' and target:
+            success = self.smooth_click(f"text={target}", target)
+            if not success:
+                # Try as a general selector
+                success = self.smooth_click(f'a:has-text("{target}")', target)
+            if success:
+                self.actions_taken.append(f"clicked:{target}")
+            else:
+                self.smooth_scroll(300)
+                
+        elif action_type == 'click_button' and target:
+            success = self.smooth_click(f"button:has-text('{target}')", target)
+            if success:
+                self.actions_taken.append(f"clicked:{target}")
+            else:
+                self.smooth_scroll(300)
+                
+        elif action_type == 'scroll':
+            pixels = int(target) if target.isdigit() else 400
+            self.smooth_scroll(pixels)
+            self.actions_taken.append("scrolled")
+    
+    def ai_driven_demo(self):
+        """AI-driven demo loop (fallback when no script provided)."""
+        while True:
+            elapsed = time.time() - self.start_time
+            
+            if elapsed > 115:
+                break
+            
+            # AI decides next action
+            decision = self.ai_decide_next_action(elapsed)
+            
+            if not decision:
+                break
+            
+            # Narrate (cursor moves naturally during narration)
+            self.narrate(decision.get('narration', 'Continuing demo'), decision.get('action_type', 'action'))
+            
+            # Execute action
+            action_type = decision.get('action_type', 'scroll')
+            target = decision.get('target', '')
+            
+            if action_type == 'search' and target:
+                self.perform_search(target)
+                self.actions_taken.append(f"searched:{target}")
+                
+            elif action_type == 'click_link' and target:
+                success = self.smooth_click(f"text={target}", target)
+                if success:
+                    self.actions_taken.append(f"clicked:{target}")
+                else:
+                    self.smooth_scroll(300)
+                    
+            elif action_type == 'click_button' and target:
+                success = self.smooth_click(f"button:has-text('{target}')", target)
+                if success:
+                    self.actions_taken.append(f"clicked:{target}")
+                else:
+                    self.smooth_scroll(300)
+                    
+            elif action_type == 'scroll':
+                pixels = int(target) if target.isdigit() else 400
+                self.smooth_scroll(pixels)
+                self.actions_taken.append("scrolled")
+                
+            elif action_type == 'wait':
+                self.idle_cursor_movement(2.0)
+            
+            # Small idle movement between actions
+            self.idle_cursor_movement(0.8)
     
     def _format_time(self, seconds: float) -> str:
         """Format timestamp."""

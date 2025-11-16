@@ -1,0 +1,61 @@
+{
+  "company": "Airbnb",
+  "website": "https://www.airbnb.com",
+  "total_duration": 143.93204951286316,
+  "actions_taken": [
+    "clicked:Experiences",
+    "searched:Montreal",
+    "clicked:Search",
+    "clicked:Local culture and history"
+  ],
+  "narrations": [
+    {
+      "timestamp": 5.245208740234375e-06,
+      "time_formatted": "00:00.000",
+      "action": "introduction",
+      "narration": "Welcome! Let me show you Airbnb and its amazing features!"
+    },
+    {
+      "timestamp": 11.5533926486969,
+      "time_formatted": "00:11.553",
+      "action": "click_link",
+      "narration": "Let\u2019s explore unique experiences available during your stay!"
+    },
+    {
+      "timestamp": 22.266434907913208,
+      "time_formatted": "00:22.266",
+      "action": "search",
+      "narration": "Let's search for experiences in Montreal to discover local adventures!"
+    },
+    {
+      "timestamp": 36.90841269493103,
+      "time_formatted": "00:36.908",
+      "action": "click_button",
+      "narration": "Let's discover exciting activities hosted by locals in Montreal!"
+    },
+    {
+      "timestamp": 49.25448942184448,
+      "time_formatted": "00:49.254",
+      "action": "click_link",
+      "narration": "Let's explore unique local experiences that highlight Montreal's rich culture and history."
+    },
+    {
+      "timestamp": 60.56360745429993,
+      "time_formatted": "01:00.564",
+      "action": "click_link",
+      "narration": "Let's explore a highly-rated tour showcasing Montreal's rich history."
+    },
+    {
+      "timestamp": 101.69398403167725,
+      "time_formatted": "01:41.694",
+      "action": "click_link",
+      "narration": "Let's dive into Montreal's vibrant street art scene for an unforgettable experience!"
+    },
+    {
+      "timestamp": 139.51758193969727,
+      "time_formatted": "02:19.518",
+      "action": "conclusion",
+      "narration": "That's Airbnb! Hope you enjoyed this quick tour!"
+    }
+  ]
+}

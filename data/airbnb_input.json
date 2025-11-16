@@ -1,0 +1,83 @@
+{
+  "company_name": "Airbnb",
+  "website_url": "https://www.airbnb.com",
+  "description": "The world's leading platform for unique travel experiences - connecting millions of travelers with unforgettable stays and local adventures worldwide! Book apartments, homes, and unique properties for your perfect vacation.",
+  "key_features": [
+    "Smart search with location, dates, and guest filters - find exactly what you need in seconds",
+    "Millions of verified properties - apartments, homes, villas, unique stays in 220+ countries",
+    "Instant booking with secure payments and flexible cancellation policies",
+    "Real guest reviews and high-quality photos show you exactly what to expect",
+    "Experiences and activities - book tours, classes, and adventures hosted by locals",
+    "Easy hosting platform - list your space and earn extra income"
+  ],
+  "unique_selling_points": [
+    "Belong Anywhere - stay in real neighborhoods and live like a local, not a tourist!",
+    "Unbeatable variety - unique properties you won't find in hotels, from tiny homes to luxury estates",
+    "Trusted by millions - verified hosts, secure payments, $1M damage protection",
+    "Better value than hotels - entire homes with kitchens, workspaces, and more space",
+    "Complete travel platform - stays + experiences all in one place"
+  ],
+  "demo_instructions": {
+    "tone": "Fast-paced and enthusiastic - like showing a friend how easy it is to plan a trip! Keep it quick and energetic.",
+    "duration_target": "30 seconds - rapid showcase of core features",
+    "navigation_plan": [
+      {
+        "step": 1,
+        "action": "scroll",
+        "narration": "Welcome to Airbnb! Your one-stop platform for booking amazing stays worldwide!",
+        "description": "Quick scroll on homepage"
+      },
+      {
+        "step": 2,
+        "action": "search Montreal",
+        "narration": "Planning a weekend trip to Montreal? Just type it in the search bar!",
+        "description": "Type Montreal in search bar"
+      },
+      {
+        "step": 3,
+        "action": "scroll",
+        "narration": "Instantly see hundreds of options - apartments, homes, all with verified reviews and photos!",
+        "description": "Scroll through Montreal results quickly"
+      },
+      {
+        "step": 4,
+        "action": "click property",
+        "narration": "Click any listing to see full details - amenities, location, real guest reviews!",
+        "description": "Click on a listing"
+      },
+      {
+        "step": 5,
+        "action": "scroll",
+        "narration": "Everything you need - kitchen, WiFi, great location - all in one place!",
+        "description": "Quick scroll through property details"
+      },
+      {
+        "step": 6,
+        "action": "click experiences nav",
+        "narration": "Plus book local experiences and activities to make your Montreal trip unforgettable!",
+        "description": "Navigate to Experiences"
+      },
+      {
+        "step": 7,
+        "action": "scroll",
+        "narration": "From booking your stay to planning activities - Airbnb makes travel simple!",
+        "description": "Final scroll through experiences"
+      }
+    ],
+    "search_keywords": {
+      "stays": ["Montreal", "Montreal Canada"],
+      "experiences": ["Montreal food tour", "Montreal walking tour", "Montreal cooking class"],
+      "avoid": ["Random cities not in context", "Unrelated searches", "Cooking classes before showing experiences section"]
+    },
+    "speaking_style": "Natural and conversational - explain what you're doing as you do it, like helping a friend book their trip. Match narration to actual actions on screen!",
+    "key_messages": [
+      "Simple powerful search - location, dates, guests - that's all you need to start!",
+      "Real results for real trips - see exactly what's available with prices and reviews",
+      "Filter and customize - narrow down to your perfect stay with smart filters",
+      "Detailed property pages - photos, amenities, location, reviews - everything you need to decide",
+      "Beyond stays - book local experiences and activities for the complete trip",
+      "Trusted and secure - verified listings, real reviews, safe payments"
+    ],
+    "call_to_action": "Ready to plan your next adventure? Start searching on Airbnb and discover your perfect stay!"
+  }
+}

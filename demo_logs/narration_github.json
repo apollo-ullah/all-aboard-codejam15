@@ -1,0 +1,75 @@
+{
+  "company": "GitHub",
+  "website": "https://github.com",
+  "total_duration": 186.70590686798096,
+  "actions_taken": [
+    "clicked:Solutions",
+    "clicked:Platform",
+    "clicked:Resources",
+    "clicked:Solutions",
+    "clicked:Platform",
+    "clicked:Explore the latest tools from Universe '25"
+  ],
+  "narrations": [
+    {
+      "timestamp": 5.0067901611328125e-06,
+      "time_formatted": "00:00.000",
+      "action": "introduction",
+      "narration": "Welcome! Let me show you GitHub and its amazing features!"
+    },
+    {
+      "timestamp": 11.308840990066528,
+      "time_formatted": "00:11.309",
+      "action": "click_button",
+      "narration": "Let's explore the solutions GitHub offers to streamline your development process."
+    },
+    {
+      "timestamp": 20.858248710632324,
+      "time_formatted": "00:20.858",
+      "action": "click_link",
+      "narration": "Let's explore the platform features that empower effective collaboration and development."
+    },
+    {
+      "timestamp": 31.1861674785614,
+      "time_formatted": "00:31.186",
+      "action": "click_link",
+      "narration": "Let's explore the Resources section to see the extensive support available for developers."
+    },
+    {
+      "timestamp": 40.652209997177124,
+      "time_formatted": "00:40.652",
+      "action": "click_link",
+      "narration": "Let's explore tailored solutions that enhance teamwork and productivity."
+    },
+    {
+      "timestamp": 50.69169521331787,
+      "time_formatted": "00:50.692",
+      "action": "click_link",
+      "narration": "Let's explore the robust platform features that enhance collaboration and productivity."
+    },
+    {
+      "timestamp": 62.398444414138794,
+      "time_formatted": "01:02.398",
+      "action": "click_link",
+      "narration": "Let's explore GitHub's latest tools that enhance collaboration and development."
+    },
+    {
+      "timestamp": 101.51136183738708,
+      "time_formatted": "01:41.511",
+      "action": "click_link",
+      "narration": "Let's explore the latest tools that enhance collaboration and productivity on GitHub."
+    },
+    {
+      "timestamp": 146.25871062278748,
+      "time_formatted": "02:26.259",
+      "action": "click_link",
+      "narration": "Let's explore the key announcements shaping software development."
+    },
+    {
+      "timestamp": 182.25335717201233,
+      "time_formatted": "03:02.253",
+      "action": "conclusion",
+      "narration": "That's GitHub! Hope you enjoyed this quick tour!"
+    }
+  ]
+}
