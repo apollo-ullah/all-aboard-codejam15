@@ -157,4 +157,60 @@ export const api = {
       throw error;
     }
   },
+
+  async generateDemoVideo(
+    url: string,
+    storyboard: Storyboard,
+    options?: { duration?: number; voiceModel?: string }
+  ): Promise<{
+    success: boolean;
+    videoPath: string;
+    audioPath?: string;
+    scriptPath: string;
+    duration: number;
+    actionsCount: number;
+    timestamp: string;
+  }> {
+    console.log('🎬 Starting demo video generation:', { url, nodeCount: storyboard.nodes.length });
+    try {
+      const response = await apiClient.post('/api/generate-demo-video', {
+        url,
+        storyboard,
+        duration: options?.duration || 120,
+        voiceModel: options?.voiceModel || 'alloy',
+      });
+      console.log('✅ Demo video generation successful:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Demo video generation failed:', error);
+      if (error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw error;
+    }
+  },
+
+  async listDemoVideos(): Promise<{
+    videos: Array<{
+      filename: string;
+      path: string;
+      size: number;
+      created: Date;
+    }>;
+    count: number;
+  }> {
+    console.log('📹 Fetching demo videos list...');
+    try {
+      const response = await apiClient.get('/api/demo-videos');
+      console.log(`✅ Found ${response.data.count} demo videos`);
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Failed to fetch demo videos:', error);
+      throw error;
+    }
+  },
+
+  getDemoVideoUrl(filename: string): string {
+    return `${apiClient.defaults.baseURL}/api/demo-videos/${encodeURIComponent(filename)}`;
+  },
 };

@@ -422,5 +422,147 @@ router.post('/generate-slides', async (req, res) => {
   }
 });
 
+// POST /api/generate-demo-video - Generate AI demo video from storyboard
+router.post('/generate-demo-video', async (req, res) => {
+  try {
+    const { url, storyboard, duration, voiceModel } = req.body;
+
+    if (!url || !storyboard) {
+      return res.status(400).json({ error: 'Missing url or storyboard' });
+    }
+
+    if (!process.env.OPENAI_KEY) {
+      return res.status(500).json({ error: 'OpenAI API key not configured' });
+    }
+
+    // Dynamic import to avoid circular dependency
+    const { DemoVideoService } = await import('../services/DemoVideoService');
+
+    const demoService = new DemoVideoService({
+      openaiApiKey: process.env.OPENAI_KEY,
+    });
+
+    console.log(`🎬 Generating demo video for: ${url}`);
+    const result = await demoService.generateDemoVideo({
+      url,
+      storyboard,
+      duration: duration || 120,
+      voiceModel: voiceModel || 'alloy',
+    });
+
+    res.json({
+      success: true,
+      videoPath: result.videoPath,
+      audioPath: result.audioPath,
+      scriptPath: result.scriptPath,
+      duration: result.duration,
+      actionsCount: result.actionsCount,
+      timestamp: result.timestamp,
+    });
+
+  } catch (error: any) {
+    console.error('Error in /generate-demo-video:', error);
+    res.status(500).json({
+      error: 'Failed to generate demo video',
+      message: error.message
+    });
+  }
+});
+
+// GET /api/demo-videos - List available demo videos
+router.get('/demo-videos', async (req, res) => {
+  try {
+    const fs = await import('fs');
+    const path = await import('path');
+
+    const videosDir = 'demo_videos';
+    const logsDir = 'demo_logs';
+
+    if (!fs.existsSync(videosDir)) {
+      return res.json({ videos: [], count: 0 });
+    }
+
+    const files = fs.readdirSync(videosDir);
+    const videos = files
+      .filter(file => file.endsWith('.webm') || file.endsWith('.mp4'))
+      .map(file => {
+        const stats = fs.statSync(path.join(videosDir, file));
+        return {
+          filename: file,
+          path: path.join(videosDir, file),
+          size: stats.size,
+          created: stats.birthtime,
+        };
+      })
+      .sort((a, b) => b.created.getTime() - a.created.getTime());
+
+    res.json({
+      videos,
+      count: videos.length,
+    });
+
+  } catch (error: any) {
+    console.error('Error in /demo-videos:', error);
+    res.status(500).json({
+      error: 'Failed to list demo videos',
+      message: error.message
+    });
+  }
+});
+
+// GET /api/demo-videos/:filename - Download a demo video
+router.get('/demo-videos/:filename', async (req, res) => {
+  try {
+    const fs = await import('fs');
+    const path = await import('path');
+
+    const { filename } = req.params;
+    const videosDir = 'demo_videos';
+    const filePath = path.join(videosDir, filename);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ error: 'Video not found' });
+    }
+
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    if (range) {
+      // Stream video for browsers
+      const parts = range.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const chunksize = (end - start) + 1;
+      const file = fs.createReadStream(filePath, { start, end });
+
+      res.writeHead(206, {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': 'video/webm',
+      });
+
+      file.pipe(res);
+    } else {
+      // Download entire file
+      res.writeHead(200, {
+        'Content-Length': fileSize,
+        'Content-Type': 'video/webm',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+      });
+
+      fs.createReadStream(filePath).pipe(res);
+    }
+
+  } catch (error: any) {
+    console.error('Error downloading video:', error);
+    res.status(500).json({
+      error: 'Failed to download video',
+      message: error.message
+    });
+  }
+});
+
 export default router;
 
