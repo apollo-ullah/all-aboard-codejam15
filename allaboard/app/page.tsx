@@ -321,11 +321,17 @@ export default function Home() {
         <Background />
         <div className="relative z-10 w-full max-w-6xl space-y-6">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-2">🔍 Analyzing Your Project</h2>
+            <h2 className="text-3xl font-bold mb-2" style={{ color: '#6B5B95' }}>Analyzing Your Project</h2>
             <p className="text-white/70">Extracting insights from your website or repo to build your pitch deck</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div 
+            className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-8 py-8 rounded-2xl backdrop-blur-2xl border-2 border-white/30 shadow-2xl"
+            style={{ 
+              backgroundColor: 'rgba(178, 175, 210, 0.2)',
+              boxShadow: '0 20px 60px rgba(107, 91, 149, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
+            }}
+          >
             <ScrapingProgress url={url} />
             {processStartTime && (
               <TimeSavingsDisplay stage="scraping" startTime={processStartTime} />

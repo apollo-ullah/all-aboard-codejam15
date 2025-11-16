@@ -1,0 +1,55 @@
+{
+  "url": "airbnb.ca",
+  "title": "Airbnb: Global Home Sharing",
+  "duration": 68.943,
+  "actionsCount": 4,
+  "actions": [
+    "searched: Paris apartments",
+    "searched: Paris apartments",
+    "clicked: first listing",
+    "clicked: first listing"
+  ],
+  "narrations": [
+    {
+      "timestamp": 11.666,
+      "action": "scene-node-1",
+      "narration": "\"Check this out.   We're diving into Airbnb's search for Paris apartments.   Pick your dates, and voila, you'll see options popping up for a perfect getaway."
+    },
+    {
+      "timestamp": 14.001,
+      "action": "scene-1",
+      "narration": "Open strong."
+    },
+    {
+      "timestamp": 26.108,
+      "action": "scene-node-2",
+      "narration": "\"Check this out.   You can easily choose your dates for a Paris apartment, with flexible options.   Notice the popular homes and guest favorites right below.   Perfect for planning your getaway."
+    },
+    {
+      "timestamp": 28.526,
+      "action": "scene-2",
+      "narration": "Explain how standard travel options often miss the mark on delivering authentic cultural experiences."
+    },
+    {
+      "timestamp": 41.285,
+      "action": "scene-node-3",
+      "narration": "\"Welcome to Airbnb.   Here, you can explore popular homes with stunning images and see key details like pricing and guest favorites.   Find the perfect stay for your adventure."
+    },
+    {
+      "timestamp": 43.815,
+      "action": "scene-3",
+      "narration": "Introduce Airbnb as the innovative solution to traditional travel limitations."
+    },
+    {
+      "timestamp": 55.207,
+      "action": "scene-node-4",
+      "narration": "\"Check out these vibrant listings.   Each has unique features, prices, and guest favorites.   From cozy cabins to chic city apartments, there's something for every traveler here."
+    },
+    {
+      "timestamp": 57.595,
+      "action": "scene-4",
+      "narration": "Here we can see the platform's key features and capabilities."
+    }
+  ],
+  "timestamp": "2025-11-16T15:19:16.578Z"
+}

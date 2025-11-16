@@ -72,7 +72,7 @@ export default function TimeSavingsDisplay({ stage, startTime }: TimeSavingsDisp
   const savedDollars = Math.floor(savedMinutes * (80 / 60)) // $80/hour rate
 
   return (
-    <div className="w-full max-w-md space-y-4 p-6 rounded-xl border border-white/10 bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-green-500/10 backdrop-blur-sm">
+    <div className="w-full max-w-md space-y-4 p-6 rounded-xl border border-white/20 bg-gradient-to-br from-purple-500/25 via-blue-500/25 to-green-500/25 backdrop-blur-md">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-yellow-400" />

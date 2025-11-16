@@ -1,0 +1,55 @@
+{
+  "url": "airbnb.ca",
+  "title": "Airbnb",
+  "duration": 69.868,
+  "actionsCount": 4,
+  "actions": [
+    "searched: Paris apartments",
+    "searched: Paris apartments",
+    "clicked: first listing",
+    "clicked: first listing"
+  ],
+  "narrations": [
+    {
+      "timestamp": 11.422,
+      "action": "scene-node-1",
+      "narration": "Welcome to Airbnb.   Check out this easy-to-use calendar for selecting your travel dates.   Below, you'll see popular home listings with beautiful photos and guest reviews."
+    },
+    {
+      "timestamp": 13.529,
+      "action": "scene-1",
+      "narration": "Open strong with Airbnb's vision: creating a global community where people can share their homes and experiences.  This sets the stage for their unique approach to travel."
+    },
+    {
+      "timestamp": 24.237,
+      "action": "scene-node-2",
+      "narration": "\"Take a look.   We're exploring Paris apartments with this intuitive calendar.   You can easily select your dates right here, making planning your stay super convenient."
+    },
+    {
+      "timestamp": 26.356,
+      "action": "scene-2",
+      "narration": "Here we can see the platform's key features and capabilities."
+    },
+    {
+      "timestamp": 38.1,
+      "action": "scene-node-3",
+      "narration": "\"Welcome to Airbnb.   Check out these popular homes.   Each listing shows guest reviews, pricing, and beautiful photos to help you find the perfect stay.   Love how easy it is."
+    },
+    {
+      "timestamp": 40.171,
+      "action": "scene-3",
+      "narration": "Present Airbnb's solution: a platform enabling travelers to connect with local hosts offering unique accommodations and experiences."
+    },
+    {
+      "timestamp": 52.511,
+      "action": "scene-node-4",
+      "narration": "Welcome to Airbnb.   Check out these diverse listings, from cozy cottages to unique cabins, perfect for any adventure.   Notice the guest favorites marked for easy browsing."
+    },
+    {
+      "timestamp": 54.649,
+      "action": "scene-4",
+      "narration": "Discuss the vast variety of accommodations available, from homes and castles to treehouses and boats.  This diversity caters to any traveler's needs and desires, enhancing their travel experience."
+    }
+  ],
+  "timestamp": "2025-11-16T10:43:50.517Z"
+}
