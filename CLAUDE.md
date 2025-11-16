@@ -24,9 +24,11 @@ npm run lint        # Run ESLint
 ### Backend (Express API)
 ```bash
 cd backend
-npm install
-npm run dev         # Start development server with hot reload on port 3000
-npm start           # Start production server (requires build first)
+npm install                    # Automatically runs Playwright install via postinstall
+npm run dev                    # Start development server with hot reload on port 3000
+npm run build                  # Build TypeScript to JavaScript
+npm start                      # Start production server (requires build first)
+npm run setup-playwright       # Manually install Playwright if needed
 ```
 
 ## Architecture & Key Components
@@ -39,14 +41,19 @@ npm start           # Start production server (requires build first)
 - Stage-based workflow: input → scraping → storyboard editing → slide generation → presentation
 - Real-time backend connection testing
 - Error handling and user feedback
+- 866 lines - comprehensive application logic with all workflow stages
 
 **Components** (`allaboard/components/`):
 - **StoryboardCanvas**: Main editing interface using React Flow for drag-and-drop storyboard editing
 - **StoryNode**: Individual editable storyboard nodes with inline editing
 - **StoryboardAssistant**: AI-powered editing assistant with chat interface
 - **PresentationViewer**: Embedded Gamma presentation viewer with full-screen and keyboard navigation
+- **DemoVideoGenerator**: AI-powered demo video generation interface with progress tracking
+- **ScrapingProgress**: Real-time scraping progress visualization with stage indicators
+- **AIInsightsPanel**: Display AI-generated insights about scraped content
+- **TimeSavingsDisplay**: Visual representation of time saved by automation
 - **Background**: Parallax background with animated elements
-- **UI Components**: Radix UI components (button, input, select, textarea, etc.)
+- **UI Components**: Radix UI components (button, input, select, textarea, etc.) in `components/ui/`
 
 **Services & Utilities** (`allaboard/lib/`):
 - **api.ts**: Axios-based API client for backend communication
@@ -63,6 +70,7 @@ npm start           # Start production server (requires build first)
 - **SlideGenerator**: Gamma API integration for presentation generation (`https://public-api.gamma.app/v1.0/generations`)
 - **StoryboardAssistantService**: AI assistant for storyboard editing
 - **DemoVideoService**: AI-powered product demo video generator using GPT-4 Vision + Playwright + OpenAI TTS
+- **TestDataService**: Test data management and fallback data for development/testing
 
 ### Data Flow
 1. URL input → BrowserCash scraping (main page + up to 5 adjacent pages)
@@ -76,6 +84,9 @@ npm start           # Start production server (requires build first)
 ### API Endpoints
 - `GET /health`: Health check endpoint
 - `GET /api/test-connection`: Backend connectivity test
+- `GET /api/test-scrape`: Quick test of scraping functionality with example.com
+- `GET /api/test-browser-cash`: Test Browser.cash API connection and endpoint discovery
+- `GET /api/test-demo-video`: Test demo video generation functionality
 - `POST /api/scrape`: Scrape website and generate initial storyboard
 - `POST /api/generate-slides`: Convert storyboard to presentation slides
 - `POST /api/improve-storyboard`: AI assistant for storyboard editing
@@ -86,10 +97,12 @@ npm start           # Start production server (requires build first)
 ## External Dependencies & APIs
 
 **Required API Keys** (configured in `backend/.env`):
-- `OPENAI_KEY`: OpenAI GPT-4o for storyboard generation (REQUIRED)
+- `OPENAI_KEY`: OpenAI GPT-4o for storyboard generation and TTS (REQUIRED)
 - `GAMMA_API_KEY`: Gamma API for slide generation (REQUIRED) (`https://public-api.gamma.app/v1.0/generations`)
 - `AGENT_API_KEY`: Browser.cash Agent API for web scraping (OPTIONAL - will be used once API is fixed) (`https://agent-api.browser.cash`)
-- `FRONTEND_URL`: Frontend URL for CORS (default: http://localhost:3001)
+- `BROWSER_CASH_API_KEY`: Alternative Browser.cash API key (OPTIONAL)
+- `BROWSER_CASH_BASE_URL`: Browser.cash API base URL (OPTIONAL - default: https://dash.browser.cash)
+- `FRONTEND_URL`: Frontend URL for CORS (default: http://localhost:5173, supports 3001)
 - `PORT`: Backend port (default: 3000)
 - `NODE_ENV`: Environment mode (default: development)
 
@@ -125,33 +138,58 @@ npm start           # Start production server (requires build first)
 all-aboard-codejam15/
 ├── allaboard/              # Next.js frontend application
 │   ├── app/                # Next.js app directory
-│   │   ├── page.tsx        # Main application page (570+ lines)
+│   │   ├── page.tsx        # Main application page (866 lines)
 │   │   ├── layout.tsx      # Root layout
-│   │   └── globals.css     # Global styles
+│   │   ├── globals.css     # Global styles
+│   │   └── favicon.ico     # Favicon
 │   ├── components/         # React components
-│   │   ├── ui/             # Radix UI wrapper components
+│   │   ├── ui/             # Radix UI wrapper components (5 components)
 │   │   ├── background.tsx  # Parallax background
-│   │   ├── StoryboardCanvas.tsx
-│   │   ├── StoryNode.tsx
-│   │   ├── StoryboardAssistant.tsx
-│   │   ├── PresentationViewer.tsx
-│   │   └── NarrativeArcButton.tsx
+│   │   ├── StoryboardCanvas.tsx       # Interactive canvas editor
+│   │   ├── StoryNode.tsx              # Individual node component
+│   │   ├── StoryboardAssistant.tsx    # AI chat assistant
+│   │   ├── PresentationViewer.tsx     # Gamma embed viewer
+│   │   ├── DemoVideoGenerator.tsx     # Video generation UI
+│   │   ├── ScrapingProgress.tsx       # Scraping progress display
+│   │   ├── AIInsightsPanel.tsx        # AI insights display
+│   │   └── TimeSavingsDisplay.tsx     # Time savings visualization
 │   ├── lib/                # Utilities and services
-│   │   ├── api.ts          # API client
-│   │   ├── narrativeArcs.ts
-│   │   ├── validation.ts
-│   │   └── utils.ts
+│   │   ├── api.ts          # Axios API client
+│   │   ├── narrativeArcs.ts # YC/Finance arc templates
+│   │   ├── validation.ts   # URL validation
+│   │   └── utils.ts        # General utilities
 │   ├── types/              # TypeScript type definitions
+│   │   └── index.ts        # Main type exports
+│   ├── public/             # Static assets
 │   └── package.json        # Dependencies
 ├── backend/                # Express.js API server
 │   ├── src/
 │   │   ├── services/       # Business logic services
+│   │   │   ├── LLMService.ts
+│   │   │   ├── BrowserCashService.ts
+│   │   │   ├── SlideGenerator.ts
+│   │   │   ├── StoryboardAssistantService.ts
+│   │   │   ├── DemoVideoService.ts
+│   │   │   └── TestDataService.ts
 │   │   ├── api/            # API routes
+│   │   │   └── routes.ts   # All API endpoints
 │   │   ├── types/          # Type definitions
+│   │   │   └── index.ts
 │   │   ├── utils/          # Utilities
+│   │   │   └── validation.ts
 │   │   └── index.ts        # Server entry point
-│   └── .env.example        # Environment variables template
-└── CLAUDE.md               # This file
+│   ├── demo_videos/        # Generated demo videos (gitignored)
+│   ├── demo_logs/          # Demo generation logs (gitignored)
+│   ├── .env.example        # Environment variables template
+│   └── package.json        # Dependencies
+├── CLAUDE.md               # This file - AI assistant guidance
+├── README.md               # Project README
+├── PROJECT_SUMMARY.md      # Comprehensive project documentation
+├── QUICK_START.md          # Quick start guide
+├── START_SERVERS.md        # Server management
+├── DEMO_VIDEO_README.md    # Demo video feature docs
+├── QUICKSTART_DEMO_VIDEO.md # Demo video quick start
+└── INTEGRATION_GUIDE.md    # Integration documentation
 ```
 
 ## Quick Start
@@ -172,6 +210,7 @@ all-aboard-codejam15/
    ```bash
    cd backend
    npm run setup-playwright
+   # Note: Playwright is also auto-installed via postinstall hook when you run npm install
    ```
 
 4. **Start servers:**
@@ -196,3 +235,68 @@ all-aboard-codejam15/
 - **API key errors**: Check all required API keys are set in `backend/.env`
 - **Build errors**: Use `npm install --legacy-peer-deps` for allaboard
 - **Network errors during build**: Google Fonts may fail in restricted networks (dev mode works fine)
+- **Playwright installation fails**: Run `npm run setup-playwright` manually or install with `--with-deps` flag
+- **Demo video generation fails**: Ensure Playwright Chromium is installed and OPENAI_KEY is configured
+- **Browser.cash API issues**: The API is currently being tested; fallback test data is available via TestDataService
+
+## Additional Documentation
+
+This repository includes comprehensive documentation:
+- **CLAUDE.md** (this file): AI assistant guidance and development workflows
+- **README.md**: Project overview and quick start
+- **PROJECT_SUMMARY.md**: Comprehensive technical documentation
+- **QUICK_START.md**: Streamlined setup instructions
+- **START_SERVERS.md**: Server management commands
+- **DEMO_VIDEO_README.md**: Demo video generation feature documentation
+- **QUICKSTART_DEMO_VIDEO.md**: Quick start for demo video feature
+- **INTEGRATION_GUIDE.md**: Integration and API documentation
+
+## Development Workflows
+
+### Adding New Components
+1. Create component in `allaboard/components/`
+2. Use TypeScript with proper type annotations
+3. Follow existing patterns (glass-morphism UI, Radix components)
+4. Import and integrate in `app/page.tsx`
+
+### Adding New API Endpoints
+1. Add route handler in `backend/src/api/routes.ts`
+2. Create/use appropriate service in `backend/src/services/`
+3. Add types to `backend/src/types/index.ts` if needed
+4. Update CORS configuration if needed
+5. Add endpoint to API client in `allaboard/lib/api.ts`
+
+### Adding New Services
+1. Create service file in `backend/src/services/`
+2. Follow TypeScript class-based pattern
+3. Add error handling and logging
+4. Export and import in routes.ts
+
+## Testing & Debugging
+
+### Testing Backend API
+```bash
+# Test health endpoint
+curl http://localhost:3000/health
+
+# Test scraping
+curl http://localhost:3000/api/test-scrape
+
+# Test Browser.cash connection
+curl http://localhost:3000/api/test-browser-cash
+
+# Test demo video generation
+curl http://localhost:3000/api/test-demo-video
+```
+
+### Frontend Debugging
+- Check browser console for errors
+- Verify backend connection indicator in UI
+- Check Network tab for API call failures
+- Inspect React Flow state in React DevTools
+
+### Backend Debugging
+- Check server console for errors and logs
+- Review demo_logs/ for video generation logs
+- Test individual services with test endpoints
+- Verify environment variables are loaded correctly
