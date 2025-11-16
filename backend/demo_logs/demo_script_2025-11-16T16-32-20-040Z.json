@@ -1,0 +1,55 @@
+{
+  "url": "airbnb.ca",
+  "title": "Airbnb",
+  "duration": 93.137,
+  "actionsCount": 4,
+  "actions": [
+    "searched: Paris apartments",
+    "searched: Paris apartments",
+    "clicked: first listing",
+    "clicked: first listing"
+  ],
+  "narrations": [
+    {
+      "timestamp": 11.205,
+      "action": "scene-node-1",
+      "narration": "\"Welcome to Airbnb.   Check out the flexible date search feature—it's perfect for finding your ideal stay.   Notice how popular listings are right at your fingertips."
+    },
+    {
+      "timestamp": 13.347,
+      "action": "scene-1",
+      "narration": "Open with Airbnb's transformative vision of belonging anywhere.  This sets the stage for understanding their disruptive impact in the hospitality industry."
+    },
+    {
+      "timestamp": 24.194,
+      "action": "scene-node-2",
+      "narration": "\"Check this out.   We're exploring Airbnb's search tool.   Just enter your destination and dates, and instantly see beautiful options tailored to your travel needs.   So exciting."
+    },
+    {
+      "timestamp": 26.261,
+      "action": "scene-2",
+      "narration": "Here we can see the platform's key features and capabilities."
+    },
+    {
+      "timestamp": 35.947,
+      "action": "scene-node-3",
+      "narration": "\"Welcome to Airbnb.   Here you can easily search for stays in Paris.   Check out these popular homes, complete with guest favorites and detailed pricing for a perfect getaway."
+    },
+    {
+      "timestamp": 38.03,
+      "action": "scene-3",
+      "narration": "Show how Airbnb provides a global platform where travelers can find unique accommodations and experiences hosted by locals.  This approach not only enriches the travel experience but also fosters cultural exchange and sustainable tourism."
+    },
+    {
+      "timestamp": 74.929,
+      "action": "scene-node-4",
+      "narration": "\"Check out these amazing homes in Pointe-Calumet.   Each spot is beautifully presented with photos, prices, and guest favorites.   So many incredible choices for your next adventure."
+    },
+    {
+      "timestamp": 77.016,
+      "action": "scene-4",
+      "narration": "This breadth of choice is a key differentiator, making Airbnb a versatile solution for any type of traveler."
+    }
+  ],
+  "timestamp": "2025-11-16T16:32:20.040Z"
+}

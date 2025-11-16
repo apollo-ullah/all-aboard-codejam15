@@ -120,7 +120,7 @@ export default function ScrapingProgress({ url, onComplete }: ScrapingProgressPr
   const currentStepIndex = PROGRESS_STEPS.findIndex(s => s.id === currentStage)
 
   return (
-    <div className="w-full max-w-2xl space-y-6 p-6 rounded-xl border border-white/20 bg-white/20 backdrop-blur-md">
+    <div className="w-full max-w-2xl space-y-6 p-6 rounded-xl border border-white/20 backdrop-blur-md" style={{ backgroundColor: 'rgba(204, 200, 226, 0.6)' }}>
       <div className="flex items-center gap-3">
         <Loader2 className="w-6 h-6 text-purple-400 animate-spin" />
         <div>

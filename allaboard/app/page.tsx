@@ -322,7 +322,7 @@ export default function Home() {
         <div className="relative z-10 w-full max-w-6xl space-y-6">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold mb-2" style={{ color: '#6B5B95' }}>Analyzing Your Project</h2>
-            <p className="text-white/70">Extracting insights from your website or repo to build your pitch deck</p>
+            <p style={{ color: '#A9A4CC' }}>Extracting insights from your website or repo to build your pitch deck</p>
           </div>
 
           <div 
@@ -445,7 +445,20 @@ export default function Home() {
             </button>
             <button
               onClick={handleGenerateSlides}
-              className="bg-gradient-to-r from-[#22C55E] to-[#10B981] text-white px-7 py-2.5 rounded-xl font-semibold hover:from-[#16A34A] hover:to-[#059669] transition-all duration-200 shadow-lg shadow-green-500/25 hover:shadow-xl hover:shadow-green-500/30 border border-green-400/40 hover:scale-[1.02] active:scale-[0.98]"
+              className="text-white px-7 py-2.5 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl border hover:scale-[1.02] active:scale-[0.98]"
+              style={{ 
+                backgroundColor: '#8A67BB',
+                borderColor: 'rgba(138, 103, 187, 0.4)',
+                boxShadow: '0 10px 30px rgba(138, 103, 187, 0.3)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#7A5AAB';
+                e.currentTarget.style.boxShadow = '0 15px 40px rgba(138, 103, 187, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#8A67BB';
+                e.currentTarget.style.boxShadow = '0 10px 30px rgba(138, 103, 187, 0.3)';
+              }}
             >
               Generate Slides
             </button>
@@ -475,9 +488,9 @@ export default function Home() {
             />
           </div>
 
-          {/* AI Insights Sidebar - Light Purple Glassmorphism */}
+          {/* AI Insights Sidebar - Dark Purple Gradient */}
           {insightsPanelOpen && (storyboard.targetAudience || storyboard.coreInnovation) && (
-            <div className="w-96 bg-gradient-to-br from-white/50 to-[#A9A4CC]/20 backdrop-blur-xl border-l border-white/40 p-6 overflow-y-auto">
+            <div className="w-96 backdrop-blur-xl border-l p-6 overflow-y-auto" style={{ background: 'linear-gradient(to bottom, #53426A, #4A3A5F)', borderColor: 'rgba(255, 255, 255, 0.1)' }}>
               <AIInsightsPanel storyboard={storyboard} pagesScraped={pagesScraped} />
             </div>
           )}
