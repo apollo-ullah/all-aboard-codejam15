@@ -1,0 +1,22 @@
+{
+  "url": "https://airbnb.ca",
+  "title": "Airbnb",
+  "duration": 50.376,
+  "actionsCount": 1,
+  "actions": [
+    "searched: Paris apartments"
+  ],
+  "narrations": [
+    {
+      "timestamp": 43.362,
+      "action": "scene-node-1",
+      "narration": "“Check this out.   Here are some popular homes, each with vibrant images and essential details like price and guest favorites.   Perfect for planning your next adventure."
+    },
+    {
+      "timestamp": 45.853,
+      "action": "scene-1",
+      "narration": "This sets the stage for an innovative travel narrative."
+    }
+  ],
+  "timestamp": "2025-11-16T15:46:36.507Z"
+}

@@ -72,64 +72,64 @@ export default function TimeSavingsDisplay({ stage, startTime }: TimeSavingsDisp
   const savedDollars = Math.floor(savedMinutes * (80 / 60)) // $80/hour rate
 
   return (
-    <div className="w-full max-w-md space-y-4 p-6 rounded-xl border border-white/10 bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-green-500/10 backdrop-blur-sm">
+    <div className="w-full max-w-md space-y-4 p-6 rounded-xl border-2 border-white/20 bg-white/90 backdrop-blur-md shadow-xl">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Zap className="w-5 h-5 text-yellow-400" />
-          <h3 className="text-lg font-semibold text-white">Time Savings</h3>
+          <Zap className="w-5 h-5 text-yellow-600" />
+          <h3 className="text-lg font-semibold text-gray-900">Time Savings</h3>
         </div>
         <span className="text-2xl">{stageInfo.icon}</span>
       </div>
 
       <div className="space-y-4">
         {/* Current Progress */}
-        <div className="flex items-center justify-between p-3 rounded-lg bg-white/5">
+        <div className="flex items-center justify-between p-4 rounded-lg bg-blue-50 border-2 border-blue-200">
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-blue-400" />
-            <span className="text-sm text-white/80">{stageInfo.label}</span>
+            <Clock className="w-4 h-4 text-blue-600" />
+            <span className="text-sm font-semibold text-gray-800">{stageInfo.label}</span>
           </div>
-          <div className="text-lg font-mono font-bold text-blue-400">
+          <div className="text-lg font-mono font-bold text-blue-600">
             {formatTime(elapsedSeconds)}
           </div>
         </div>
 
         {/* Manual Time */}
-        <div className="flex items-center justify-between p-3 rounded-lg bg-white/5">
-          <span className="text-sm text-white/60">Manual Time:</span>
-          <div className="text-lg font-mono font-bold text-white/60 line-through">
+        <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 border-2 border-gray-200">
+          <span className="text-sm font-medium text-gray-700">Manual Time:</span>
+          <div className="text-lg font-mono font-bold text-gray-500 line-through">
             {formatManualTime(manualTimeMinutes)}
           </div>
         </div>
 
         {/* Divider */}
-        <div className="border-t border-white/10" />
+        <div className="border-t-2 border-gray-200" />
 
         {/* Time Saved */}
         <div className="space-y-3">
-          <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/20">
+          <div className="flex items-center justify-between p-4 rounded-lg bg-green-50 border-2 border-green-400 shadow-sm">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-green-400" />
-              <span className="text-sm font-medium text-white">Time Saved:</span>
+              <TrendingUp className="w-5 h-5 text-green-600" />
+              <span className="text-sm font-semibold text-gray-900">Time Saved:</span>
             </div>
-            <div className="text-2xl font-bold text-green-400">
+            <div className="text-2xl font-bold text-green-600">
               {formatManualTime(savedMinutes)}
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-400/20">
-            <span className="text-sm font-medium text-white">Cost Savings:</span>
-            <div className="text-2xl font-bold text-yellow-400">
+          <div className="flex items-center justify-between p-4 rounded-lg bg-yellow-50 border-2 border-yellow-400 shadow-sm">
+            <span className="text-sm font-semibold text-gray-900">Cost Savings:</span>
+            <div className="text-2xl font-bold text-yellow-600">
               ${savedDollars}
             </div>
           </div>
         </div>
 
         {stage === 'complete' && (
-          <div className="mt-4 p-3 rounded-lg bg-purple-500/20 border border-purple-400/20">
-            <div className="text-xs text-purple-300 text-center">
-              💡 At $80/hr, that's <span className="font-bold">${savedDollars}</span> saved per deck.
+          <div className="mt-4 p-4 rounded-lg bg-purple-50 border-2 border-purple-300">
+            <div className="text-xs text-gray-700 text-center font-medium">
+              💡 At $80/hr, that's <span className="font-bold text-purple-700">${savedDollars}</span> saved per deck.
               <br />
-              10 decks/week = <span className="font-bold">${savedDollars * 10}/week</span> = <span className="font-bold">${(savedDollars * 10 * 52).toLocaleString()}/year</span>
+              10 decks/week = <span className="font-bold text-purple-700">${savedDollars * 10}/week</span> = <span className="font-bold text-purple-700">${(savedDollars * 10 * 52).toLocaleString()}/year</span>
             </div>
           </div>
         )}

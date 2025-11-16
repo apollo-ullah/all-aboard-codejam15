@@ -1,0 +1,55 @@
+{
+  "url": "https://airbnb.ca",
+  "title": "Airbnb",
+  "duration": 57.835,
+  "actionsCount": 4,
+  "actions": [
+    "searched: Paris apartments",
+    "searched: Paris apartments",
+    "clicked: first listing",
+    "clicked: first listing"
+  ],
+  "narrations": [
+    {
+      "timestamp": 9.563,
+      "action": "scene-node-1",
+      "narration": "\"Check this out.   We're setting up a search for Paris apartments.   You can easily choose dates, and see popular options in Tokyo and beyond.   Ready to explore."
+    },
+    {
+      "timestamp": 11.637,
+      "action": "scene-1",
+      "narration": "This sets the stage for an innovative travel narrative."
+    },
+    {
+      "timestamp": 20.573,
+      "action": "scene-node-2",
+      "narration": "\"Check this out.   We’re exploring Paris apartments.   You can easily select dates and guest numbers to find the perfect stay, with popular options right at your fingertips."
+    },
+    {
+      "timestamp": 22.637,
+      "action": "scene-2",
+      "narration": "Paint a vivid picture of the traditional travel experience—often characterized by standard hotels, lack of local engagement, and rising costs."
+    },
+    {
+      "timestamp": 32.456,
+      "action": "scene-node-3",
+      "narration": "Welcome to Airbnb.   Check out these inviting homes in Tokyo, each one featuring beautiful photos, pricing, and guest favorites.   Perfect for finding your next stay."
+    },
+    {
+      "timestamp": 34.653,
+      "action": "scene-3",
+      "narration": "Introduce Airbnb as the transformative solution to traditional travel woes."
+    },
+    {
+      "timestamp": 44.638,
+      "action": "scene-node-4",
+      "narration": "Welcome to Airbnb.   Check out these incredible homes in Tokyo, each with beautiful photos and guest favorites marked.   Perfect for finding your ideal stay."
+    },
+    {
+      "timestamp": 46.738,
+      "action": "scene-4",
+      "narration": "Discuss the sheer scale of Airbnb's offerings, with over 7 million listings worldwide.  This not only showcases the platform's reach but also underscores the diversity of accommodations, catering to every traveler's unique preferences and needs."
+    }
+  ],
+  "timestamp": "2025-11-16T15:48:32.835Z"
+}

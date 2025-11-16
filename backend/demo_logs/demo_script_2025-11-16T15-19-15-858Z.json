@@ -1,0 +1,55 @@
+{
+  "url": "https://www.airbnb.ca/",
+  "title": "Airbnb",
+  "duration": 69.181,
+  "actionsCount": 4,
+  "actions": [
+    "searched: Paris apartments",
+    "searched: Paris apartments",
+    "clicked: first listing",
+    "clicked: first listing"
+  ],
+  "narrations": [
+    {
+      "timestamp": 12.16,
+      "action": "scene-node-1",
+      "narration": "\"Welcome to Airbnb's vibrant selection.   Here, you can browse popular homes with ease, checking out prices, reviews, and unique amenities.   Perfect for finding your next getaway."
+    },
+    {
+      "timestamp": 14.283,
+      "action": "scene-1",
+      "narration": "Open strong.  Set the stage for how Airbnb has transformed the travel industry."
+    },
+    {
+      "timestamp": 23.787,
+      "action": "scene-node-2",
+      "narration": "\"Check this out.   You can easily select your travel dates here.   Notice how it’s set to November and December 2025, making planning ahead a breeze."
+    },
+    {
+      "timestamp": 25.907,
+      "action": "scene-2",
+      "narration": "Discuss the growing demand for travel experiences that go beyond conventional hotels.  This sets up Airbnb's solution to this problem."
+    },
+    {
+      "timestamp": 38.242,
+      "action": "scene-node-3",
+      "narration": "\"Check this out.   We're exploring incredible listings in Pointe-Calumet and Toronto.   Each option shows vibrant photos, pricing, and guest favorites.   It's your gateway to unique stays worldwide."
+    },
+    {
+      "timestamp": 40.452,
+      "action": "scene-3",
+      "narration": "Explain how Airbnb connects travelers with local hosts, providing a diverse range of accommodations from spare rooms to entire homes."
+    },
+    {
+      "timestamp": 53.958,
+      "action": "scene-node-4",
+      "narration": "\"Check this out.   We've got a cozy cottage, a charming guesthouse, and even a stunning chalet.   Each one offers a unique and personal touch you'll love."
+    },
+    {
+      "timestamp": 56.054,
+      "action": "scene-4",
+      "narration": "Showcase the variety of accommodation types available on Airbnb.  Stress the uniqueness and personal touch that differentiates Airbnb stays from traditional hotels."
+    }
+  ],
+  "timestamp": "2025-11-16T15:19:15.858Z"
+}

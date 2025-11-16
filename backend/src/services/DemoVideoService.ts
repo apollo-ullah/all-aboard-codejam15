@@ -1,6 +1,7 @@
 import { chromium, Browser, BrowserContext, Page } from 'playwright';
 import OpenAI from 'openai';
 import { Storyboard, StoryNode } from '../types/index';
+import { normalizeUrl } from '../utils/validation';
 import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
@@ -196,12 +197,14 @@ export class DemoVideoService {
   private async navigateToWebsite(url: string): Promise<void> {
     if (!this.page) throw new Error('Browser not initialized');
 
-    console.log(`📍 Navigating to ${url}...`);
+    // Normalize URL (add https:// if missing)
+    const normalizedUrl = normalizeUrl(url);
+    console.log(`📍 Navigating to ${normalizedUrl}...`);
 
     try {
-      await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await this.page.goto(normalizedUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
     } catch {
-      await this.page.goto(url, { timeout: 30000 });
+      await this.page.goto(normalizedUrl, { timeout: 30000 });
     }
 
     await this.page.waitForTimeout(2000);
@@ -1728,24 +1731,78 @@ Return ONLY a JSON object with the index of the most likely listing:
   }
 
   /**
+   * Process script through GPT to make it sound natural and conversational
+   */
+  private async processScriptForTTS(rawScript: string): Promise<string> {
+    console.log(`   ✨ Processing script for natural voiceover...`);
+    
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a professional voiceover script writer. Your task is to rewrite the given script to sound natural, conversational, and engaging when spoken aloud. 
+
+Rules:
+- Remove ALL metadata, instructions, speaker notes, or technical details
+- Make it sound like a natural presenter talking to an audience
+- Use conversational language, not formal documentation
+- Keep the core message and information intact
+- Make transitions smooth and natural
+- Remove any phrases like "now we see", "this slide shows", "let's look at" - just describe what's there
+- Write in a friendly, confident tone
+- Keep it concise but informative
+- Ensure proper flow between sentences
+
+Output ONLY the rewritten script, nothing else.`
+          },
+          {
+            role: 'user',
+            content: `Rewrite this script to sound natural for voiceover:\n\n${rawScript}`
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      });
+
+      const processedScript = response.choices[0].message.content?.trim() || rawScript;
+      
+      // Final cleanup pass
+      const finalScript = this.cleanNarrationText(processedScript);
+      
+      console.log(`   ✅ Script processed (${finalScript.length} chars)`);
+      return finalScript;
+
+    } catch (error: any) {
+      console.warn(`   ⚠️  Script processing failed, using cleaned original:`, error.message);
+      // Fallback to cleaned original script
+      return this.cleanNarrationText(rawScript);
+    }
+  }
+
+  /**
    * Generate voice-over audio from script using OpenAI TTS
    * Enhanced for more natural, engaging delivery!
    */
   private async generateVoiceOver(script: string, voice: string): Promise<string> {
     console.log(`🎙️  Generating voice-over...`);
 
-    // CRITICAL: Clean the script one more time before sending to TTS
+    // First, clean the script to remove obvious metadata
     const cleanedScript = this.cleanNarrationText(script);
     
-    console.log(`   📝 TTS Input (first 200 chars): "${cleanedScript.substring(0, 200)}..."`);
-    console.log(`   📏 Script length: ${cleanedScript.length} characters`);
+    // Then process through GPT to make it natural and conversational
+    const naturalScript = await this.processScriptForTTS(cleanedScript);
+    
+    console.log(`   📝 Final TTS Input (first 200 chars): "${naturalScript.substring(0, 200)}..."`);
+    console.log(`   📏 Script length: ${naturalScript.length} characters`);
 
     try {
       // Use TTS-1-HD for higher quality audio (more natural and engaging)
       const mp3 = await this.openai.audio.speech.create({
         model: 'tts-1-hd',  // HD model for better quality!
         voice: voice as any,
-        input: cleanedScript,  // Use cleaned script!
+        input: naturalScript,  // Use processed natural script!
         speed: 1.05  // Slightly faster for more energetic delivery (1.05 = 5% faster)
       });
 

@@ -9,6 +9,7 @@ import Background from '@/components/background'
 import StoryboardCanvas from '@/components/StoryboardCanvas'
 import StoryboardAssistant from '@/components/StoryboardAssistant'
 import PresentationViewer from '@/components/PresentationViewer'
+import VideoViewer from '@/components/VideoViewer'
 import AIInsightsPanel from '@/components/AIInsightsPanel'
 import TimeSavingsDisplay from '@/components/TimeSavingsDisplay'
 import ScrapingProgress from '@/components/ScrapingProgress'
@@ -20,8 +21,7 @@ import { applyNarrativeArc } from '@/lib/narrativeArcs'
 type Mode = 'speed' | 'simple' | 'advanced'
 type OutputType = 'video' | 'slides'
 type StyleType = 'vc-pitch' | 'hackathon' | 'recruiter' | 'sales' | 'onboarding' | 'technical'
-type AnalysisMode = 'standard' | 'competitive' | 'briefing' | 'partnership'
-type Stage = 'input' | 'scraping' | 'storyboard' | 'generating' | 'presentation'
+type Stage = 'input' | 'scraping' | 'storyboard' | 'generating' | 'presentation' | 'video'
 
 const styles = [
   { value: 'vc-pitch', label: 'VC Pitch Deck' },
@@ -51,7 +51,6 @@ export default function Home() {
   const [description, setDescription] = useState('')
   const [style, setStyle] = useState<StyleType>('vc-pitch')
   const [sector, setSector] = useState('')
-  const [analysisMode, setAnalysisMode] = useState<AnalysisMode>('competitive')
 
   // Application State
   const [stage, setStage] = useState<Stage>('input')
@@ -69,6 +68,9 @@ export default function Home() {
   const [demoVideoOpen, setDemoVideoOpen] = useState(false)
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false)
   const [videoProgress, setVideoProgress] = useState<string>('')
+  const [videoUrl, setVideoUrl] = useState<string>('')
+  const [videoFilename, setVideoFilename] = useState<string>('')
+  const [videoDuration, setVideoDuration] = useState<number | undefined>(undefined)
   const [processStartTime, setProcessStartTime] = useState<number | undefined>(undefined)
 
   // Backend connection status
@@ -113,8 +115,8 @@ export default function Home() {
       await api.testConnection()
       setBackendConnected(true)
 
-      // Scrape and generate storyboard with analysis mode
-      const response = await api.scrapeWebsite(url.trim(), analysisMode)
+      // Scrape and generate storyboard (using standard mode)
+      const response = await api.scrapeWebsite(url.trim(), 'standard')
       console.log('📦 Received storyboard response:', response)
 
       if (response.storyboard) {
@@ -181,12 +183,17 @@ export default function Home() {
       console.log('✅ Video generated!', response)
       setVideoProgress('✅ Demo video generated successfully!')
       
-      // Download the video automatically
+      // Extract video filename and set up video viewing
+      const filename = response.videoPath.split('/').pop() || ''
+      const videoUrl = api.getDemoVideoUrl(filename)
+      
+      setVideoFilename(filename)
+      setVideoUrl(videoUrl)
+      setVideoDuration(response.duration)
+      
+      // Switch to video viewing stage
       setTimeout(() => {
-        const videoFilename = response.videoPath.split('/').pop() || ''
-        const downloadUrl = api.getDemoVideoUrl(videoFilename)
-        console.log('📥 Downloading video:', downloadUrl)
-        window.open(downloadUrl, '_blank')
+        setStage('video')
         setVideoProgress('')
       }, 1500)
       
@@ -197,6 +204,13 @@ export default function Home() {
     } finally {
       setIsGeneratingVideo(false)
     }
+  }
+
+  const handleCloseVideo = () => {
+    setStage('storyboard')
+    setVideoUrl('')
+    setVideoFilename('')
+    setVideoDuration(undefined)
   }
 
   const handleLoadTestData = () => {
@@ -321,8 +335,8 @@ export default function Home() {
         <Background />
         <div className="relative z-10 w-full max-w-6xl space-y-6">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-2">🔍 Analyzing Your Project</h2>
-            <p className="text-white/70">Extracting insights from your website or repo to build your pitch deck</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2 drop-shadow-lg">🔍 Analyzing Your Project</h2>
+            <p className="text-gray-700 font-medium">Extracting insights from your website or repo to build your pitch deck</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -439,7 +453,7 @@ export default function Home() {
             </button>
             <button
               onClick={handleGenerateSlides}
-              className="bg-gradient-to-r from-[#22C55E] to-[#10B981] text-white px-7 py-2.5 rounded-xl font-semibold hover:from-[#16A34A] hover:to-[#059669] transition-all duration-200 shadow-lg shadow-green-500/25 hover:shadow-xl hover:shadow-green-500/30 border border-green-400/40 hover:scale-[1.02] active:scale-[0.98]"
+              className="bg-[#7a5aab] text-white px-7 py-2.5 rounded-xl font-semibold hover:bg-[#6a4a9b] transition-all duration-200 shadow-lg shadow-[#7a5aab]/25 hover:shadow-xl hover:shadow-[#7a5aab]/30 border border-[#7a5aab]/40 hover:scale-[1.02] active:scale-[0.98]"
             >
               Generate Slides
             </button>
@@ -484,7 +498,16 @@ export default function Home() {
             console.log('🎬 Rendering DemoVideoGenerator component');
             return (
               <div className="border-t border-white/40 bg-gradient-to-b from-white/30 to-[#A9A4CC]/20 backdrop-blur-xl p-6 overflow-y-auto max-h-96">
-                <DemoVideoGenerator url={url} storyboard={storyboard} />
+                <DemoVideoGenerator 
+                  url={url} 
+                  storyboard={storyboard}
+                  onVideoGenerated={(videoUrl, filename, duration) => {
+                    setVideoUrl(videoUrl)
+                    setVideoFilename(filename)
+                    setVideoDuration(duration)
+                    setStage('video')
+                  }}
+                />
               </div>
             );
           }
@@ -503,6 +526,17 @@ export default function Home() {
         pdfUrl={pdfUrl}
         slideCount={slideCount}
         onClose={handleClosePresentation}
+      />
+    )
+  }
+
+  if (stage === 'video' && videoUrl) {
+    return (
+      <VideoViewer
+        videoUrl={videoUrl}
+        videoFilename={videoFilename}
+        duration={videoDuration}
+        onClose={handleCloseVideo}
       />
     )
   }
@@ -737,53 +771,6 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Analysis Mode Selector */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">Analysis Mode</label>
-                <div className="grid grid-cols-4 gap-2 glass rounded-lg p-1.5">
-                  <button
-                    onClick={() => setAnalysisMode('standard')}
-                    className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${
-                      analysisMode === 'standard'
-                        ? 'bg-primary text-primary-foreground shadow-md'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
-                    }`}
-                  >
-                    Standard
-                  </button>
-                  <button
-                    onClick={() => setAnalysisMode('competitive')}
-                    className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${
-                      analysisMode === 'competitive'
-                        ? 'bg-primary text-primary-foreground shadow-md'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
-                    }`}
-                  >
-                    Competitive
-                  </button>
-                  <button
-                    onClick={() => setAnalysisMode('briefing')}
-                    className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${
-                      analysisMode === 'briefing'
-                        ? 'bg-primary text-primary-foreground shadow-md'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
-                    }`}
-                  >
-                    Briefing
-                  </button>
-                  <button
-                    onClick={() => setAnalysisMode('partnership')}
-                    className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${
-                      analysisMode === 'partnership'
-                        ? 'bg-primary text-primary-foreground shadow-md'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
-                    }`}
-                  >
-                    Partnership
-                  </button>
-                </div>
-              </div>
-
               <div className="flex gap-2 pt-2">
                 <div className="flex gap-1 glass rounded-lg p-1">
                   <button
@@ -814,9 +801,7 @@ export default function Home() {
                   className="flex-1 h-9 rounded-lg font-medium text-sm disabled:opacity-50 shimmer disabled:shimmer-none transition-all hover:scale-[1.01] active:scale-[0.99]"
                 >
                   <Zap className="w-4 h-4 mr-2" strokeWidth={2} />
-                  {analysisMode === 'competitive' ? 'Analyze Competitor' :
-                   analysisMode === 'briefing' ? 'Generate Briefing' :
-                   analysisMode === 'partnership' ? 'Create Pitch' : 'Generate Deck'}
+                  Generate Deck
                 </Button>
               </div>
             </div>

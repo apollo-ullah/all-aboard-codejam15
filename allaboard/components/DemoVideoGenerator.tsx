@@ -11,6 +11,7 @@ import { Video, Download, Loader2, Play, Settings, Mic } from 'lucide-react';
 interface DemoVideoGeneratorProps {
   url: string;
   storyboard: Storyboard;
+  onVideoGenerated?: (videoUrl: string, filename: string, duration: number) => void;
 }
 
 type VoiceModel = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
@@ -24,7 +25,7 @@ interface GenerationResult {
   timestamp: string;
 }
 
-export function DemoVideoGenerator({ url, storyboard }: DemoVideoGeneratorProps) {
+export function DemoVideoGenerator({ url, storyboard, onVideoGenerated }: DemoVideoGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState<string>('');
   const [result, setResult] = useState<GenerationResult | null>(null);
@@ -63,6 +64,15 @@ export function DemoVideoGenerator({ url, storyboard }: DemoVideoGeneratorProps)
         actionsCount: response.actionsCount,
         timestamp: response.timestamp,
       });
+
+      // Trigger callback to show video in viewer
+      if (onVideoGenerated) {
+        const filename = response.videoPath.split('/').pop() || '';
+        const videoUrl = api.getDemoVideoUrl(filename);
+        setTimeout(() => {
+          onVideoGenerated(videoUrl, filename, response.duration);
+        }, 500);
+      }
 
     } catch (err: any) {
       console.error('Demo video generation error:', err);
@@ -206,6 +216,19 @@ export function DemoVideoGenerator({ url, storyboard }: DemoVideoGeneratorProps)
             </div>
 
             <div className="flex gap-2">
+              {onVideoGenerated && (
+                <Button
+                  onClick={() => {
+                    const filename = result.videoPath.split('/').pop() || '';
+                    const videoUrl = api.getDemoVideoUrl(filename);
+                    onVideoGenerated(videoUrl, filename, result.duration);
+                  }}
+                  className="flex-1 bg-gradient-to-r from-[#A9A4CC] to-[#C5B8D6] text-white hover:from-[#9A94BC] hover:to-[#B5A8C6] shadow-lg shadow-[#A9A4CC]/30 border border-[#A9A4CC]/40 rounded-xl transition-all"
+                >
+                  <Play className="mr-2 h-4 w-4" />
+                  View Video
+                </Button>
+              )}
               <Button
                 onClick={() => {
                   // Download video

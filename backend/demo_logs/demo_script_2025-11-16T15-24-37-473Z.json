@@ -1,0 +1,55 @@
+{
+  "url": "https://www.airbnb.ca/",
+  "title": "Airbnb",
+  "duration": 73.376,
+  "actionsCount": 4,
+  "actions": [
+    "searched: Paris apartments",
+    "clicked: first listing",
+    "clicked: first listing",
+    "clicked: first listing"
+  ],
+  "narrations": [
+    {
+      "timestamp": 14.169,
+      "action": "scene-node-1",
+      "narration": "\"Welcome to Airbnb.   Here, you can explore popular homes with stunning photos and guest reviews.   Notice the clear pricing and availability - perfect for planning your next getaway."
+    },
+    {
+      "timestamp": 16.288,
+      "action": "scene-1",
+      "narration": "Open with Airbnb's bold vision to create a world where anyone can belong anywhere.  Set the stage for how Airbnb has reshaped the accommodation landscape."
+    },
+    {
+      "timestamp": 26.996,
+      "action": "scene-node-2",
+      "narration": "\"Check out these popular homes on Airbnb.   Each listing has stunning photos, guest favorites, and pricing details.   Perfect for finding a unique and memorable stay."
+    },
+    {
+      "timestamp": 29.104,
+      "action": "scene-2",
+      "narration": "Travelers often miss out on authentic local culture and personal connections."
+    },
+    {
+      "timestamp": 41.357,
+      "action": "scene-node-3",
+      "narration": "\"Check this out.   You're seeing a variety of unique stays, from cozy cottages to stunning chalets."
+    },
+    {
+      "timestamp": 43.488,
+      "action": "scene-3",
+      "narration": "Describe Airbnb's solution: a global marketplace with diverse accommodation options, from treehouses to castles."
+    },
+    {
+      "timestamp": 55.198,
+      "action": "scene-node-4",
+      "narration": "\"Check this out.   We're exploring popular homes in Pointe-Calumet and Toronto.   Each listing shows beautiful images, prices, and guest favorites—helping you choose your perfect stay effortlessly."
+    },
+    {
+      "timestamp": 57.305,
+      "action": "scene-4",
+      "narration": "Discuss Airbnb's expansion into local experiences, offering travelers activities like cooking classes and historical tours.  This feature enhances the travel experience by providing authentic cultural interactions, setting Airbnb apart from competitors focused solely on accommodations."
+    }
+  ],
+  "timestamp": "2025-11-16T15:24:37.474Z"
+}
