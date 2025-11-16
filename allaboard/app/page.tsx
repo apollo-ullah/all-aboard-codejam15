@@ -12,6 +12,7 @@ import PresentationViewer from '@/components/PresentationViewer'
 import AIInsightsPanel from '@/components/AIInsightsPanel'
 import TimeSavingsDisplay from '@/components/TimeSavingsDisplay'
 import ScrapingProgress from '@/components/ScrapingProgress'
+import { DemoVideoGenerator } from '@/components/DemoVideoGenerator'
 import { api } from '@/lib/api'
 import { Storyboard } from '@/types'
 import { applyNarrativeArc } from '@/lib/narrativeArcs'
@@ -64,6 +65,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const [assistantOpen, setAssistantOpen] = useState(false)
   const [insightsPanelOpen, setInsightsPanelOpen] = useState(true)
+  const [demoVideoOpen, setDemoVideoOpen] = useState(false)
   const [processStartTime, setProcessStartTime] = useState<number | undefined>(undefined)
 
   // Backend connection status
@@ -362,6 +364,21 @@ export default function Home() {
               <MessageSquare size={16} /> AI Assistant
             </button>
             <button
+              onClick={() => {
+                console.log('🎬 Demo Video button clicked, current state:', demoVideoOpen);
+                setDemoVideoOpen(!demoVideoOpen);
+                console.log('🎬 Demo Video state will be:', !demoVideoOpen);
+              }}
+              className={`px-4 py-2 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg flex items-center gap-2 ${
+                demoVideoOpen
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+              title="AI Demo Video Generator"
+            >
+              🎬 Demo Video
+            </button>
+            <button
               onClick={handleGenerateSlides}
               className="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-md hover:shadow-lg"
             >
@@ -393,6 +410,20 @@ export default function Home() {
             </div>
           )}
         </div>
+
+        {/* Demo Video Generator Section */}
+        {(() => {
+          console.log('🎬 Demo Video render check:', { demoVideoOpen, hasUrl: !!url, hasStoryboard: !!storyboard });
+          if (demoVideoOpen && url && storyboard) {
+            console.log('🎬 Rendering DemoVideoGenerator component');
+            return (
+              <div className="border-t border-gray-200 bg-white p-6 overflow-y-auto max-h-96">
+                <DemoVideoGenerator url={url} storyboard={storyboard} />
+              </div>
+            );
+          }
+          return null;
+        })()}
       </div>
     )
   }

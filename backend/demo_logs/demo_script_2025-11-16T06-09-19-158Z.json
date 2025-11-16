@@ -1,0 +1,44 @@
+{
+  "url": "https://www.airbnb.ca/",
+  "title": "Airbnb",
+  "duration": 70.335,
+  "actionsCount": 3,
+  "actions": [
+    "searched: Paris",
+    "searched: Paris",
+    "clicked: first listing"
+  ],
+  "narrations": [
+    {
+      "timestamp": 12.331,
+      "action": "scene-node-1",
+      "narration": "Now we're looking at Airbnb's homepage, featuring a prominent search bar for destinations, dates, and guests. Below, highlighted listings showcase popular homes, emphasizing Airbnb's range and ability to transform travel experiences."
+    },
+    {
+      "timestamp": 16.562,
+      "action": "scene-1",
+      "narration": "Open strong by emphasizing Airbnb's vision of transforming travel. Highlight their mission to create a world where anyone can belong anywhere. Set the stage for how they've disrupted the traditional hospitality industry."
+    },
+    {
+      "timestamp": 28.943,
+      "action": "scene-node-2",
+      "narration": "Now we're looking at the Airbnb homepage, featuring a search bar for destination, dates, and guests. A calendar dropdown is open, allowing easy date selection. Nearby, listings showcase personalized stays, enhancing cultural immersion."
+    },
+    {
+      "timestamp": 33.212,
+      "action": "scene-2",
+      "narration": "Focus on the lack of personalization and cultural immersion in traditional travel options. Mention the missed opportunity for travelers to experience local cultures authentically, and the high costs associated with hotel stays."
+    },
+    {
+      "timestamp": 45.219,
+      "action": "scene-node-3",
+      "narration": "Now we're looking at Airbnb's homepage. The search bar invites you to enter your destination and dates. Below, vibrant listings showcase unique stays like treehouses and cozy cabins, highlighting diverse and authentic travel experiences."
+    },
+    {
+      "timestamp": 49.387,
+      "action": "scene-3",
+      "narration": "Introduce Airbnb's solution: a platform that connects travelers with hosts offering unique accommodations and experiences. Emphasize the authenticity and diversity of options available, from treehouses to city tours led by locals."
+    }
+  ],
+  "timestamp": "2025-11-16T06:09:19.158Z"
+}

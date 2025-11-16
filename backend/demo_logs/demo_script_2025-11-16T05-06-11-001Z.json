@@ -1,0 +1,56 @@
+{
+  "url": "https://www.airbnb.ca/",
+  "title": "STORYTEX AI Platform",
+  "duration": 147.509,
+  "actionsCount": 5,
+  "actions": [
+    "clicked:Experiences",
+    "scrolled",
+    "scrolled",
+    "scrolled",
+    "clicked:Popular experiences in Montreal"
+  ],
+  "narrations": [
+    {
+      "timestamp": 0.004,
+      "action": "navigation",
+      "narration": "Welcome!  Let me show you STORYTEX AI Platform."
+    },
+    {
+      "timestamp": 11.862,
+      "action": "navigation",
+      "narration": "Let's explore AI-powered website-to-presentation platform.  Here's the challenge: • Manual presentation creation is time-consuming\n• Extracting key information from websites is tedious\n• Maintaining consistent narrative flow is chal."
+    },
+    {
+      "timestamp": 22.644,
+      "action": "navigation",
+      "narration": "The solution is simple: • AI agentic web scraping with Browser. cash\n• GPT-4o powered storyboard generation\n• Interactive drag-and-drop editing canvas\n• GAMMA API slide genera."
+    },
+    {
+      "timestamp": 32.644,
+      "action": "navigation",
+      "narration": "Check out this feature: • Browser. cash AI agents for intelligent content extraction\n• Multi-page analysis (main + adjacent pages)\n• Context-aware content filtering."
+    },
+    {
+      "timestamp": 72.428,
+      "action": "navigation",
+      "narration": "Check out this feature: • OpenAI GPT-4o for content analysis\n• Narrative arc templates (YC, Finance)\n• Structured presentation flow\n• Speaker notes generation.  Check out this feature: • React Flow-based drag-and-drop editing\n• Real-time node manipulation\n• AI assistant for improvements\n• Narrative arc application."
+    },
+    {
+      "timestamp": 83.162,
+      "action": "navigation",
+      "narration": "This means • 90% reduction in presentation creation time\n• Professional, consistent narrative structure\n• Seamless integration with existing workflows\n• Multiple.  🚀 Transform any website into a compelling presentation\n• Enter a URL\n• Get AI-generated storyboard\n• Edit interactively\n• Export professional slides Thank you for considering STORYTEX."
+    },
+    {
+      "timestamp": 92.541,
+      "action": "navigation",
+      "narration": "We're excited to help you transform your presentations.  That's the quick tour!"
+    },
+    {
+      "timestamp": 134.144,
+      "action": "conclusion",
+      "narration": "Thanks for watching!"
+    }
+  ],
+  "timestamp": "2025-11-16T05:06:11.001Z"
+}

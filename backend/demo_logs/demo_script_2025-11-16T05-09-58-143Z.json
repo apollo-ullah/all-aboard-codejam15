@@ -1,0 +1,40 @@
+{
+  "url": "https://www.airbnb.ca/",
+  "title": "STORYTEX AI Platform",
+  "duration": 62.081,
+  "actionsCount": 4,
+  "actions": [
+    "searched:features",
+    "searched:pricing",
+    "searched:pricing",
+    "searched:pricing"
+  ],
+  "narrations": [
+    {
+      "timestamp": 0.001,
+      "action": "navigation",
+      "narration": "Welcome!  Let me show you STORYTEX AI Platform."
+    },
+    {
+      "timestamp": 12.327,
+      "action": "navigation",
+      "narration": "Let's explore AI-powered website-to-presentation platform.  Here's the challenge: • Manual presentation creation is time-consuming\n• Extracting key information from websites is tedious\n• Maintaining consistent narrative flow is chal."
+    },
+    {
+      "timestamp": 25.106,
+      "action": "navigation",
+      "narration": "The solution is simple: • AI agentic web scraping with Browser. cash\n• GPT-4o powered storyboard generation\n• Interactive drag-and-drop editing canvas\n• GAMMA API slide genera."
+    },
+    {
+      "timestamp": 38.208,
+      "action": "navigation",
+      "narration": "Check out this feature: • Browser. cash AI agents for intelligent content extraction\n• Multi-page analysis (main + adjacent pages)\n• Context-aware content filtering."
+    },
+    {
+      "timestamp": 49.633,
+      "action": "conclusion",
+      "narration": "Thanks for watching!"
+    }
+  ],
+  "timestamp": "2025-11-16T05:09:58.143Z"
+}

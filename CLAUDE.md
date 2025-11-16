@@ -62,6 +62,7 @@ npm start           # Start production server (requires build first)
 - **BrowserCashService**: Web scraping using Browser.cash Agent API (`https://agent-api.browser.cash`)
 - **SlideGenerator**: Gamma API integration for presentation generation (`https://public-api.gamma.app/v1.0/generations`)
 - **StoryboardAssistantService**: AI assistant for storyboard editing
+- **DemoVideoService**: AI-powered product demo video generator using GPT-4 Vision + Playwright + OpenAI TTS
 
 ### Data Flow
 1. URL input → BrowserCash scraping (main page + up to 5 adjacent pages)
@@ -78,6 +79,9 @@ npm start           # Start production server (requires build first)
 - `POST /api/scrape`: Scrape website and generate initial storyboard
 - `POST /api/generate-slides`: Convert storyboard to presentation slides
 - `POST /api/improve-storyboard`: AI assistant for storyboard editing
+- `POST /api/generate-demo-video`: Generate AI-powered product demo video with voice-over
+- `GET /api/demo-videos`: List available demo videos
+- `GET /api/demo-videos/:filename`: Download or stream a demo video
 
 ## External Dependencies & APIs
 
@@ -100,8 +104,9 @@ npm start           # Start production server (requires build first)
 - **Radix UI**: Accessible component primitives (dialogs, dropdowns, etc.)
 - **Tailwind CSS 4.1.9**: Utility-first CSS framework
 - **Lucide React**: Icon library
-- **OpenAI SDK**: LLM integration (backend)
+- **OpenAI SDK**: LLM integration and TTS for voice-overs (backend)
 - **Express 5.1.0**: Backend web framework
+- **Playwright 1.48.0**: Browser automation for AI demo videos (backend)
 
 ## Development Notes
 
@@ -163,7 +168,13 @@ all-aboard-codejam15/
    - Optionally add AGENT_API_KEY (Browser.cash - currently unused)
    - Optionally create `allaboard/.env.local` with NEXT_PUBLIC_API_URL if backend is not on localhost:3000
 
-3. **Start servers:**
+3. **Setup Playwright (for demo video generation):**
+   ```bash
+   cd backend
+   npm run setup-playwright
+   ```
+
+4. **Start servers:**
    ```bash
    # Terminal 1: Start backend
    cd backend && npm run dev
@@ -172,7 +183,7 @@ all-aboard-codejam15/
    cd allaboard && npm run dev
    ```
 
-4. **Open app:**
+5. **Open app:**
    - Navigate to http://localhost:3001
    - Enter a website URL
    - Wait for AI to generate storyboard

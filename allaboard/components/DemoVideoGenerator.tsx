@@ -31,11 +31,15 @@ export function DemoVideoGenerator({ url, storyboard }: DemoVideoGeneratorProps)
   const [error, setError] = useState<string>('');
 
   // Configuration
-  const [duration, setDuration] = useState<number>(120);
+  const [duration, setDuration] = useState<number>(45);
   const [voiceModel, setVoiceModel] = useState<VoiceModel>('alloy');
   const [showConfig, setShowConfig] = useState(false);
 
+  // Debug: Log when component mounts
+  console.log('🎬 DemoVideoGenerator mounted', { url, nodeCount: storyboard?.nodes?.length });
+
   const handleGenerateVideo = async () => {
+    console.log('🎬 handleGenerateVideo called!', { url, storyboard, duration, voiceModel });
     setIsGenerating(true);
     setProgress('Initializing AI demo agent...');
     setError('');
@@ -117,10 +121,9 @@ export function DemoVideoGenerator({ url, storyboard }: DemoVideoGeneratorProps)
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="border-white/20 bg-gray-900">
-                    <SelectItem value="60">1 minute</SelectItem>
-                    <SelectItem value="90">1.5 minutes</SelectItem>
-                    <SelectItem value="120">2 minutes (recommended)</SelectItem>
-                    <SelectItem value="180">3 minutes</SelectItem>
+                    <SelectItem value="30">30 seconds</SelectItem>
+                    <SelectItem value="45">45 seconds (recommended)</SelectItem>
+                    <SelectItem value="60">60 seconds (max)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

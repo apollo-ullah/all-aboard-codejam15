@@ -1,0 +1,44 @@
+{
+  "url": "https://www.airbnb.ca/",
+  "title": "Airbnb",
+  "duration": 63.397,
+  "actionsCount": 3,
+  "actions": [
+    "searched: Paris apartments",
+    "searched: Paris apartments",
+    "clicked: first listing"
+  ],
+  "narrations": [
+    {
+      "timestamp": 28.26,
+      "action": "scene-node-1",
+      "narration": "Welcome to Airbnb.   Here, you can explore Paris apartments by selecting dates with our easy calendar.   Check out how popular listings are right at your fingertips."
+    },
+    {
+      "timestamp": 31.151,
+      "action": "scene-1",
+      "narration": "Here we can see the platform's key features and capabilities."
+    },
+    {
+      "timestamp": 40.867,
+      "action": "scene-node-2",
+      "narration": "\"Check this out.   We’re searching for a cozy Paris apartment.   You’ll see options with dates, guest details, and flexible booking.   Perfect for planning your ideal getaway."
+    },
+    {
+      "timestamp": 43.665,
+      "action": "scene-2",
+      "narration": "This leads into how Airbnb directly addresses this need."
+    },
+    {
+      "timestamp": 53.539,
+      "action": "scene-node-3",
+      "narration": "\"Check this out.   We're exploring stunning homes in Pointe-Calumet and Toronto, each with beautiful photos, prices, and guest favorites.   Imagine the unique local experiences awaiting you."
+    },
+    {
+      "timestamp": 56.513,
+      "action": "scene-3",
+      "narration": "Describe Airbnb’s innovative approach to solving the problem by connecting travelers with local hosts.  This provides not just a place to stay, but an entire experience rooted in local culture.  It's about belonging anywhere."
+    }
+  ],
+  "timestamp": "2025-11-16T07:16:58.349Z"
+}

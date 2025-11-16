@@ -1,0 +1,35 @@
+{
+  "url": "https://www.airbnb.ca/",
+  "title": "STORYTEX AI Platform",
+  "duration": 63.878,
+  "actionsCount": 4,
+  "actions": [
+    "scrolled",
+    "highlighted",
+    "scrolled (search fallback)",
+    "scrolled (search fallback)"
+  ],
+  "narrations": [
+    {
+      "timestamp": 9.063,
+      "action": "scene-1",
+      "narration": "Welcome to STORYTEX, the revolutionary platform that transforms any website into a professional presentation using AI-powered web scraping and intelligent content analysis."
+    },
+    {
+      "timestamp": 17.796,
+      "action": "scene-2",
+      "narration": "Creating presentations from web content typically requires hours of manual work, copying and pasting information, and struggling to maintain a coherent narrative structure."
+    },
+    {
+      "timestamp": 25.976,
+      "action": "scene-3",
+      "narration": "STORYTEX uses cutting-edge AI to automatically scrape websites, analyze content, and generate structured storyboards that can be edited interactively before converting to professional slides."
+    },
+    {
+      "timestamp": 51.395,
+      "action": "scene-4",
+      "narration": "Our platform leverages Browser.cash AI agents to intelligently navigate and extract meaningful content from websites, analyzing not just the main page but relevant adjacent pages for comprehensive understanding."
+    }
+  ],
+  "timestamp": "2025-11-16T05:35:07.496Z"
+}

@@ -422,16 +422,53 @@ router.post('/generate-slides', async (req, res) => {
   }
 });
 
+// GET /api/test-demo-video - Test demo video setup
+router.get('/test-demo-video', async (req, res) => {
+  try {
+    console.log('🎬 Testing demo video setup...');
+
+    // Check if Playwright is available
+    let playwrightStatus = 'not installed';
+    try {
+      const { chromium } = await import('playwright');
+      playwrightStatus = 'installed';
+      console.log('✅ Playwright is available');
+    } catch (error) {
+      console.error('❌ Playwright not available:', error);
+      playwrightStatus = 'error: ' + (error as Error).message;
+    }
+
+    res.json({
+      success: true,
+      playwright: playwrightStatus,
+      openaiKey: !!process.env.OPENAI_KEY,
+      videosDir: 'demo_videos',
+      logsDir: 'demo_logs',
+      message: 'Demo video service is ready'
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      error: 'Demo video test failed',
+      message: error.message
+    });
+  }
+});
+
 // POST /api/generate-demo-video - Generate AI demo video from storyboard
 router.post('/generate-demo-video', async (req, res) => {
+  console.log('🎬 POST /api/generate-demo-video - Request received');
+  console.log('   Body:', JSON.stringify(req.body, null, 2));
+
   try {
     const { url, storyboard, duration, voiceModel } = req.body;
 
     if (!url || !storyboard) {
+      console.error('❌ Missing required fields:', { hasUrl: !!url, hasStoryboard: !!storyboard });
       return res.status(400).json({ error: 'Missing url or storyboard' });
     }
 
     if (!process.env.OPENAI_KEY) {
+      console.error('❌ OPENAI_KEY not configured');
       return res.status(500).json({ error: 'OpenAI API key not configured' });
     }
 
