@@ -566,7 +566,7 @@ router.get('/demo-videos/:filename', async (req, res) => {
     const range = req.headers.range;
 
     if (range) {
-      // Stream video for browsers
+      // Stream video for browsers (range request)
       const parts = range.replace(/bytes=/, '').split('-');
       const start = parseInt(parts[0], 10);
       const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
@@ -582,11 +582,12 @@ router.get('/demo-videos/:filename', async (req, res) => {
 
       file.pipe(res);
     } else {
-      // Download entire file
+      // Serve video for playback (no range request - initial load)
       res.writeHead(200, {
         'Content-Length': fileSize,
         'Content-Type': 'video/webm',
-        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Accept-Ranges': 'bytes',
+        // Don't set Content-Disposition so browser can play it inline
       });
 
       fs.createReadStream(filePath).pipe(res);

@@ -9,6 +9,7 @@ import Background from '@/components/background'
 import StoryboardCanvas from '@/components/StoryboardCanvas'
 import StoryboardAssistant from '@/components/StoryboardAssistant'
 import PresentationViewer from '@/components/PresentationViewer'
+import VideoViewer from '@/components/VideoViewer'
 import AIInsightsPanel from '@/components/AIInsightsPanel'
 import TimeSavingsDisplay from '@/components/TimeSavingsDisplay'
 import ScrapingProgress from '@/components/ScrapingProgress'
@@ -21,7 +22,7 @@ type Mode = 'speed' | 'simple' | 'advanced'
 type OutputType = 'video' | 'slides'
 type StyleType = 'vc-pitch' | 'hackathon' | 'recruiter' | 'sales' | 'onboarding' | 'technical'
 type AnalysisMode = 'standard' | 'competitive' | 'briefing' | 'partnership'
-type Stage = 'input' | 'scraping' | 'storyboard' | 'generating' | 'presentation'
+type Stage = 'input' | 'scraping' | 'storyboard' | 'generating' | 'presentation' | 'video'
 
 const styles = [
   { value: 'vc-pitch', label: 'VC Pitch Deck' },
@@ -69,6 +70,9 @@ export default function Home() {
   const [demoVideoOpen, setDemoVideoOpen] = useState(false)
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false)
   const [videoProgress, setVideoProgress] = useState<string>('')
+  const [videoUrl, setVideoUrl] = useState<string>('')
+  const [videoFilename, setVideoFilename] = useState<string>('')
+  const [videoDuration, setVideoDuration] = useState<number | undefined>(undefined)
   const [processStartTime, setProcessStartTime] = useState<number | undefined>(undefined)
 
   // Backend connection status
@@ -181,12 +185,17 @@ export default function Home() {
       console.log('✅ Video generated!', response)
       setVideoProgress('✅ Demo video generated successfully!')
       
-      // Download the video automatically
+      // Extract video filename and set up video viewing
+      const filename = response.videoPath.split('/').pop() || ''
+      const videoUrl = api.getDemoVideoUrl(filename)
+      
+      setVideoFilename(filename)
+      setVideoUrl(videoUrl)
+      setVideoDuration(response.duration)
+      
+      // Switch to video viewing stage
       setTimeout(() => {
-        const videoFilename = response.videoPath.split('/').pop() || ''
-        const downloadUrl = api.getDemoVideoUrl(videoFilename)
-        console.log('📥 Downloading video:', downloadUrl)
-        window.open(downloadUrl, '_blank')
+        setStage('video')
         setVideoProgress('')
       }, 1500)
       
@@ -197,6 +206,13 @@ export default function Home() {
     } finally {
       setIsGeneratingVideo(false)
     }
+  }
+
+  const handleCloseVideo = () => {
+    setStage('storyboard')
+    setVideoUrl('')
+    setVideoFilename('')
+    setVideoDuration(undefined)
   }
 
   const handleLoadTestData = () => {
@@ -484,7 +500,16 @@ export default function Home() {
             console.log('🎬 Rendering DemoVideoGenerator component');
             return (
               <div className="border-t border-white/40 bg-gradient-to-b from-white/30 to-[#A9A4CC]/20 backdrop-blur-xl p-6 overflow-y-auto max-h-96">
-                <DemoVideoGenerator url={url} storyboard={storyboard} />
+                <DemoVideoGenerator 
+                  url={url} 
+                  storyboard={storyboard}
+                  onVideoGenerated={(videoUrl, filename, duration) => {
+                    setVideoUrl(videoUrl)
+                    setVideoFilename(filename)
+                    setVideoDuration(duration)
+                    setStage('video')
+                  }}
+                />
               </div>
             );
           }
@@ -503,6 +528,17 @@ export default function Home() {
         pdfUrl={pdfUrl}
         slideCount={slideCount}
         onClose={handleClosePresentation}
+      />
+    )
+  }
+
+  if (stage === 'video' && videoUrl) {
+    return (
+      <VideoViewer
+        videoUrl={videoUrl}
+        videoFilename={videoFilename}
+        duration={videoDuration}
+        onClose={handleCloseVideo}
       />
     )
   }
