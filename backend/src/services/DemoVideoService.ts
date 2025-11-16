@@ -1,6 +1,7 @@
 import { chromium, Browser, BrowserContext, Page } from 'playwright';
 import OpenAI from 'openai';
 import { Storyboard, StoryNode } from '../types/index';
+import { normalizeUrl } from '../utils/validation';
 import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
@@ -196,12 +197,14 @@ export class DemoVideoService {
   private async navigateToWebsite(url: string): Promise<void> {
     if (!this.page) throw new Error('Browser not initialized');
 
-    console.log(`📍 Navigating to ${url}...`);
+    // Normalize URL (add https:// if missing)
+    const normalizedUrl = normalizeUrl(url);
+    console.log(`📍 Navigating to ${normalizedUrl}...`);
 
     try {
-      await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await this.page.goto(normalizedUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
     } catch {
-      await this.page.goto(url, { timeout: 30000 });
+      await this.page.goto(normalizedUrl, { timeout: 30000 });
     }
 
     await this.page.waitForTimeout(2000);
