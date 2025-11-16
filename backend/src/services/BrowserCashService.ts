@@ -828,7 +828,7 @@ Extract what technologies and tools this project uses.`;
           agent: 'gemini',
           prompt: prompt,
           mode: 'text',
-          stepLimit: 20, // Higher limit for comprehensive scraping
+          stepLimit: 25, // Higher limit for comprehensive scraping (matching working example)
         },
         {
           headers: {
@@ -942,26 +942,29 @@ Extract what technologies and tools this project uses.`;
    * Poll for task completion
    */
   private async pollTask(taskId: string): Promise<string> {
-    // Wait a moment before first poll
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    let attempts = 0;
-    const maxAttempts = 60; // 3 minutes total (60 * 3 seconds)
-    const pollInterval = 3000; // 3 seconds
+    // Wait a moment before first poll (matching working example: 5 seconds)
+    console.log(`   ⏳ Waiting 5 seconds before first status check...`);
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
-    console.log(`   🔄 Polling task ${taskId} (max ${maxAttempts} attempts, ${pollInterval}ms interval)...`);
+    let attempts = 0;
+    const maxAttempts = 60; // 5 minutes total (60 * 5 seconds)
+    const pollInterval = 5000; // 5 seconds (matching working example)
+
+    console.log(`   🔄 Polling task ${taskId} every ${pollInterval}ms...`);
 
     while (attempts < maxAttempts) {
       attempts++;
-      
+
       try {
+        console.log(`   [${new Date().toLocaleTimeString()}] Check #${attempts}...`);
+
         const response = await axios.get<TaskStatus>(
           `${this.baseUrl}/v1/task/${taskId}`,
           {
             headers: {
               'Authorization': `Bearer ${this.agentApiKey}`,
             },
-            timeout: 30000, // Increased to 30 seconds for status checks
+            timeout: 30000, // 30 seconds for status checks
             validateStatus: (status) => status < 500, // Don't throw on 4xx errors
           }
         );
@@ -976,42 +979,42 @@ Extract what technologies and tools this project uses.`;
         }
 
         const data = response.data;
+
+        // Check if we have any response data
+        if (!data) {
+          console.log(`   ⚠️ No response data, will retry...`);
+          await new Promise(resolve => setTimeout(resolve, pollInterval));
+          continue;
+        }
+
         // Check both 'status' (official) and 'state' (alternative) fields per docs
-        const status = data.status || data.state;
-        
-        // Handle queued/running states (continue polling)
-        if (status === 'queued' || status === 'running' || status === 'active') {
-          // Log progress every 5 attempts
-          if (attempts % 5 === 0) {
-            const duration = data.stoppedAt && data.startedAt
-              ? Math.round((data.stoppedAt - data.startedAt) / 1000)
-              : data.startedAt
-              ? Math.round((Date.now() - data.startedAt) / 1000)
-              : 0;
-            console.log(`   📊 Polling (${attempts}/${maxAttempts}): Status = "${status}", Duration = ${duration}s`);
-          }
-          // Continue polling
-        } else if (status === 'completed') {
-          // Task completed - extract result
-          console.log(`   ✅ Task completed! Extracting result...`);
-          
+        const status = data.status || data.state || 'unknown';
+        console.log(`   Task Status: ${status}`);
+
+        // Handle success states (matching working example: completed, success, finished)
+        if (status === 'completed' || status === 'success' || status === 'finished') {
+          console.log(`   ✅ Task completed successfully!`);
+
           // Extract result - can be in various formats per docs
           let resultText: string | null = null;
-          
+
           if (data.result) {
             if (typeof data.result === 'string') {
               resultText = data.result;
             } else if (typeof data.result === 'object') {
               // Try different possible result field names
-              resultText = data.result.answer || 
-                          data.result.content || 
+              resultText = data.result.answer ||
+                          data.result.content ||
                           data.result.text ||
                           (typeof data.result === 'object' ? JSON.stringify(data.result) : null);
             }
           }
-          
+
           if (resultText && resultText.trim().length > 0) {
             console.log(`   ✅ Result extracted (${resultText.length} chars)`);
+            console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+            console.log(`FINAL OUTPUT:`);
+            console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
             return resultText;
           } else {
             console.warn(`   ⚠️ Task completed but result is empty or missing`);
@@ -1020,20 +1023,28 @@ Extract what technologies and tools this project uses.`;
           }
         } else if (status === 'failed' || status === 'error') {
           // Task failed - extract error reason
-          const failedReason = data.failedReason || 
-                              data.error || 
+          console.log(`   ❌ Task failed!`);
+          console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+          console.log(`FAILURE DETAILS:`);
+          console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
+          console.log(JSON.stringify(data, null, 2));
+
+          const failedReason = data.failedReason ||
+                              data.error ||
                               (data.result && typeof data.result === 'object' ? data.result.answer : null) ||
                               (data.result && typeof data.result === 'string' ? data.result : null) ||
                               'Unknown error';
           console.error(`   ❌ Task failed: ${failedReason}`);
           throw new Error(`Task failed: ${failedReason}`);
+        } else if (status === 'active' || status === 'running' || status === 'pending' || status === 'processing' || status === 'queued') {
+          // Handle active/processing states (matching working example)
+          console.log(`   Task still ${status}... waiting ${pollInterval/1000} seconds\n`);
+          await new Promise(resolve => setTimeout(resolve, pollInterval));
         } else {
-          // Unknown status - log and continue
-          console.warn(`   ⚠️ Unknown status "${status}", continuing to poll...`);
-        }
-
-        // Wait before next poll
-        if (attempts < maxAttempts) {
+          // Unknown status - log and continue (matching working example)
+          console.log(`   ⚠️ Unknown status: ${status}`);
+          console.log(`   Full response:`, JSON.stringify(data, null, 2));
+          console.log(`   Continuing to poll...\n`);
           await new Promise(resolve => setTimeout(resolve, pollInterval));
         }
       } catch (error: any) {
@@ -1041,17 +1052,16 @@ Extract what technologies and tools this project uses.`;
         if (error.response && error.response.status === 404) {
           throw new Error(`Task not found: ${taskId}. The task may have expired or been deleted.`);
         }
-        
+
         // If we've exhausted all attempts, throw the error
         if (attempts >= maxAttempts) {
           throw new Error(`Task polling timeout after ${attempts} attempts: ${error.message}`);
         }
-        
-        // Log the error but continue polling
-        if (attempts % 10 === 0) {
-          console.warn(`   ⚠️ Polling error (attempt ${attempts}): ${error.message}. Continuing...`);
-        }
-        
+
+        // Log the error but continue polling (matching working example)
+        console.error(`   ⚠️ Error checking status: ${error.message}`);
+        console.log(`   Retrying in ${pollInterval/1000} seconds...\n`);
+
         // Wait before retrying
         await new Promise(resolve => setTimeout(resolve, pollInterval));
       }

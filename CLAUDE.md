@@ -88,7 +88,7 @@ npm start           # Start production server (requires build first)
 **Required API Keys** (configured in `backend/.env`):
 - `OPENAI_KEY`: OpenAI GPT-4o for storyboard generation (REQUIRED)
 - `GAMMA_API_KEY`: Gamma API for slide generation (REQUIRED) (`https://public-api.gamma.app/v1.0/generations`)
-- `AGENT_API_KEY`: Browser.cash Agent API for web scraping (OPTIONAL - will be used once API is fixed) (`https://agent-api.browser.cash`)
+- `AGENT_API_KEY`: Browser.cash Agent API for web scraping (REQUIRED) (`https://agent-api.browser.cash`)
 - `FRONTEND_URL`: Frontend URL for CORS (default: http://localhost:3001)
 - `PORT`: Backend port (default: 3000)
 - `NODE_ENV`: Environment mode (default: development)
