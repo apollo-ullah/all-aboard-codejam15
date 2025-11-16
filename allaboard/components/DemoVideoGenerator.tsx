@@ -83,13 +83,13 @@ export function DemoVideoGenerator({ url, storyboard }: DemoVideoGeneratorProps)
   ];
 
   return (
-    <Card className="w-full border-white/10 bg-white/5 backdrop-blur-xl">
+    <Card className="w-full border-white/40 bg-white/30 backdrop-blur-2xl shadow-xl shadow-[#A9A4CC]/10">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-white">
-          <Video className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2 text-gray-900 text-lg">
+          <Video className="h-5 w-5 text-[#A9A4CC]" />
           AI Demo Video Generator
         </CardTitle>
-        <CardDescription className="text-white/60">
+        <CardDescription className="text-gray-700">
           Create an AI-powered product demo video with voice-over
         </CardDescription>
       </CardHeader>
@@ -100,27 +100,27 @@ export function DemoVideoGenerator({ url, storyboard }: DemoVideoGeneratorProps)
             variant="outline"
             size="sm"
             onClick={() => setShowConfig(!showConfig)}
-            className="w-full border-white/20 bg-white/5 text-white hover:bg-white/10"
+            className="w-full border-gray-300 bg-white/50 text-gray-700 hover:bg-white/70 hover:text-gray-900 backdrop-blur-sm transition-all duration-200 rounded-xl"
           >
             <Settings className="mr-2 h-4 w-4" />
             {showConfig ? 'Hide' : 'Show'} Configuration
           </Button>
 
           {showConfig && (
-            <div className="space-y-3 rounded-lg border border-white/10 bg-white/5 p-4">
+            <div className="space-y-3 rounded-xl border border-white/40 bg-white/40 backdrop-blur-sm p-4 shadow-lg">
               {/* Duration Selector */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white">
+                <label className="text-sm font-medium text-gray-900">
                   Duration
                 </label>
                 <Select
                   value={duration.toString()}
                   onValueChange={(value) => setDuration(parseInt(value))}
                 >
-                  <SelectTrigger className="border-white/20 bg-white/5 text-white">
+                  <SelectTrigger className="border-gray-300 bg-white/60 backdrop-blur-sm text-gray-900 rounded-xl hover:bg-white/80 transition-all">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="border-white/20 bg-gray-900">
+                  <SelectContent className="border-gray-200 bg-white/95 backdrop-blur-xl">
                     <SelectItem value="30">30 seconds</SelectItem>
                     <SelectItem value="45">45 seconds (recommended)</SelectItem>
                     <SelectItem value="60">60 seconds (max)</SelectItem>
@@ -130,7 +130,7 @@ export function DemoVideoGenerator({ url, storyboard }: DemoVideoGeneratorProps)
 
               {/* Voice Model Selector */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white">
+                <label className="text-sm font-medium text-gray-900">
                   <Mic className="mr-2 inline h-4 w-4" />
                   Voice-over Voice
                 </label>
@@ -138,15 +138,15 @@ export function DemoVideoGenerator({ url, storyboard }: DemoVideoGeneratorProps)
                   value={voiceModel}
                   onValueChange={(value) => setVoiceModel(value as VoiceModel)}
                 >
-                  <SelectTrigger className="border-white/20 bg-white/5 text-white">
+                  <SelectTrigger className="border-gray-300 bg-white/60 backdrop-blur-sm text-gray-900 rounded-xl hover:bg-white/80 transition-all">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="border-white/20 bg-gray-900">
+                  <SelectContent className="border-gray-200 bg-white/95 backdrop-blur-xl">
                     {voiceOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         <div>
-                          <div className="font-medium text-white">{option.label}</div>
-                          <div className="text-xs text-white/60">{option.description}</div>
+                          <div className="font-medium text-gray-900">{option.label}</div>
+                          <div className="text-xs text-gray-600">{option.description}</div>
                         </div>
                       </SelectItem>
                     ))}
@@ -161,7 +161,7 @@ export function DemoVideoGenerator({ url, storyboard }: DemoVideoGeneratorProps)
         <Button
           onClick={handleGenerateVideo}
           disabled={isGenerating || !storyboard?.nodes?.length}
-          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700"
+          className="w-full bg-gradient-to-r from-[#A9A4CC] to-[#C5B8D6] text-white hover:from-[#9A94BC] hover:to-[#B5A8C6] shadow-lg shadow-[#A9A4CC]/30 border border-[#A9A4CC]/40 rounded-xl transition-all duration-200"
           size="lg"
         >
           {isGenerating ? (
@@ -179,27 +179,27 @@ export function DemoVideoGenerator({ url, storyboard }: DemoVideoGeneratorProps)
 
         {/* Progress */}
         {progress && (
-          <div className="rounded-lg border border-white/10 bg-white/5 p-4">
-            <p className="text-sm text-white/80">{progress}</p>
+          <div className="rounded-xl border border-[#A9A4CC]/40 bg-white/50 backdrop-blur-sm p-4 shadow-lg">
+            <p className="text-sm text-gray-800">{progress}</p>
           </div>
         )}
 
         {/* Error */}
         {error && (
-          <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4">
-            <p className="text-sm text-red-300">{error}</p>
+          <div className="rounded-xl border border-red-300 bg-red-50 backdrop-blur-sm p-4 shadow-lg">
+            <p className="text-sm text-red-700">{error}</p>
           </div>
         )}
 
         {/* Result */}
         {result && (
-          <div className="space-y-3 rounded-lg border border-green-500/20 bg-green-500/10 p-4">
+          <div className="space-y-3 rounded-xl border border-green-300 bg-green-50 backdrop-blur-sm p-4 shadow-lg">
             <div className="flex items-center gap-2">
-              <Video className="h-5 w-5 text-green-400" />
-              <h3 className="font-semibold text-green-300">Demo Video Generated!</h3>
+              <Video className="h-5 w-5 text-green-600" />
+              <h3 className="font-semibold text-green-700">Demo Video Generated!</h3>
             </div>
 
-            <div className="space-y-2 text-sm text-white/80">
+            <div className="space-y-2 text-sm text-gray-700">
               <p>Duration: {result.duration.toFixed(1)}s</p>
               <p>Actions performed: {result.actionsCount}</p>
               {result.audioPath && <p>Voice-over: ✓ Generated</p>}
@@ -213,7 +213,7 @@ export function DemoVideoGenerator({ url, storyboard }: DemoVideoGeneratorProps)
                   const downloadUrl = api.getDemoVideoUrl(videoFilename);
                   window.open(downloadUrl, '_blank');
                 }}
-                className="flex-1 border-white/20 bg-white/10 text-white hover:bg-white/20"
+                className="flex-1 border-gray-300 bg-white/60 backdrop-blur-sm text-gray-700 hover:bg-white/80 hover:text-gray-900 rounded-xl transition-all"
                 variant="outline"
               >
                 <Download className="mr-2 h-4 w-4" />
@@ -227,7 +227,7 @@ export function DemoVideoGenerator({ url, storyboard }: DemoVideoGeneratorProps)
                     const downloadUrl = `${api.getDemoVideoUrl('')}${audioFilename}`;
                     window.open(downloadUrl, '_blank');
                   }}
-                  className="flex-1 border-white/20 bg-white/10 text-white hover:bg-white/20"
+                  className="flex-1 border-gray-300 bg-white/60 backdrop-blur-sm text-gray-700 hover:bg-white/80 hover:text-gray-900 rounded-xl transition-all"
                   variant="outline"
                 >
                   <Mic className="mr-2 h-4 w-4" />
@@ -236,16 +236,16 @@ export function DemoVideoGenerator({ url, storyboard }: DemoVideoGeneratorProps)
               )}
             </div>
 
-            <p className="text-xs text-white/50">
+            <p className="text-xs text-gray-500">
               Video saved at: {result.timestamp}
             </p>
           </div>
         )}
 
         {/* Info */}
-        <div className="space-y-2 rounded-lg border border-blue-500/20 bg-blue-500/10 p-4">
-          <h4 className="text-sm font-semibold text-blue-300">What happens:</h4>
-          <ul className="space-y-1 text-xs text-white/70">
+        <div className="space-y-2 rounded-xl border border-[#A9A4CC]/40 bg-[#A9A4CC]/10 backdrop-blur-sm p-4 shadow-lg">
+          <h4 className="text-sm font-semibold text-[#7A6FA8]">✨ What happens:</h4>
+          <ul className="space-y-1 text-xs text-gray-700">
             <li>• AI agent launches a browser and navigates to {url}</li>
             <li>• GPT-4 Vision analyzes the page and decides actions</li>
             <li>• Smooth cursor movements simulate human interaction</li>

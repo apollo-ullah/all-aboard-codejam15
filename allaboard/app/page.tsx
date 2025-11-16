@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Sparkles, Settings2, Zap, ArrowLeft, MessageSquare } from 'lucide-react'
+import { Sparkles, Settings2, Zap, ArrowLeft, MessageSquare, Loader2 } from 'lucide-react'
 import Background from '@/components/background'
 import StoryboardCanvas from '@/components/StoryboardCanvas'
 import StoryboardAssistant from '@/components/StoryboardAssistant'
@@ -56,6 +56,7 @@ export default function Home() {
   // Application State
   const [stage, setStage] = useState<Stage>('input')
   const [storyboard, setStoryboard] = useState<Storyboard | null>(null)
+  const [sourceUrl, setSourceUrl] = useState('') // Store the original URL permanently
   const [presentationUrl, setPresentationUrl] = useState('')
   const [embedUrl, setEmbedUrl] = useState<string | undefined>(undefined)
   const [downloadUrl, setDownloadUrl] = useState<string | undefined>(undefined)
@@ -66,6 +67,8 @@ export default function Home() {
   const [assistantOpen, setAssistantOpen] = useState(false)
   const [insightsPanelOpen, setInsightsPanelOpen] = useState(true)
   const [demoVideoOpen, setDemoVideoOpen] = useState(false)
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false)
+  const [videoProgress, setVideoProgress] = useState<string>('')
   const [processStartTime, setProcessStartTime] = useState<number | undefined>(undefined)
 
   // Backend connection status
@@ -103,6 +106,7 @@ export default function Home() {
     setStage('scraping')
     setError(null)
     setProcessStartTime(Date.now())
+    setSourceUrl(url.trim()) // Save the URL permanently
 
     try {
       // Test connection first
@@ -149,6 +153,49 @@ export default function Home() {
       console.error('Slide generation error:', error)
       setError(error.message || 'Failed to generate slides')
       setStage('storyboard')
+    }
+  }
+
+  const handleGenerateDemoVideo = async () => {
+    console.log('🎬🎬🎬 DEMO VIDEO BUTTON CLICKED!', { storyboard, url, sourceUrl })
+    
+    if (!storyboard || !sourceUrl) {
+      console.error('❌ Missing storyboard or URL:', { storyboard, url, sourceUrl })
+      alert('Please generate a storyboard first!')
+      return
+    }
+    
+    console.log('✅ Starting video generation with URL:', sourceUrl)
+    setIsGeneratingVideo(true)
+    setVideoProgress('🎬 Starting AI demo video generation...')
+    
+    try {
+      setVideoProgress('🚀 Launching browser and starting recording...')
+      console.log('📞 Calling API with URL:', sourceUrl)
+      
+      const response = await api.generateDemoVideo(sourceUrl, storyboard, {
+        duration: 45,
+        voiceModel: 'alloy',
+      })
+      
+      console.log('✅ Video generated!', response)
+      setVideoProgress('✅ Demo video generated successfully!')
+      
+      // Download the video automatically
+      setTimeout(() => {
+        const videoFilename = response.videoPath.split('/').pop() || ''
+        const downloadUrl = api.getDemoVideoUrl(videoFilename)
+        console.log('📥 Downloading video:', downloadUrl)
+        window.open(downloadUrl, '_blank')
+        setVideoProgress('')
+      }, 1500)
+      
+    } catch (err: any) {
+      console.error('❌ Demo video generation error:', err)
+      setVideoProgress(`❌ Error: ${err.message || 'Failed to generate demo video'}`)
+      setTimeout(() => setVideoProgress(''), 5000)
+    } finally {
+      setIsGeneratingVideo(false)
     }
   }
 
@@ -233,6 +280,7 @@ export default function Home() {
   const handleReset = () => {
     setStage('input')
     setUrl('')
+    setSourceUrl('')
     setStoryboard(null)
     setPresentationUrl('')
     setEmbedUrl(undefined)
@@ -306,32 +354,37 @@ export default function Home() {
     const slideStyle: 'YC' | 'Finance' = style === 'vc-pitch' || style === 'hackathon' ? 'YC' : 'Finance'
 
     return (
-      <div className="flex flex-col h-screen bg-gray-50">
-        {/* Header */}
-        <div className="bg-white shadow-sm px-6 py-4 flex items-center justify-between border-b z-10">
+      <div className="flex flex-col h-screen bg-gradient-to-br from-[#E8E6F2] via-[#D4D1E8] to-[#C5C1DC] relative overflow-hidden">
+        {/* Ambient Background Effects */}
+        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5"></div>
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#A9A4CC]/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-[#B8B3D6]/30 rounded-full blur-3xl"></div>
+        
+        {/* Header - Glassmorphism */}
+        <div className="bg-white/40 backdrop-blur-xl shadow-lg px-6 py-4 flex items-center justify-between border-b border-white/40 z-10 relative">
           <div className="flex items-center gap-4">
             <button
               onClick={handleReset}
-              className="text-gray-600 hover:text-gray-800 flex items-center gap-2 text-sm font-medium px-3 py-1 rounded hover:bg-gray-100 transition-colors"
+              className="text-gray-700 hover:text-gray-900 flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-xl hover:bg-white/70 transition-all duration-200 backdrop-blur-sm border border-[#A9A4CC]/25 hover:border-[#A9A4CC]/40 shadow-sm"
             >
               <ArrowLeft size={16} /> Back
             </button>
-            <div className="h-6 w-px bg-gray-300"></div>
+            <div className="h-6 w-px bg-[#A9A4CC]/30"></div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-gray-700">{storyboard.title}</span>
+              <span className="text-sm font-bold text-gray-900">{storyboard.title}</span>
               {storyboard.tagline && (
-                <span className="text-xs text-gray-500">• {storyboard.tagline}</span>
+                <span className="text-xs text-gray-600 font-medium">• {storyboard.tagline}</span>
               )}
             </div>
             {(storyboard.targetAudience || storyboard.coreInnovation) && (
               <>
-                <div className="h-6 w-px bg-gray-300"></div>
+                <div className="h-6 w-px bg-[#A9A4CC]/30"></div>
                 <button
                   onClick={() => setInsightsPanelOpen(!insightsPanelOpen)}
-                  className={`text-sm px-3 py-1 rounded transition-colors ${
+                  className={`text-sm font-semibold px-4 py-2 rounded-xl transition-all duration-200 backdrop-blur-sm border shadow-sm ${
                     insightsPanelOpen
-                      ? 'bg-purple-100 text-purple-700 hover:bg-purple-200'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-[#A9A4CC] text-white border-[#A9A4CC]/60 shadow-lg shadow-[#A9A4CC]/30 scale-[0.98]'
+                      : 'bg-white/60 text-gray-700 border-[#A9A4CC]/30 hover:bg-white/80 hover:text-gray-900 hover:border-[#A9A4CC]/40'
                   }`}
                   title="Toggle AI Insights"
                 >
@@ -339,53 +392,66 @@ export default function Home() {
                 </button>
               </>
             )}
-            <div className="h-6 w-px bg-gray-300"></div>
+            <div className="h-6 w-px bg-[#A9A4CC]/30"></div>
             <button
               onClick={handleApplyArc}
-              className="text-sm px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+              className="text-sm px-4 py-2 bg-[#A9A4CC]/20 text-[#7A6FA8] border border-[#A9A4CC]/40 rounded-xl hover:bg-[#A9A4CC]/30 hover:text-[#6B5F98] transition-all duration-200 backdrop-blur-sm font-medium shadow-sm"
               title="Reorder slides to match narrative arc"
             >
               📊 Apply Narrative Arc
             </button>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded">
+          <div className="flex items-center gap-3">
+            <div className="text-sm font-medium text-[#7A6FA8] bg-white/50 backdrop-blur-sm px-4 py-2 rounded-xl border border-[#A9A4CC]/30 shadow-sm">
               {storyboard.nodes.length} {storyboard.nodes.length === 1 ? 'slide' : 'slides'}
             </div>
             <button
               onClick={() => setAssistantOpen(!assistantOpen)}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg flex items-center gap-2 ${
+              className={`px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 backdrop-blur-sm border flex items-center gap-2 shadow-sm hover:shadow-md ${
                 assistantOpen
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-gradient-to-r from-[#A9A4CC] to-[#B8B3D6] text-white border-[#A9A4CC]/50 shadow-lg shadow-[#A9A4CC]/25 scale-[0.98]'
+                  : 'bg-white/60 text-gray-700 border-[#A9A4CC]/30 hover:bg-white/80 hover:text-gray-900 hover:border-[#A9A4CC]/40'
               }`}
               title="AI Assistant"
             >
-              <MessageSquare size={16} /> AI Assistant
+              <MessageSquare size={18} /> AI Assistant
             </button>
             <button
-              onClick={() => {
-                console.log('🎬 Demo Video button clicked, current state:', demoVideoOpen);
-                setDemoVideoOpen(!demoVideoOpen);
-                console.log('🎬 Demo Video state will be:', !demoVideoOpen);
-              }}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg flex items-center gap-2 ${
-                demoVideoOpen
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              onClick={handleGenerateDemoVideo}
+              disabled={isGeneratingVideo}
+              className={`px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 backdrop-blur-sm border flex items-center gap-2 shadow-sm hover:shadow-md ${
+                isGeneratingVideo
+                  ? 'bg-gradient-to-r from-[#A9A4CC] to-[#C5B8D6] text-white border-[#A9A4CC]/50 shadow-lg shadow-[#A9A4CC]/25 cursor-wait'
+                  : 'bg-white/60 text-gray-700 border-[#A9A4CC]/30 hover:bg-white/80 hover:text-gray-900 hover:border-[#A9A4CC]/40 hover:scale-[1.02]'
               }`}
-              title="AI Demo Video Generator"
+              title="Generate AI Demo Video"
             >
-              🎬 Demo Video
+              {isGeneratingVideo ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  🎬 Demo Video
+                </>
+              )}
             </button>
             <button
               onClick={handleGenerateSlides}
-              className="bg-green-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors shadow-md hover:shadow-lg"
+              className="bg-gradient-to-r from-[#22C55E] to-[#10B981] text-white px-7 py-2.5 rounded-xl font-semibold hover:from-[#16A34A] hover:to-[#059669] transition-all duration-200 shadow-lg shadow-green-500/25 hover:shadow-xl hover:shadow-green-500/30 border border-green-400/40 hover:scale-[1.02] active:scale-[0.98]"
             >
               Generate Slides
             </button>
           </div>
         </div>
+
+        {/* Video Progress Toast */}
+        {videoProgress && (
+          <div className="absolute top-20 right-6 z-50 bg-gradient-to-r from-[#A9A4CC] to-[#C5B8D6] text-white px-6 py-3 rounded-xl shadow-xl shadow-[#A9A4CC]/30 backdrop-blur-xl border border-white/20 animate-in slide-in-from-top">
+            <p className="text-sm font-medium">{videoProgress}</p>
+          </div>
+        )}
 
         {/* Canvas with optional sidebar */}
         <div className="flex-1 overflow-hidden relative flex">
@@ -403,21 +469,21 @@ export default function Home() {
             />
           </div>
 
-          {/* AI Insights Sidebar */}
+          {/* AI Insights Sidebar - Light Purple Glassmorphism */}
           {insightsPanelOpen && (storyboard.targetAudience || storyboard.coreInnovation) && (
-            <div className="w-96 bg-gradient-to-br from-gray-900 to-gray-800 border-l border-gray-700 p-6 overflow-y-auto">
+            <div className="w-96 bg-gradient-to-br from-white/50 to-[#A9A4CC]/20 backdrop-blur-xl border-l border-white/40 p-6 overflow-y-auto">
               <AIInsightsPanel storyboard={storyboard} pagesScraped={pagesScraped} />
             </div>
           )}
         </div>
 
-        {/* Demo Video Generator Section */}
+        {/* Demo Video Generator Section - Light Glassmorphism Style */}
         {(() => {
           console.log('🎬 Demo Video render check:', { demoVideoOpen, hasUrl: !!url, hasStoryboard: !!storyboard });
           if (demoVideoOpen && url && storyboard) {
             console.log('🎬 Rendering DemoVideoGenerator component');
             return (
-              <div className="border-t border-gray-200 bg-white p-6 overflow-y-auto max-h-96">
+              <div className="border-t border-white/40 bg-gradient-to-b from-white/30 to-[#A9A4CC]/20 backdrop-blur-xl p-6 overflow-y-auto max-h-96">
                 <DemoVideoGenerator url={url} storyboard={storyboard} />
               </div>
             );
