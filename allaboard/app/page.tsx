@@ -453,7 +453,7 @@ export default function Home() {
             </button>
             <button
               onClick={handleGenerateSlides}
-              className="bg-gradient-to-r from-[#22C55E] to-[#10B981] text-white px-7 py-2.5 rounded-xl font-semibold hover:from-[#16A34A] hover:to-[#059669] transition-all duration-200 shadow-lg shadow-green-500/25 hover:shadow-xl hover:shadow-green-500/30 border border-green-400/40 hover:scale-[1.02] active:scale-[0.98]"
+              className="bg-[#7a5aab] text-white px-7 py-2.5 rounded-xl font-semibold hover:bg-[#6a4a9b] transition-all duration-200 shadow-lg shadow-[#7a5aab]/25 hover:shadow-xl hover:shadow-[#7a5aab]/30 border border-[#7a5aab]/40 hover:scale-[1.02] active:scale-[0.98]"
             >
               Generate Slides
             </button>

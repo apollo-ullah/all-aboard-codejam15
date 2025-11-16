@@ -77,7 +77,7 @@ export default function StoryboardAssistant({
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: data.response || data.message || 'I received your message, but I need more context.',
+        content: data.response || 'I received your message, but I need more context.',
         timestamp: new Date(),
       };
 
@@ -128,7 +128,7 @@ export default function StoryboardAssistant({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed right-0 top-0 h-full w-96 bg-white shadow-2xl z-50 flex flex-col border-l">
+    <div className="fixed right-0 top-0 h-full w-96 shadow-2xl z-50 flex flex-col border-l backdrop-blur-xl" style={{ background: 'linear-gradient(to bottom, #53426A, #4A3A5F)' }}>
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -145,14 +145,24 @@ export default function StoryboardAssistant({
       </div>
 
       {/* Quick Actions */}
-      <div className="p-3 bg-gray-50 border-b">
-        <div className="text-xs font-semibold text-gray-600 mb-2">Quick Actions:</div>
+      <div className="p-3 border-b" style={{ backgroundColor: 'rgba(83, 66, 106, 0.5)', borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+        <div className="text-xs font-semibold text-white/80 mb-2">Quick Actions:</div>
         <div className="flex flex-wrap gap-2">
           {quickActions.map((action, idx) => (
             <button
               key={idx}
               onClick={() => setInput(action.prompt)}
-              className="text-xs px-2 py-1 bg-white border rounded hover:bg-gray-100 transition-colors"
+              className="text-xs px-2 py-1 border rounded transition-colors text-white/90"
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                borderColor: 'rgba(255, 255, 255, 0.2)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+              }}
             >
               {action.label}
             </button>
@@ -170,9 +180,14 @@ export default function StoryboardAssistant({
             <div
               className={`max-w-[80%] rounded-lg p-3 ${
                 message.role === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-800'
+                  ? 'text-white'
+                  : 'text-white/90'
               }`}
+              style={{
+                backgroundColor: message.role === 'user' 
+                  ? 'rgba(138, 103, 187, 0.6)' 
+                  : 'rgba(255, 255, 255, 0.1)'
+              }}
             >
               <p className="text-sm whitespace-pre-wrap">{message.content}</p>
               <span className="text-xs opacity-70 mt-1 block">
@@ -183,8 +198,8 @@ export default function StoryboardAssistant({
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 rounded-lg p-3">
-              <Loader2 size={16} className="animate-spin text-gray-600" />
+            <div className="rounded-lg p-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
+              <Loader2 size={16} className="animate-spin text-white/80" />
             </div>
           </div>
         )}
@@ -192,7 +207,7 @@ export default function StoryboardAssistant({
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t bg-white">
+      <div className="p-4 border-t" style={{ backgroundColor: 'rgba(83, 66, 106, 0.5)', borderColor: 'rgba(255, 255, 255, 0.1)' }}>
         <div className="flex gap-2">
           <textarea
             ref={inputRef}
@@ -200,23 +215,40 @@ export default function StoryboardAssistant({
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask me anything about your storyboard..."
-            className="flex-1 p-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+            className="flex-1 p-2 rounded-lg resize-none focus:outline-none focus:ring-2 text-sm text-white placeholder:text-white/50"
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderColor: 'rgba(255, 255, 255, 0.2)',
+              borderWidth: '1px'
+            }}
             rows={2}
             disabled={isLoading}
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            className="px-4 py-2 text-white rounded-lg disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            style={{ 
+              backgroundColor: !input.trim() || isLoading ? 'rgba(255, 255, 255, 0.2)' : '#8A67BB'
+            }}
+            onMouseEnter={(e) => {
+              if (!(!input.trim() || isLoading)) {
+                e.currentTarget.style.backgroundColor = '#7A5AAB';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!(!input.trim() || isLoading)) {
+                e.currentTarget.style.backgroundColor = '#8A67BB';
+              }
+            }}
           >
             <Send size={16} />
           </button>
         </div>
-        <div className="text-xs text-gray-500 mt-2">
+        <div className="text-xs text-white/60 mt-2">
           Press Enter to send, Shift+Enter for new line
         </div>
       </div>
     </div>
   );
 }
-
