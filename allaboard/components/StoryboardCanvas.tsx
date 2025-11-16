@@ -110,12 +110,14 @@ export default function StoryboardCanvas({ initialNodes, onNodesChange }: Storyb
         return node;
       });
       
-      // Notify parent component with updated nodes
-      const storyNodes = updated.map(n => ({
-        ...n.data,
-        position: n.position
-      } as StoryNodeType));
-      onNodesChange(storyNodes);
+      // Defer parent notification to avoid updating during render
+      setTimeout(() => {
+        const storyNodes = updated.map(n => ({
+          ...n.data,
+          position: n.position
+        } as StoryNodeType));
+        onNodesChange(storyNodes);
+      }, 0);
       
       return updated;
     });
@@ -158,12 +160,14 @@ export default function StoryboardCanvas({ initialNodes, onNodesChange }: Storyb
         return filtered;
       });
       
-      // Notify parent component
-      const storyNodes = updated.map(n => ({
-        ...n.data,
-        position: n.position
-      } as StoryNodeType));
-      onNodesChange(storyNodes);
+      // Defer parent notification to avoid updating during render
+      setTimeout(() => {
+        const storyNodes = updated.map(n => ({
+          ...n.data,
+          position: n.position
+        } as StoryNodeType));
+        onNodesChange(storyNodes);
+      }, 0);
       
       return updated;
     });
@@ -422,12 +426,14 @@ export default function StoryboardCanvas({ initialNodes, onNodesChange }: Storyb
       });
     }
     
-    // Notify parent
-    const updatedNodes = [...nodes.map(n => ({
-      ...n.data,
-      position: n.position
-    } as StoryNodeType)), newNode];
-    onNodesChange(updatedNodes);
+    // Defer parent notification to avoid updating during render
+    setTimeout(() => {
+      const updatedNodes = [...nodes.map(n => ({
+        ...n.data,
+        position: n.position
+      } as StoryNodeType)), newNode];
+      onNodesChange(updatedNodes);
+    }, 0);
     
     console.log('➕ Added new node:', newNodeId);
   }, [nodes, setNodes, setEdges, handleNodeEdit, handleNodeDelete, onNodesChange]);

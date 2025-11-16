@@ -1,6 +1,7 @@
 import express from 'express';
 import axios from 'axios';
 import { BrowserCashService } from '../services/BrowserCashService';
+import { PlaywrightScrapingService } from '../services/PlaywrightScrapingService';
 import { LLMService } from '../services/LLMService';
 import { SlideGenerator } from '../services/SlideGenerator';
 import { StoryboardAssistantService } from '../services/StoryboardAssistantService';
@@ -12,24 +13,19 @@ const router = express.Router();
 // GET /api/test-scrape - Quick test of scraping functionality
 router.get('/test-scrape', async (req, res) => {
   try {
-    if (!process.env.AGENT_API_KEY) {
-      return res.status(500).json({ error: 'AGENT_API_KEY not configured' });
-    }
-    
-    const browserCash = new BrowserCashService({
-      agentApiKey: process.env.AGENT_API_KEY,
-      baseUrl: 'https://agent-api.browser.cash'
-    });
-    
     console.log('🧪 Testing scrape with simple URL: https://example.com');
     const startTime = Date.now();
     
+    // Try Playwright first
     try {
-      const result = await browserCash.scrapeWebsite('https://example.com');
+      console.log('   🎭 Testing Playwright scraping...');
+      const playwrightService = new PlaywrightScrapingService();
+      const result = await playwrightService.scrapeWebsite('https://example.com');
       const duration = Date.now() - startTime;
       
       res.json({
         success: true,
+        method: 'Playwright',
         duration: `${duration}ms`,
         mainPage: {
           title: result.mainPage.title,
@@ -38,14 +34,51 @@ router.get('/test-scrape', async (req, res) => {
         },
         adjacentPages: result.adjacentPages.length
       });
-    } catch (error: any) {
-      const duration = Date.now() - startTime;
-      res.status(500).json({
-        success: false,
-        duration: `${duration}ms`,
-        error: error.message,
-        stack: error.stack
-      });
+    } catch (playwrightError: any) {
+      console.warn('   ⚠️ Playwright failed, trying Browser.cash fallback...');
+      
+      // Fallback to Browser.cash
+      if (!process.env.AGENT_API_KEY) {
+        const duration = Date.now() - startTime;
+        return res.status(500).json({
+          success: false,
+          duration: `${duration}ms`,
+          error: 'Playwright failed and AGENT_API_KEY not configured for fallback',
+          playwrightError: playwrightError.message
+        });
+      }
+      
+      try {
+        const browserCash = new BrowserCashService({
+          agentApiKey: process.env.AGENT_API_KEY,
+          baseUrl: 'https://agent-api.browser.cash'
+        });
+        
+        const result = await browserCash.scrapeWebsite('https://example.com');
+        const duration = Date.now() - startTime;
+        
+        res.json({
+          success: true,
+          method: 'Browser.cash (fallback)',
+          duration: `${duration}ms`,
+          mainPage: {
+            title: result.mainPage.title,
+            contentLength: result.mainPage.content.length,
+            linksFound: result.mainPage.links.length
+          },
+          adjacentPages: result.adjacentPages.length,
+          playwrightError: playwrightError.message
+        });
+      } catch (browserCashError: any) {
+        const duration = Date.now() - startTime;
+        res.status(500).json({
+          success: false,
+          duration: `${duration}ms`,
+          error: 'Both Playwright and Browser.cash failed',
+          playwrightError: playwrightError.message,
+          browserCashError: browserCashError.message
+        });
+      }
     }
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -162,21 +195,7 @@ router.post('/scrape', async (req, res) => {
       return res.status(400).json({ error: 'Invalid URL format. Please provide a valid http:// or https:// URL' });
     }
     
-    // 1. Scrape website using Browser.cash Agent API
-    if (!process.env.AGENT_API_KEY) {
-      console.error(`   ❌ [${requestId}] AGENT_API_KEY not configured`);
-      return res.status(500).json({ error: 'AGENT_API_KEY not configured' });
-    }
-    
-    console.log(`   ✅ [${requestId}] API key configured (length: ${process.env.AGENT_API_KEY.length})`);
-    
-    const browserCash = new BrowserCashService({
-      agentApiKey: process.env.AGENT_API_KEY,
-      // Base URL is hardcoded to agent-api.browser.cash (not dashboard URL)
-      baseUrl: 'https://agent-api.browser.cash'
-    });
-    
-    // Check if user wants to force test data (useful when Browser.cash is down)
+    // Check if user wants to force test data
     const useTestData = req.body.useTestData === true || req.query.useTestData === 'true';
     
     // Check if URL is for Airbnb (case-insensitive, works with partial URLs like "airbnb")
@@ -192,7 +211,7 @@ router.post('/scrape', async (req, res) => {
         if (useTestData) {
           console.log(`📦 [${requestId}] Using test data (forced via parameter)`);
         } else {
-          console.log(`📦 [${requestId}] Detected Airbnb URL - using test data (Browser.cash may be unreliable)`);
+          console.log(`📦 [${requestId}] Detected Airbnb URL - using test data`);
         }
         scrapedData = testData;
       } else if (useTestData) {
@@ -203,23 +222,52 @@ router.post('/scrape', async (req, res) => {
       }
     }
     
-    // If we don't have test data yet, try scraping
+    // If we don't have test data yet, try scraping with Playwright first, then Browser.cash as fallback
     if (!scrapedData) {
       console.log(`🌐 [${requestId}] Starting scrape for: ${url}`);
+      
+      // Try Playwright first (primary method)
       try {
-        scrapedData = await browserCash.scrapeWebsite(url);
-      } catch (scrapeError: any) {
+        console.log(`   🎭 [${requestId}] Attempting Playwright scraping (primary method)...`);
+        const playwrightService = new PlaywrightScrapingService();
+        scrapedData = await playwrightService.scrapeWebsite(url);
         const scrapeDuration = Date.now() - scrapeStartTime;
-        console.error(`❌ [${requestId}] Scraping failed after ${scrapeDuration}ms:`, scrapeError.message);
+        console.log(`   ✅ [${requestId}] Playwright scraping succeeded in ${scrapeDuration}ms`);
+      } catch (playwrightError: any) {
+        const scrapeDuration = Date.now() - scrapeStartTime;
+        console.warn(`   ⚠️ [${requestId}] Playwright scraping failed after ${scrapeDuration}ms:`, playwrightError.message);
+        console.log(`   🔄 [${requestId}] Falling back to Browser.cash...`);
         
-        // Fallback to test data if available (for Airbnb URLs)
-        const testData = TestDataService.getTestData(url);
-        if (testData) {
-          console.log(`📦 [${requestId}] Scraping failed, using test data fallback for ${url}`);
-          scrapedData = testData;
-        } else {
-          // If no test data available, throw the error
-          throw scrapeError;
+        // Fallback to Browser.cash
+        try {
+          if (!process.env.AGENT_API_KEY) {
+            console.warn(`   ⚠️ [${requestId}] AGENT_API_KEY not configured, cannot use Browser.cash fallback`);
+            throw new Error('Playwright scraping failed and Browser.cash API key not configured');
+          }
+          
+          const browserCash = new BrowserCashService({
+            agentApiKey: process.env.AGENT_API_KEY,
+            baseUrl: 'https://agent-api.browser.cash'
+          });
+          
+          scrapedData = await browserCash.scrapeWebsite(url);
+          const fallbackDuration = Date.now() - scrapeStartTime;
+          console.log(`   ✅ [${requestId}] Browser.cash fallback succeeded in ${fallbackDuration}ms`);
+        } catch (browserCashError: any) {
+          const totalDuration = Date.now() - scrapeStartTime;
+          console.error(`   ❌ [${requestId}] Both Playwright and Browser.cash failed after ${totalDuration}ms`);
+          console.error(`   Playwright error: ${playwrightError.message}`);
+          console.error(`   Browser.cash error: ${browserCashError.message}`);
+          
+          // Final fallback to test data if available
+          const testData = TestDataService.getTestData(url);
+          if (testData) {
+            console.log(`   📦 [${requestId}] Using test data as final fallback`);
+            scrapedData = testData;
+          } else {
+            // If no test data available, throw the error
+            throw new Error(`Scraping failed with both methods. Playwright: ${playwrightError.message}. Browser.cash: ${browserCashError.message}`);
+          }
         }
       }
     }

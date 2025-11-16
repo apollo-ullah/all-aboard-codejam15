@@ -1,0 +1,55 @@
+{
+  "url": "https://airbnb.ca",
+  "title": "Airbnb",
+  "duration": 61.152,
+  "actionsCount": 4,
+  "actions": [
+    "searched: Paris apartments",
+    "searched: Paris apartments",
+    "clicked: first listing",
+    "clicked: first listing"
+  ],
+  "narrations": [
+    {
+      "timestamp": 9.518,
+      "action": "scene-node-1",
+      "narration": "\"Check this out.   You can easily select your travel dates, and right in front of you are fantastic options with beautiful images, pricing, and guest reviews.   Perfect for planning your getaway."
+    },
+    {
+      "timestamp": 11.568,
+      "action": "scene-1",
+      "narration": "This sets the stage for an innovative travel narrative."
+    },
+    {
+      "timestamp": 20.616,
+      "action": "scene-node-2",
+      "narration": "\"Here we are on Airbnb's homepage.   Check out the search bar with suggestions for Paris apartments.   Below, you'll see stunning property options with prices and guest favorites.   Perfect for planning your next getaway."
+    },
+    {
+      "timestamp": 23.168,
+      "action": "scene-2",
+      "narration": "Paint a vivid picture of the traditional travel experience—often characterized by standard hotels, lack of local engagement, and rising costs."
+    },
+    {
+      "timestamp": 33.444,
+      "action": "scene-node-3",
+      "narration": "\"Check this out.   We've got a variety of beautiful options in Toronto, from cozy rooms to stylish apartments, all with guest reviews and prices right here."
+    },
+    {
+      "timestamp": 36.002,
+      "action": "scene-3",
+      "narration": "Introduce Airbnb as the transformative solution to traditional travel woes."
+    },
+    {
+      "timestamp": 46.212,
+      "action": "scene-node-4",
+      "narration": "\"Check this out.   Over 7 million listings worldwide on Airbnb.   From cozy cottages to chic apartments, there's something for everyone, perfectly tailored to your travel desires."
+    },
+    {
+      "timestamp": 48.338,
+      "action": "scene-4",
+      "narration": "Discuss the sheer scale of Airbnb's offerings, with over 7 million listings worldwide.  This not only showcases the platform's reach but also underscores the diversity of accommodations, catering to every traveler's unique preferences and needs."
+    }
+  ],
+  "timestamp": "2025-11-16T15:54:01.176Z"
+}

@@ -21,7 +21,6 @@ import { applyNarrativeArc } from '@/lib/narrativeArcs'
 type Mode = 'speed' | 'simple' | 'advanced'
 type OutputType = 'video' | 'slides'
 type StyleType = 'vc-pitch' | 'hackathon' | 'recruiter' | 'sales' | 'onboarding' | 'technical'
-type AnalysisMode = 'standard' | 'competitive' | 'briefing' | 'partnership'
 type Stage = 'input' | 'scraping' | 'storyboard' | 'generating' | 'presentation' | 'video'
 
 const styles = [
@@ -52,7 +51,6 @@ export default function Home() {
   const [description, setDescription] = useState('')
   const [style, setStyle] = useState<StyleType>('vc-pitch')
   const [sector, setSector] = useState('')
-  const [analysisMode, setAnalysisMode] = useState<AnalysisMode>('competitive')
 
   // Application State
   const [stage, setStage] = useState<Stage>('input')
@@ -117,8 +115,8 @@ export default function Home() {
       await api.testConnection()
       setBackendConnected(true)
 
-      // Scrape and generate storyboard with analysis mode
-      const response = await api.scrapeWebsite(url.trim(), analysisMode)
+      // Scrape and generate storyboard (using standard mode)
+      const response = await api.scrapeWebsite(url.trim(), 'standard')
       console.log('📦 Received storyboard response:', response)
 
       if (response.storyboard) {
@@ -337,8 +335,8 @@ export default function Home() {
         <Background />
         <div className="relative z-10 w-full max-w-6xl space-y-6">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-2">🔍 Analyzing Your Project</h2>
-            <p className="text-white/70">Extracting insights from your website or repo to build your pitch deck</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2 drop-shadow-lg">🔍 Analyzing Your Project</h2>
+            <p className="text-gray-700 font-medium">Extracting insights from your website or repo to build your pitch deck</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -773,53 +771,6 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Analysis Mode Selector */}
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground">Analysis Mode</label>
-                <div className="grid grid-cols-4 gap-2 glass rounded-lg p-1.5">
-                  <button
-                    onClick={() => setAnalysisMode('standard')}
-                    className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${
-                      analysisMode === 'standard'
-                        ? 'bg-primary text-primary-foreground shadow-md'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
-                    }`}
-                  >
-                    Standard
-                  </button>
-                  <button
-                    onClick={() => setAnalysisMode('competitive')}
-                    className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${
-                      analysisMode === 'competitive'
-                        ? 'bg-primary text-primary-foreground shadow-md'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
-                    }`}
-                  >
-                    Competitive
-                  </button>
-                  <button
-                    onClick={() => setAnalysisMode('briefing')}
-                    className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${
-                      analysisMode === 'briefing'
-                        ? 'bg-primary text-primary-foreground shadow-md'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
-                    }`}
-                  >
-                    Briefing
-                  </button>
-                  <button
-                    onClick={() => setAnalysisMode('partnership')}
-                    className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${
-                      analysisMode === 'partnership'
-                        ? 'bg-primary text-primary-foreground shadow-md'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
-                    }`}
-                  >
-                    Partnership
-                  </button>
-                </div>
-              </div>
-
               <div className="flex gap-2 pt-2">
                 <div className="flex gap-1 glass rounded-lg p-1">
                   <button
@@ -850,9 +801,7 @@ export default function Home() {
                   className="flex-1 h-9 rounded-lg font-medium text-sm disabled:opacity-50 shimmer disabled:shimmer-none transition-all hover:scale-[1.01] active:scale-[0.99]"
                 >
                   <Zap className="w-4 h-4 mr-2" strokeWidth={2} />
-                  {analysisMode === 'competitive' ? 'Analyze Competitor' :
-                   analysisMode === 'briefing' ? 'Generate Briefing' :
-                   analysisMode === 'partnership' ? 'Create Pitch' : 'Generate Deck'}
+                  Generate Deck
                 </Button>
               </div>
             </div>
