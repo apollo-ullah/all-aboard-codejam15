@@ -29,12 +29,12 @@ export default function StoryboardAssistant({
     {
       id: '1',
       role: 'assistant',
-      content: `Hi! I'm your AI presentation assistant. I can help you improve your ${style}-style storyboard. Try asking me to:
-• Improve the flow or content
-• Add missing slides
-• Make it more compelling
-• Reorder slides
-• Enhance specific nodes`,
+      content: `Hi! I'm your AI pitch assistant. I can help you refine your ${style === 'YC' ? 'VC pitch' : 'executive'} deck. Try asking me to:
+• Strengthen your value proposition
+• Add missing slides (traction, team, market size)
+• Make it more compelling for investors
+• Improve the narrative flow
+• Enhance specific slides`,
       timestamp: new Date(),
     },
   ]);

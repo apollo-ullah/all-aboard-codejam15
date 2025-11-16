@@ -9,6 +9,9 @@ import Background from '@/components/background'
 import StoryboardCanvas from '@/components/StoryboardCanvas'
 import StoryboardAssistant from '@/components/StoryboardAssistant'
 import PresentationViewer from '@/components/PresentationViewer'
+import AIInsightsPanel from '@/components/AIInsightsPanel'
+import TimeSavingsDisplay from '@/components/TimeSavingsDisplay'
+import ScrapingProgress from '@/components/ScrapingProgress'
 import { api } from '@/lib/api'
 import { Storyboard } from '@/types'
 import { applyNarrativeArc } from '@/lib/narrativeArcs'
@@ -16,14 +19,15 @@ import { applyNarrativeArc } from '@/lib/narrativeArcs'
 type Mode = 'speed' | 'simple' | 'advanced'
 type OutputType = 'video' | 'slides'
 type StyleType = 'vc-pitch' | 'hackathon' | 'recruiter' | 'sales' | 'onboarding' | 'technical'
+type AnalysisMode = 'standard' | 'competitive' | 'briefing' | 'partnership'
 type Stage = 'input' | 'scraping' | 'storyboard' | 'generating' | 'presentation'
 
 const styles = [
-  { value: 'vc-pitch', label: 'VC Pitch' },
-  { value: 'hackathon', label: 'Hackathon Pitch' },
-  { value: 'recruiter', label: 'Recruiter/Portfolio' },
-  { value: 'sales', label: 'Sales' },
-  { value: 'onboarding', label: 'Internal Team Onboarding' },
+  { value: 'vc-pitch', label: 'VC Pitch Deck' },
+  { value: 'hackathon', label: 'Hackathon Demo' },
+  { value: 'recruiter', label: 'Portfolio Showcase' },
+  { value: 'sales', label: 'Product Demo' },
+  { value: 'onboarding', label: 'Team Onboarding' },
   { value: 'technical', label: 'Technical Walkthrough' },
 ]
 
@@ -46,6 +50,7 @@ export default function Home() {
   const [description, setDescription] = useState('')
   const [style, setStyle] = useState<StyleType>('vc-pitch')
   const [sector, setSector] = useState('')
+  const [analysisMode, setAnalysisMode] = useState<AnalysisMode>('competitive')
 
   // Application State
   const [stage, setStage] = useState<Stage>('input')
@@ -55,8 +60,11 @@ export default function Home() {
   const [downloadUrl, setDownloadUrl] = useState<string | undefined>(undefined)
   const [pdfUrl, setPdfUrl] = useState<string | undefined>(undefined)
   const [slideCount, setSlideCount] = useState(0)
+  const [pagesScraped, setPagesScraped] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [assistantOpen, setAssistantOpen] = useState(false)
+  const [insightsPanelOpen, setInsightsPanelOpen] = useState(true)
+  const [processStartTime, setProcessStartTime] = useState<number | undefined>(undefined)
 
   // Backend connection status
   const [backendConnected, setBackendConnected] = useState<boolean | null>(null)
@@ -92,18 +100,20 @@ export default function Home() {
 
     setStage('scraping')
     setError(null)
+    setProcessStartTime(Date.now())
 
     try {
       // Test connection first
       await api.testConnection()
       setBackendConnected(true)
 
-      // Scrape and generate storyboard
-      const response = await api.scrapeWebsite(url.trim())
+      // Scrape and generate storyboard with analysis mode
+      const response = await api.scrapeWebsite(url.trim(), analysisMode)
       console.log('📦 Received storyboard response:', response)
 
       if (response.storyboard) {
         setStoryboard(response.storyboard)
+        setPagesScraped(response.scrapedData?.pagesScraped || 0)
         setStage('storyboard')
       } else {
         throw new Error('No storyboard data received')
@@ -257,13 +267,20 @@ export default function Home() {
   // Render different stages
   if (stage === 'scraping') {
     return (
-      <div className="min-h-screen relative overflow-hidden bg-background flex flex-col items-center justify-center">
+      <div className="min-h-screen relative overflow-hidden bg-background flex flex-col items-center justify-center p-6">
         <Background />
-        <div className="relative z-10 text-center space-y-4">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <h2 className="text-2xl font-bold text-foreground">Analyzing Website...</h2>
-          <p className="text-muted-foreground">Scraping content and generating storyboard with AI</p>
-          <p className="text-sm text-muted-foreground/60">This may take a minute</p>
+        <div className="relative z-10 w-full max-w-6xl space-y-6">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-white mb-2">🔍 Analyzing Your Project</h2>
+            <p className="text-white/70">Extracting insights from your website or repo to build your pitch deck</p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ScrapingProgress url={url} />
+            {processStartTime && (
+              <TimeSavingsDisplay stage="scraping" startTime={processStartTime} />
+            )}
+          </div>
         </div>
       </div>
     )
@@ -273,10 +290,10 @@ export default function Home() {
     return (
       <div className="min-h-screen relative overflow-hidden bg-background flex flex-col items-center justify-center">
         <Background />
-        <div className="relative z-10 text-center space-y-4">
+          <div className="relative z-10 text-center space-y-4">
           <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <h2 className="text-2xl font-bold text-foreground">Generating Slides...</h2>
-          <p className="text-muted-foreground">Creating your presentation with GAMMA API</p>
+          <h2 className="text-2xl font-bold text-foreground">Creating Your Pitch Deck...</h2>
+          <p className="text-muted-foreground">Generating VC-ready slides that do your project justice</p>
           <p className="text-sm text-muted-foreground/60">This may take a few minutes</p>
         </div>
       </div>
@@ -304,6 +321,22 @@ export default function Home() {
                 <span className="text-xs text-gray-500">• {storyboard.tagline}</span>
               )}
             </div>
+            {(storyboard.targetAudience || storyboard.coreInnovation) && (
+              <>
+                <div className="h-6 w-px bg-gray-300"></div>
+                <button
+                  onClick={() => setInsightsPanelOpen(!insightsPanelOpen)}
+                  className={`text-sm px-3 py-1 rounded transition-colors ${
+                    insightsPanelOpen
+                      ? 'bg-purple-100 text-purple-700 hover:bg-purple-200'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                  title="Toggle AI Insights"
+                >
+                  🧠 AI Insights
+                </button>
+              </>
+            )}
             <div className="h-6 w-px bg-gray-300"></div>
             <button
               onClick={handleApplyArc}
@@ -337,19 +370,28 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Canvas */}
-        <div className="flex-1 overflow-hidden relative">
-          <StoryboardCanvas
-            initialNodes={storyboard.nodes}
-            onNodesChange={handleNodesChange}
-          />
-          <StoryboardAssistant
-            storyboard={storyboard}
-            style={slideStyle}
-            isOpen={assistantOpen}
-            onClose={() => setAssistantOpen(false)}
-            onStoryboardUpdate={(updated) => setStoryboard(updated)}
-          />
+        {/* Canvas with optional sidebar */}
+        <div className="flex-1 overflow-hidden relative flex">
+          <div className="flex-1 overflow-hidden relative">
+            <StoryboardCanvas
+              initialNodes={storyboard.nodes}
+              onNodesChange={handleNodesChange}
+            />
+            <StoryboardAssistant
+              storyboard={storyboard}
+              style={slideStyle}
+              isOpen={assistantOpen}
+              onClose={() => setAssistantOpen(false)}
+              onStoryboardUpdate={(updated) => setStoryboard(updated)}
+            />
+          </div>
+
+          {/* AI Insights Sidebar */}
+          {insightsPanelOpen && (storyboard.targetAudience || storyboard.coreInnovation) && (
+            <div className="w-96 bg-gradient-to-br from-gray-900 to-gray-800 border-l border-gray-700 p-6 overflow-y-auto">
+              <AIInsightsPanel storyboard={storyboard} pagesScraped={pagesScraped} />
+            </div>
+          )}
         </div>
       </div>
     )
@@ -380,7 +422,10 @@ export default function Home() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/30 flex items-center justify-center backdrop-blur-xl border border-primary/20">
               <Sparkles className="w-4 h-4 text-primary" strokeWidth={2} />
             </div>
-            <span className="font-semibold text-foreground tracking-tight">STORYTEX</span>
+            <div className="flex flex-col">
+              <span className="font-semibold text-foreground tracking-tight leading-tight">All Aboard</span>
+              <span className="text-[9px] text-muted-foreground leading-none">Pitch Perfect for Founders</span>
+            </div>
           </div>
 
           {/* Mode selector */}
@@ -511,7 +556,7 @@ export default function Home() {
                   {showPlaceholder && !url && (
                     <div className="absolute left-[52px] pointer-events-none">
                       <div className="text-sm md:text-base font-medium tracking-tight text-muted-foreground/60">
-                        {'Paste your website URL or GitHub repository...'.split('').map((char, i) => (
+                        {'Paste GitHub repo URL (recommended) or website...'.split('').map((char, i) => (
                           <span
                             key={i}
                             className="inline-block animate-blur-in"
@@ -532,7 +577,7 @@ export default function Home() {
 
               {mode === 'simple' && (
                 <Textarea
-                  placeholder="Describe what story you want to tell... (optional)"
+                  placeholder="Add context about your pitch or target audience... (optional)"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
@@ -543,7 +588,7 @@ export default function Home() {
               {mode === 'advanced' && (
                 <div className="space-y-3">
                   <Textarea
-                    placeholder="Describe what story you want to tell... (optional)"
+                    placeholder="Add context about your pitch, target VCs, or key points to emphasize... (optional)"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={3}
@@ -587,6 +632,53 @@ export default function Home() {
                 </div>
               )}
 
+              {/* Analysis Mode Selector */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">Analysis Mode</label>
+                <div className="grid grid-cols-4 gap-2 glass rounded-lg p-1.5">
+                  <button
+                    onClick={() => setAnalysisMode('standard')}
+                    className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${
+                      analysisMode === 'standard'
+                        ? 'bg-primary text-primary-foreground shadow-md'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
+                    }`}
+                  >
+                    📊 Standard
+                  </button>
+                  <button
+                    onClick={() => setAnalysisMode('competitive')}
+                    className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${
+                      analysisMode === 'competitive'
+                        ? 'bg-primary text-primary-foreground shadow-md'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
+                    }`}
+                  >
+                    🔍 Competitive
+                  </button>
+                  <button
+                    onClick={() => setAnalysisMode('briefing')}
+                    className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${
+                      analysisMode === 'briefing'
+                        ? 'bg-primary text-primary-foreground shadow-md'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
+                    }`}
+                  >
+                    📋 Briefing
+                  </button>
+                  <button
+                    onClick={() => setAnalysisMode('partnership')}
+                    className={`px-3 py-2 rounded-md text-xs font-medium transition-all ${
+                      analysisMode === 'partnership'
+                        ? 'bg-primary text-primary-foreground shadow-md'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
+                    }`}
+                  >
+                    🤝 Partnership
+                  </button>
+                </div>
+              </div>
+
               <div className="flex gap-2 pt-2">
                 <div className="flex gap-1 glass rounded-lg p-1">
                   <button
@@ -616,8 +708,10 @@ export default function Home() {
                   disabled={!url}
                   className="flex-1 h-9 rounded-lg font-medium text-sm disabled:opacity-50 shimmer disabled:shimmer-none transition-all hover:scale-[1.01] active:scale-[0.99]"
                 >
-                  <Sparkles className="w-4 h-4 mr-2" strokeWidth={2} />
-                  Generate
+                  <Zap className="w-4 h-4 mr-2" strokeWidth={2} />
+                  {analysisMode === 'competitive' ? 'Analyze Competitor' :
+                   analysisMode === 'briefing' ? 'Generate Briefing' :
+                   analysisMode === 'partnership' ? 'Create Pitch' : 'Generate Deck'}
                 </Button>
               </div>
               
@@ -658,10 +752,31 @@ export default function Home() {
           </div>
 
           <p className="text-center text-xs text-muted-foreground/60">
-            {mode === 'speed' && 'Lightning fast generation with smart defaults'}
-            {mode === 'simple' && 'Customize your story with optional context'}
-            {mode === 'advanced' && 'Full control over presentation style and targeting'}
+            {mode === 'speed' && '⚡ Quick presentation generation - Drop URL, get slides'}
+            {mode === 'simple' && '🎯 GitHub/Website → AI Analysis → Storyboard → Pitch Deck'}
+            {mode === 'advanced' && '🚀 Full control: Presentation style • Analysis mode • Sector targeting'}
           </p>
+
+          {/* Value Prop */}
+          <div className="text-center space-y-2 pt-4">
+            <p className="text-sm text-white/80 font-medium">
+              Democratize storytelling for builders
+            </p>
+            <p className="text-xs text-white/60">
+              Every technical founder, student, and indie hacker should have a fair shot at showing what they built
+            </p>
+            <p className="text-xs text-white/50 mt-2">
+              Without needing to be a designer, video editor, or pitch expert
+            </p>
+            <div className="mt-3 pt-3 border-t border-white/10">
+              <p className="text-xs text-primary/90 font-semibold mb-1">
+                🚀 GitHub Repos Get Deep Intelligence:
+              </p>
+              <p className="text-xs text-white/50 leading-relaxed">
+                Stars • Forks • Contributors • Releases • Tech Stack • Community Engagement
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 

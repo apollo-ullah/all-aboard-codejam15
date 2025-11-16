@@ -133,14 +133,24 @@ router.post('/scrape', async (req, res) => {
   res.setTimeout(300000); // 5 minutes
   
   try {
-    let { url } = req.body;
-    
+    let { url, mode } = req.body;
+
+    // Default to 'standard' mode if not specified
+    const analysisMode = mode || 'standard';
+
     console.log(`   Original URL:`, url);
-    
+    console.log(`   Analysis Mode:`, analysisMode);
+
     // Validate URL
     if (!url || typeof url !== 'string') {
       console.error(`   ❌ [${requestId}] Invalid request: URL missing or not a string`);
       return res.status(400).json({ error: 'URL is required and must be a string' });
+    }
+
+    // Validate mode
+    if (!['standard', 'competitive', 'briefing', 'partnership'].includes(analysisMode)) {
+      console.error(`   ❌ [${requestId}] Invalid mode: ${analysisMode}`);
+      return res.status(400).json({ error: 'Mode must be one of: standard, competitive, briefing, partnership' });
     }
     
     // Normalize URL (add https:// if missing)
@@ -245,12 +255,12 @@ router.post('/scrape', async (req, res) => {
       apiKey: process.env.OPENAI_KEY!
     });
     
-    console.log(`🤖 [${requestId}] Generating storyboard...`);
+    console.log(`🤖 [${requestId}] Generating storyboard in ${analysisMode} mode...`);
     console.log(`   📄 Scraped content length: ${scrapedData.mainPage.content.length} characters`);
     const llmStartTime = Date.now();
-    
-    const storyboard = await llmService.generateStoryboard(scrapedData);
-    
+
+    const storyboard = await llmService.generateStoryboard(scrapedData, analysisMode as 'standard' | 'competitive' | 'briefing' | 'partnership');
+
     const llmDuration = Date.now() - llmStartTime;
     console.log(`✅ [${requestId}] Storyboard generated in ${llmDuration}ms`);
     console.log(`   Storyboard title: ${storyboard.title}`);

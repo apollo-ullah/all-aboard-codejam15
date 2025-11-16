@@ -97,10 +97,10 @@ export const api = {
     }
   },
 
-  async scrapeWebsite(url: string): Promise<ScrapeResponse> {
-    console.log('🌐 Starting scrape request for:', url);
+  async scrapeWebsite(url: string, mode: 'standard' | 'competitive' | 'briefing' | 'partnership' = 'standard'): Promise<ScrapeResponse> {
+    console.log('🌐 Starting scrape request for:', url, 'with mode:', mode);
     try {
-      const response = await apiClient.post<ScrapeResponse>('/api/scrape', { url });
+      const response = await apiClient.post<ScrapeResponse>('/api/scrape', { url, mode });
       console.log('✅ Scrape successful:', response.data);
       return response.data;
     } catch (error: any) {

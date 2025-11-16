@@ -1,14 +1,41 @@
-# All Aboard - AI Product Storyteller
+# All Aboard - Democratize Storytelling for Builders
 
-Transform website URLs into professional slide decks with an interactive storyboard editor.
+## The Mission
+
+**Democratize storytelling for builders.** Every technical founder, student, and indie hacker should have a fair shot at showing what they built - without needing to be a designer, video editor, or pitch expert.
+
+## The Problem
+
+**Good ideas lose because founders can't communicate them.** Not because the tech isn't solid. Not because the product isn't useful. But simply because the presentation didn't show the value clearly.
+
+We've seen:
+- Students build genuinely impressive tools but get overshadowed by teams with better presentations
+- Early-stage founders with real potential completely dismissed because their demo didn't land
+- Judges miss the brilliance of a project because they only had a surface-level view
+
+## The Solution
+
+**Drop in a GitHub repo or website URL.** We analyze your work, understand what you built, and generate a presentation that does your project justice. 
+
+- **Slides for pitches** - VC-ready decks that communicate your value
+- **Videos for demos** - Compelling demos that help people actually get it
+- **Stories that help** - Judges, investors, and users understand what you built
+
+**How it works:**
+
+1. Drop in your GitHub repo or website URL
+2. AI analyzes your work and understands what you built
+3. Generate an editable storyboard
+4. Create slides for pitches or videos for demos
+5. Stories that help judges, investors, and users actually get it
 
 ## Overview
 
-This AI-powered hackathon project automatically:
+This AI-powered tool automatically:
 
-1. Scrapes websites using Browser.cash Agent API
+1. Scrapes websites/repos using Browser.cash Agent API
 2. Generates editable storyboards using OpenAI GPT-4o
-3. Creates professional presentations using Gamma API
+3. Creates professional VC pitch decks using Gamma API
 4. Embeds presentations directly in the app for seamless viewing
 
 ## Features

@@ -10,6 +10,8 @@ export interface StoryNode {
 export interface Storyboard {
   title: string;
   tagline: string;
+  targetAudience?: string;
+  coreInnovation?: string;
   nodes: StoryNode[];
 }
 

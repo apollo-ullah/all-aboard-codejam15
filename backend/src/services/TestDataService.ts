@@ -246,12 +246,282 @@ BENEFITS FOR GUESTS:
   }
 
   /**
+   * Get test data for YouTube
+   */
+  static getYouTubeTestData(): ScrapedData {
+    const mainPage: ScrapeResult = {
+      url: 'https://www.youtube.com',
+      title: 'YouTube - Watch, Share, and Create Videos',
+      content: `YouTube is the world's largest video-sharing platform, enabling billions of users to discover, watch, and share original videos. Founded in 2005 and acquired by Google in 2006, YouTube has revolutionized how people consume and create content.
+
+KEY FEATURES:
+- Over 2 billion logged-in monthly users worldwide
+- 500+ hours of video uploaded every minute
+- Support for videos up to 12 hours long (or unlimited for verified accounts)
+- Live streaming capabilities with real-time interaction
+- YouTube Shorts for vertical, mobile-first video content
+- YouTube Premium for ad-free viewing and offline downloads
+- YouTube Music for streaming music and music videos
+- Creator Studio for content management and analytics
+- Monetization through YouTube Partner Program
+- Community features: comments, likes, shares, playlists, subscriptions
+
+CONTENT ECOSYSTEM:
+- Music videos and official artist channels
+- Educational content and tutorials
+- Gaming and live streams
+- Vlogs and lifestyle content
+- News and current events
+- Product reviews and unboxings
+- Cooking and recipe videos
+- Fitness and wellness content
+- Tech reviews and demos
+- Comedy and entertainment
+
+MONETIZATION:
+- Ad revenue sharing through YouTube Partner Program
+- Channel memberships and Super Chat
+- Merchandise shelf integration
+- YouTube Premium revenue share
+- Brand partnerships and sponsorships
+
+TECHNOLOGY:
+- Advanced recommendation algorithm using machine learning
+- Content ID system for copyright protection
+- Real-time analytics and insights for creators
+- Multi-platform support (web, mobile apps, smart TVs, gaming consoles)
+- 4K, 8K, and HDR video support
+- Live chat and community features
+- Automatic captions and translations
+
+IMPACT:
+- Empowers millions of creators to build careers and businesses
+- Provides free education and entertainment to billions
+- Enables businesses to reach global audiences
+- Supports independent artists and musicians
+- Facilitates knowledge sharing and learning
+- Creates new forms of entertainment and media
+
+STATISTICS:
+- Over 1 billion hours of video watched daily
+- Available in 100+ countries and 80+ languages
+- 70% of watch time comes from mobile devices
+- YouTube Kids provides safe content for children
+- YouTube TV offers live TV streaming service`,
+      metadata: {
+        description: 'Enjoy the videos and music you love, upload original content, and share it all with friends, family, and the world on YouTube.',
+        ogTitle: 'YouTube',
+        ogDescription: 'Enjoy the videos and music you love, upload original content, and share it all with friends, family, and the world on YouTube.'
+      },
+      links: [
+        'https://www.youtube.com/about',
+        'https://www.youtube.com/creators',
+        'https://www.youtube.com/premium',
+        'https://www.youtube.com/music',
+        'https://www.youtube.com/tv',
+        'https://www.youtube.com/kids'
+      ]
+    };
+
+    const adjacentPages: ScrapeResult[] = [
+      {
+        url: 'https://www.youtube.com/about',
+        title: 'About YouTube',
+        content: `YouTube's mission is to give everyone a voice and show them the world. We believe that everyone deserves to have a voice, and that the world is a better place when we listen, share, and build community through our stories.
+
+COMPANY HISTORY:
+- Founded in 2005 by Chad Hurley, Steve Chen, and Jawed Karim
+- Acquired by Google in 2006 for $1.65 billion
+- Headquartered in San Bruno, California
+- Part of Alphabet Inc. (Google's parent company)
+
+OUR VALUES:
+- Freedom of expression
+- Opportunity for all creators
+- Responsibility to our community
+- Innovation in video technology
+- Global reach and accessibility
+
+COMMITMENT:
+- Supporting creators and artists
+- Protecting user privacy and safety
+- Combating harmful content
+- Promoting diverse voices
+- Building tools for creators to succeed`,
+        metadata: {
+          description: 'Learn about YouTube\'s mission, history, and commitment to creators and users',
+          ogTitle: 'About YouTube',
+          ogDescription: 'Learn about YouTube'
+        },
+        links: [
+          'https://www.youtube.com/creators',
+          'https://www.youtube.com/premium'
+        ]
+      },
+      {
+        url: 'https://www.youtube.com/creators',
+        title: 'YouTube for Creators',
+        content: `YouTube Creator Academy provides resources, tools, and best practices to help creators build successful channels and grow their audience.
+
+CREATOR TOOLS:
+- YouTube Studio for channel management
+- Analytics and insights dashboard
+- Content ID and copyright tools
+- Live streaming capabilities
+- Community tab and posts
+- Channel memberships
+- Super Chat and Super Stickers
+- Merchandise shelf
+
+MONETIZATION OPTIONS:
+- Ad revenue sharing (YouTube Partner Program)
+- Channel memberships
+- Super Chat and Super Stickers
+- YouTube Premium revenue share
+- Brand partnerships
+- Merchandise sales
+
+GROWTH RESOURCES:
+- Creator Academy courses
+- Best practices guides
+- Community forums
+- Creator support team
+- Events and workshops
+- Creator awards program`,
+        metadata: {
+          description: 'Resources and tools for YouTube creators',
+          ogTitle: 'YouTube for Creators',
+          ogDescription: 'Resources for creators'
+        },
+        links: [
+          'https://www.youtube.com/about',
+          'https://www.youtube.com/premium'
+        ]
+      },
+      {
+        url: 'https://www.youtube.com/premium',
+        title: 'YouTube Premium',
+        content: `YouTube Premium is a subscription service that provides an enhanced YouTube experience with ad-free viewing, background play, and offline downloads.
+
+PREMIUM FEATURES:
+- Ad-free viewing across all YouTube content
+- Background play on mobile devices
+- Offline downloads for videos
+- YouTube Music Premium included
+- Original content and exclusive series
+- Early access to new features
+
+PRICING:
+- Individual plans available
+- Family plans for multiple users
+- Student discounts
+- Free trial period
+
+BENEFITS:
+- Uninterrupted viewing experience
+- Support creators through revenue share
+- Access to YouTube Music Premium
+- Download videos for offline viewing
+- Play videos in background while using other apps`,
+        metadata: {
+          description: 'Ad-free YouTube with background play and offline downloads',
+          ogTitle: 'YouTube Premium',
+          ogDescription: 'Ad-free YouTube experience'
+        },
+        links: [
+          'https://www.youtube.com/music',
+          'https://www.youtube.com/tv'
+        ]
+      },
+      {
+        url: 'https://www.youtube.com/music',
+        title: 'YouTube Music',
+        content: `YouTube Music is a music streaming service that provides access to millions of songs, albums, and music videos.
+
+FEATURES:
+- Access to official songs, albums, and music videos
+- Personalized playlists and recommendations
+- Offline downloads
+- Background play
+- Ad-free listening (with Premium)
+- Smart search that finds songs even with partial lyrics
+- Integration with YouTube's video library
+
+CONTENT:
+- Official music from major labels
+- Independent artist content
+- Live performances and concerts
+- Remixes and covers
+- Music videos and behind-the-scenes content
+
+PLATFORMS:
+- Web player
+- Mobile apps (iOS and Android)
+- Smart speakers and devices
+- Car integration`,
+        metadata: {
+          description: 'Music streaming service with official songs and music videos',
+          ogTitle: 'YouTube Music',
+          ogDescription: 'Stream music and music videos'
+        },
+        links: [
+          'https://www.youtube.com/premium',
+          'https://www.youtube.com'
+        ]
+      },
+      {
+        url: 'https://www.youtube.com/tv',
+        title: 'YouTube TV',
+        content: `YouTube TV is a live TV streaming service that provides access to live and on-demand content from major networks.
+
+FEATURES:
+- Live TV from 100+ channels
+- Cloud DVR with unlimited storage
+- Multiple simultaneous streams
+- On-demand content library
+- Local and national news
+- Sports coverage
+- Entertainment and lifestyle channels
+
+CHANNEL LINEUP:
+- Major broadcast networks (ABC, CBS, NBC, FOX)
+- Cable networks (ESPN, CNN, HGTV, etc.)
+- Sports networks
+- News channels
+- Entertainment and lifestyle
+- Kids programming
+
+PRICING:
+- Base plan with core channels
+- Add-on packages available
+- Family sharing options`,
+        metadata: {
+          description: 'Live TV streaming service with 100+ channels',
+          ogTitle: 'YouTube TV',
+          ogDescription: 'Stream live TV'
+        },
+        links: [
+          'https://www.youtube.com/premium',
+          'https://www.youtube.com'
+        ]
+      }
+    ];
+
+    return {
+      mainPage,
+      adjacentPages
+    };
+  }
+
+  /**
    * Check if URL matches a test data pattern
    */
   static hasTestData(url: string): boolean {
     const normalizedUrl = url.toLowerCase().trim();
     return normalizedUrl.includes('airbnb.com') || 
-           normalizedUrl.includes('airbnb');
+           normalizedUrl.includes('airbnb') ||
+           normalizedUrl.includes('youtube.com') ||
+           normalizedUrl.includes('youtube');
   }
 
   /**
@@ -263,6 +533,11 @@ BENEFITS FOR GUESTS:
     if (normalizedUrl.includes('airbnb.com') || normalizedUrl.includes('airbnb')) {
       console.log('📦 Using Airbnb test data (Browser.cash API unavailable)');
       return this.getAirbnbTestData();
+    }
+    
+    if (normalizedUrl.includes('youtube.com') || normalizedUrl.includes('youtube')) {
+      console.log('📦 Using YouTube test data (Browser.cash API unavailable)');
+      return this.getYouTubeTestData();
     }
     
     return null;

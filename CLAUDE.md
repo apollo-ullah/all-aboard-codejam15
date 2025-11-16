@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **All Aboard** (formerly STORYTEX) is a hackathon project that transforms website URLs into professional slide decks with an interactive storyboard editor. The application consists of two main components:
 
-- **Allaboard** (Next.js 15 + React + TypeScript): Full-featured frontend with beautiful glass-morphism UI, interactive storyboard canvas editor using React Flow, AI-powered editing assistant, and embedded Gamma presentation viewer
+- **Allaboard** (Next.js 16 + React 19 + TypeScript): Full-featured frontend with beautiful glass-morphism UI, interactive storyboard canvas editor using React Flow, AI-powered editing assistant, and embedded Gamma presentation viewer
 - **Backend** (Node.js + Express + TypeScript): API server handling web scraping (Browser.cash), storyboard generation (OpenAI GPT-4o), and slide generation (Gamma API)
 
 ## Development Commands
@@ -82,28 +82,31 @@ npm start           # Start production server (requires build first)
 ## External Dependencies & APIs
 
 **Required API Keys** (configured in `backend/.env`):
-- `AGENT_API_KEY`: Browser.cash Agent API for web scraping (`https://agent-api.browser.cash`)
-- `OPENAI_KEY`: OpenAI GPT-4o for storyboard generation
-- `GAMMA_API_KEY`: Gamma API for slide generation (`https://public-api.gamma.app/v1.0/generations`)
-- `CORS_ORIGINS`: Frontend origins for CORS (default: http://localhost:3001,http://localhost:5173)
+- `OPENAI_KEY`: OpenAI GPT-4o for storyboard generation (REQUIRED)
+- `GAMMA_API_KEY`: Gamma API for slide generation (REQUIRED) (`https://public-api.gamma.app/v1.0/generations`)
+- `AGENT_API_KEY`: Browser.cash Agent API for web scraping (OPTIONAL - will be used once API is fixed) (`https://agent-api.browser.cash`)
+- `FRONTEND_URL`: Frontend URL for CORS (default: http://localhost:3001)
 - `PORT`: Backend port (default: 3000)
+- `NODE_ENV`: Environment mode (default: development)
 
 **Frontend Environment** (configured in `allaboard/.env.local`):
 - `NEXT_PUBLIC_API_URL`: Backend API URL (default: http://localhost:3000)
 
 **Core Libraries**:
-- **Next.js 16**: React framework with Turbopack
-- **React Flow (reactflow)**: Canvas-based storyboard editor
+- **Next.js 16.0.3**: React framework with Turbopack
+- **React 19.2.0**: Latest React with improved performance
+- **React Flow (reactflow)**: Canvas-based storyboard editor with drag-and-drop
 - **Axios**: HTTP client for API communication
-- **Radix UI**: Accessible component primitives
-- **Tailwind CSS 4**: Utility-first CSS framework
+- **Radix UI**: Accessible component primitives (dialogs, dropdowns, etc.)
+- **Tailwind CSS 4.1.9**: Utility-first CSS framework
 - **Lucide React**: Icon library
 - **OpenAI SDK**: LLM integration (backend)
+- **Express 5.1.0**: Backend web framework
 
 ## Development Notes
 
 - **Ports**: Backend runs on port 3000, frontend (allaboard) on port 3001
-- **CORS**: Backend accepts requests from localhost:3001 and localhost:5173
+- **CORS**: Backend accepts requests from FRONTEND_URL (default: localhost:3001) and localhost:5173 (legacy Vite app)
 - **TypeScript**: Used throughout with strict type checking
 - **Styling**: Glass-morphism design with parallax background and custom animations
 - **Storyboard Node Types**: title, problem, solution, feature, benefit, cta
@@ -156,8 +159,9 @@ all-aboard-codejam15/
 
 2. **Configure environment:**
    - Copy `backend/.env.example` to `backend/.env`
-   - Add your API keys: AGENT_API_KEY, OPENAI_KEY, GAMMA_API_KEY
-   - Optionally create `allaboard/.env.local` with NEXT_PUBLIC_API_URL
+   - Add required API keys: OPENAI_KEY, GAMMA_API_KEY
+   - Optionally add AGENT_API_KEY (Browser.cash - currently unused)
+   - Optionally create `allaboard/.env.local` with NEXT_PUBLIC_API_URL if backend is not on localhost:3000
 
 3. **Start servers:**
    ```bash

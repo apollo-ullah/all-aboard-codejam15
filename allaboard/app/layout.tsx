@@ -7,8 +7,8 @@ import 'reactflow/dist/style.css'
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'STORYTEX - AI Storyteller',
-  description: 'Transform your GitHub repos into compelling videos and slide decks',
+  title: 'All Aboard - Democratize Storytelling for Builders',
+  description: 'Drop in a GitHub repo or website URL. We analyze your work, understand what you built, and generate a presentation that does your project justice. Slides for pitches. Videos for demos.',
   generator: 'v0.app',
   icons: {
     icon: [

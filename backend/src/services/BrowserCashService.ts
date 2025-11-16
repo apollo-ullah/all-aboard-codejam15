@@ -17,29 +17,29 @@ interface TaskResponse {
 }
 
 interface TaskStatus {
-  id: string;
-  task: string;
-  state: 'active' | 'completed' | 'failed' | 'error';
-  startedAt: number;
-  stoppedAt: number | null;
-  inputTokens: number | null;
-  outputTokens: number | null;
-  data: {
+  id?: string;
+  taskId?: string;
+  task?: string;
+  status?: 'queued' | 'running' | 'completed' | 'failed'; // Official field from docs
+  state?: 'queued' | 'running' | 'active' | 'completed' | 'failed' | 'error'; // Alternative field name
+  startedAt?: number;
+  stoppedAt?: number | null;
+  inputTokens?: number | null;
+  outputTokens?: number | null;
+  data?: {
     prompt: string;
     agent: string;
     mode: string;
     stepLimit: number;
   };
-  result: {
-    answer: string;
-    tokenUsage?: {
-      inputTokens: number;
-      outputTokens: number;
-    };
-    steps?: number;
-    stepLimit?: number;
-  } | null;
-  attemptsMade: number;
+  result?: {
+    answer?: string;
+    content?: string;
+    [key: string]: any; // Allow other result fields
+  } | string | null; // Result can be object or string
+  attemptsMade?: number;
+  failedReason?: string;
+  error?: string;
 }
 
 export class BrowserCashService {
@@ -58,43 +58,65 @@ export class BrowserCashService {
   }
 
   /**
-   * Scrape a website and its adjacent pages
+   * Scrape a website with intelligent, mission-focused strategy
+   * Revolutionary approach: Context-aware scraping for pitch deck generation
    */
   async scrapeWebsite(url: string): Promise<ScrapedData> {
     try {
-      console.log(`🌐 Scraping website: ${url}`);
+      console.log(`🌐 Intelligent scraping for pitch deck: ${url}`);
       console.log(`   Using Browser.cash Agent API: ${this.baseUrl}`);
       
-      // 1. Scrape main page
-      console.log(`   📄 Step 1: Scraping main page...`);
-      const mainPage = await this.scrapePage(url);
-      console.log(`   ✅ Main page scraped: "${mainPage.title}" (${mainPage.content.length} chars)`);
+      // 1. Scrape main page with enhanced prompt
+      console.log(`   📄 Step 1: Analyzing main page...`);
+      const mainPage = await this.scrapePageIntelligently(url, 'main');
+      console.log(`   ✅ Main page analyzed: "${mainPage.title}" (${mainPage.content.length} chars)`);
       
-      // 2. Find and scrape adjacent pages
+      // 2. Detect project type and GitHub links
+      const projectType = this.detectProjectType(mainPage, url);
+      console.log(`   🎯 Detected project type: ${projectType}`);
+      
+      // 3. Intelligent page discovery - find the MOST VALUABLE pages for a pitch
+      const priorityPages = this.discoverPriorityPages(mainPage.links, url, projectType);
+      console.log(`   🔍 Discovered ${priorityPages.length} priority pages for pitch deck`);
+      
+      // 4. Scrape priority pages in order of importance
       const adjacentPages: ScrapeResult[] = [];
+      const maxPages = 7; // Increased from 5 for better coverage
       
-      // Extract links from main page
-      const relevantLinks = this.findAdjacentPages(mainPage.links, url);
-      console.log(`   🔗 Found ${relevantLinks.length} relevant adjacent pages`);
-      
-      // Scrape up to 5 adjacent pages
-      if (relevantLinks.length > 0) {
-        console.log(`   📄 Step 2: Scraping up to 5 adjacent pages...`);
-        for (let i = 0; i < Math.min(5, relevantLinks.length); i++) {
-          const link = relevantLinks[i];
-          try {
-            console.log(`   📄 Scraping adjacent page ${i + 1}/5: ${link}`);
-            const page = await this.scrapePage(link);
+      for (let i = 0; i < Math.min(maxPages, priorityPages.length); i++) {
+        const pageInfo = priorityPages[i];
+        try {
+          console.log(`   📄 Scraping priority page ${i + 1}/${Math.min(maxPages, priorityPages.length)}: ${pageInfo.url} (${pageInfo.priority})`);
+          const page = await this.scrapePageIntelligently(pageInfo.url, pageInfo.type);
             adjacentPages.push(page);
-            console.log(`   ✅ Scraped: ${link} - "${page.title}"`);
+          console.log(`   ✅ Scraped: ${pageInfo.url} - "${page.title}"`);
           } catch (error: any) {
-            console.warn(`   ⚠️ Failed to scrape ${link}: ${error.message}`);
+          console.warn(`   ⚠️ Failed to scrape ${pageInfo.url}: ${error.message}`);
             // Continue with other pages
           }
+      }
+      
+      // 5. If GitHub repo detected, extract comprehensive GitHub intelligence (with graceful fallback)
+      if (projectType === 'github' || this.isGitHubUrl(url)) {
+        console.log(`   🔗 GitHub repo detected - extracting comprehensive intelligence...`);
+        try {
+          // Use Promise.allSettled to continue even if some extractions fail
+          const githubIntelligence = await this.extractGitHubIntelligence(url);
+          if (githubIntelligence && githubIntelligence.length > 0) {
+            // Add all GitHub intelligence pages
+            adjacentPages.push(...githubIntelligence);
+            console.log(`   ✅ Extracted ${githubIntelligence.length} GitHub intelligence pages`);
+          } else {
+            console.log(`   ℹ️ No GitHub intelligence extracted, continuing with main page only`);
+          }
+        } catch (error: any) {
+          console.warn(`   ⚠️ GitHub intelligence extraction failed: ${error.message}`);
+          console.warn(`   ℹ️ Continuing with main page and adjacent pages only`);
+          // Don't throw - continue with what we have
         }
       }
       
-      console.log(`   ✅ Scraping complete: 1 main page + ${adjacentPages.length} adjacent pages`);
+      console.log(`   ✅ Intelligent scraping complete: 1 main page + ${adjacentPages.length} priority pages`);
       return { mainPage, adjacentPages };
     } catch (error: any) {
       console.error('❌ Error scraping website:', error.message);
@@ -104,10 +126,81 @@ export class BrowserCashService {
   }
 
   /**
-   * Scrape a single page using Browser.cash Agent API
+   * Intelligently scrape a page with context-aware prompts
    */
-  private async scrapePage(url: string): Promise<ScrapeResult> {
-    const prompt = `Visit and scrape the website ${url}. Extract and provide:
+  private async scrapePageIntelligently(url: string, pageType: 'main' | 'about' | 'features' | 'pricing' | 'testimonials' | 'blog' | 'docs' | 'github' | 'other'): Promise<ScrapeResult> {
+    const contextPrompts: Record<string, string> = {
+      main: `You are analyzing a startup/product website to create a pitch deck. Focus on:
+- Value proposition and unique selling points
+- Target audience and market positioning
+- Key features and differentiators
+- Any metrics, numbers, or growth stats
+- Customer logos or social proof
+- The core problem being solved`,
+      
+      about: `This is the "About" or "Company" page. Extract:
+- Company mission and vision
+- Founding story or origin
+- Team information
+- Company values
+- What makes them unique`,
+      
+      features: `This is a features/product page. Extract:
+- All product features and capabilities
+- How each feature solves a problem
+- Technical specifications if relevant
+- Use cases and applications
+- Feature comparisons or advantages`,
+      
+      pricing: `This is a pricing page. Extract:
+- Pricing tiers and models
+- Value proposition at each tier
+- What's included in each plan
+- ROI or cost savings messaging
+- Enterprise/contact options`,
+      
+      testimonials: `This is a testimonials/customers page. Extract:
+- Customer quotes and testimonials
+- Customer logos and company names
+- Use cases and success stories
+- Metrics or results mentioned
+- Industry verticals served`,
+      
+      blog: `This is a blog or content page. Extract:
+- Key insights about the product/market
+- Thought leadership content
+- Product updates or announcements
+- Market analysis or trends
+- Any metrics or data points`,
+      
+      docs: `This is documentation. Extract:
+- Product capabilities and features
+- Technical architecture if relevant
+- Use cases and examples
+- Integration information
+- API or developer information`,
+      
+      github: `This is a GitHub repository. Extract:
+- Project description and README
+- Key features and capabilities
+- Technology stack
+- Installation/usage information
+- Contributing guidelines or community info`,
+      
+      other: `Extract all relevant content for a pitch deck:
+- Key information about the product/service
+- Value propositions
+- Features and benefits
+- Any metrics or social proof`
+    };
+    
+    const contextPrompt = contextPrompts[pageType] || contextPrompts.other;
+    
+    const prompt = `Visit and analyze the website ${url} for creating a pitch deck.
+
+${contextPrompt}
+
+Extract and provide:
 
 TITLE: [The page title from the <title> tag or main heading]
 
@@ -117,12 +210,15 @@ CONTENT: [All main content including:
 - All headings (H1, H2, H3, etc.)
 - All paragraphs and text content
 - Lists and bullet points
-- Key features, benefits, or important information
+- Key features, benefits, metrics, or important information
+- Customer testimonials, logos, or social proof
+- Any numbers, statistics, or data points
+- Value propositions and unique selling points
 - Any other relevant text content]
 
 LINKS: [List all links found on the page, one per line, with full URLs]
 
-Please be comprehensive and include all important information from the page.`;
+Be comprehensive and prioritize information that would be valuable for a pitch deck.`;
 
     try {
       // Create scraping task
@@ -154,58 +250,622 @@ Please be comprehensive and include all important information from the page.`;
   }
 
   /**
+   * Legacy method - kept for backward compatibility
+   */
+  private async scrapePage(url: string): Promise<ScrapeResult> {
+    return this.scrapePageIntelligently(url, 'other');
+  }
+
+  /**
+   * Detect project type from URL and content
+   */
+  private detectProjectType(mainPage: ScrapeResult, url: string): 'github' | 'saas' | 'opensource' | 'website' | 'unknown' {
+    const urlLower = url.toLowerCase();
+    const contentLower = mainPage.content.toLowerCase();
+    const titleLower = mainPage.title.toLowerCase();
+    
+    // Check for GitHub
+    if (urlLower.includes('github.com') || urlLower.includes('github.io')) {
+      return 'github';
+    }
+    
+    // Check for open source indicators
+    if (contentLower.includes('open source') || 
+        contentLower.includes('opensource') ||
+        contentLower.includes('mit license') ||
+        contentLower.includes('apache license') ||
+        contentLower.includes('contributing') ||
+        contentLower.includes('pull request')) {
+      return 'opensource';
+    }
+    
+    // Check for SaaS indicators
+    if (contentLower.includes('pricing') ||
+        contentLower.includes('subscription') ||
+        contentLower.includes('free trial') ||
+        contentLower.includes('sign up') ||
+        contentLower.includes('dashboard') ||
+        titleLower.includes('saas') ||
+        contentLower.includes('software as a service')) {
+      return 'saas';
+    }
+    
+    // Default to website
+    return 'website';
+  }
+
+  /**
+   * Discover priority pages for pitch deck generation
+   * Revolutionary: Intelligently ranks pages by value for storytelling
+   */
+  private discoverPriorityPages(links: string[], baseUrl: string, projectType: string): Array<{url: string, type: 'about' | 'features' | 'pricing' | 'testimonials' | 'blog' | 'docs' | 'github' | 'other', priority: number}> {
+    const baseDomain = new URL(baseUrl).hostname;
+    const priorityPages: Array<{url: string, type: any, priority: number}> = [];
+    
+    // Priority patterns for pitch deck generation (ordered by importance)
+    const priorityPatterns = [
+      // Highest priority: Social proof and validation
+      { 
+        patterns: ['testimonial', 'customer', 'case-study', 'success', 'stories', 'reviews', 'clients', 'users'],
+        type: 'testimonials' as const,
+        priority: 100,
+        description: 'Social proof'
+      },
+      // High priority: Value proposition
+      { 
+        patterns: ['features', 'product', 'solutions', 'capabilities', 'how-it-works', 'what-we-do'],
+        type: 'features' as const,
+        priority: 90,
+        description: 'Product features'
+      },
+      // High priority: About/Company story
+      { 
+        patterns: ['about', 'company', 'team', 'story', 'mission', 'vision', 'why'],
+        type: 'about' as const,
+        priority: 85,
+        description: 'Company story'
+      },
+      // Medium-high: Pricing/Business model
+      { 
+        patterns: ['pricing', 'plans', 'purchase', 'buy', 'pricing-table'],
+        type: 'pricing' as const,
+        priority: 75,
+        description: 'Pricing model'
+      },
+      // Medium: Documentation/Technical
+      { 
+        patterns: ['docs', 'documentation', 'guide', 'api', 'developer', 'integration'],
+        type: 'docs' as const,
+        priority: 60,
+        description: 'Technical docs'
+      },
+      // Medium: Blog/Content
+      { 
+        patterns: ['blog', 'news', 'updates', 'announcements', 'articles'],
+        type: 'blog' as const,
+        priority: 50,
+        description: 'Content/blog'
+      },
+    ];
+    
+    // For GitHub repos, prioritize README and docs
+    if (projectType === 'github') {
+      priorityPatterns.unshift({
+        patterns: ['readme', 'docs', 'documentation'],
+        type: 'docs' as const,
+        priority: 95,
+        description: 'GitHub docs'
+      });
+    }
+    
+    // Score and categorize each link
+    for (const link of links) {
+      try {
+        const linkUrl = new URL(link);
+        const linkHost = linkUrl.hostname;
+        const linkPath = linkUrl.pathname.toLowerCase();
+        
+        // Only include same-domain links
+        if (linkHost !== baseDomain && !linkHost.includes(baseDomain.replace('www.', ''))) {
+          continue;
+        }
+        
+        // Skip common non-content pages
+        const skipPatterns = ['privacy', 'terms', 'legal', 'cookie', 'contact', 'support', 'login', 'signup', 'register'];
+        if (skipPatterns.some(pattern => linkPath.includes(pattern))) {
+          continue;
+        }
+        
+        // Score the link based on priority patterns
+        let maxPriority = 0;
+        let matchedType: any = 'other';
+        
+        for (const patternGroup of priorityPatterns) {
+          const matches = patternGroup.patterns.some(pattern => 
+            linkPath.includes(pattern) || link.toLowerCase().includes(pattern)
+          );
+          
+          if (matches && patternGroup.priority > maxPriority) {
+            maxPriority = patternGroup.priority;
+            matchedType = patternGroup.type;
+          }
+        }
+        
+        // If no pattern matched, give it a low priority
+        if (maxPriority === 0) {
+          maxPriority = 10;
+          matchedType = 'other';
+        }
+        
+        priorityPages.push({
+          url: link,
+          type: matchedType,
+          priority: maxPriority
+        });
+      } catch (error) {
+        // Skip invalid URLs
+        continue;
+      }
+    }
+    
+    // Sort by priority (highest first), then by URL length (shorter = usually more important)
+    priorityPages.sort((a, b) => {
+      if (b.priority !== a.priority) {
+        return b.priority - a.priority;
+      }
+      return a.url.length - b.url.length;
+    });
+    
+    // Remove duplicates (same URL)
+    const seen = new Set<string>();
+    const uniquePages = priorityPages.filter(page => {
+      if (seen.has(page.url)) {
+        return false;
+      }
+      seen.add(page.url);
+      return true;
+    });
+    
+    return uniquePages;
+  }
+
+  /**
+   * Check if URL is a GitHub repository
+   */
+  private isGitHubUrl(url: string): boolean {
+    return url.toLowerCase().includes('github.com');
+  }
+
+  /**
+   * Extract comprehensive GitHub intelligence for pitch deck generation
+   * Revolutionary: Multi-faceted GitHub analysis with graceful error handling
+   */
+  private async extractGitHubIntelligence(url: string): Promise<ScrapeResult[]> {
+    const intelligencePages: ScrapeResult[] = [];
+    
+    try {
+      const githubRepoMatch = url.match(/github\.com\/([^\/]+)\/([^\/]+)/);
+      if (!githubRepoMatch) {
+        return [];
+      }
+      
+      const [, owner, repo] = githubRepoMatch;
+      const baseRepoUrl = `https://github.com/${owner}/${repo}`;
+      
+      console.log(`   📊 Extracting GitHub intelligence for ${owner}/${repo}...`);
+      
+      // Use Promise.allSettled to run all extractions in parallel and continue even if some fail
+      const extractionPromises = [
+        // 1. Repository Overview & Metrics (highest priority)
+        this.extractGitHubMetrics(baseRepoUrl, owner, repo).catch(err => {
+          console.warn(`   ⚠️ Metrics extraction failed: ${err.message}`);
+          return null;
+        }),
+        
+        // 2. README Deep Analysis (high priority)
+        this.extractGitHubReadme(baseRepoUrl, owner, repo).catch(err => {
+          console.warn(`   ⚠️ README extraction failed: ${err.message}`);
+          return null;
+        }),
+        
+        // 3. Releases (medium priority - can skip if fails)
+        this.extractGitHubReleases(baseRepoUrl, owner, repo).catch(err => {
+          console.warn(`   ⚠️ Releases extraction failed: ${err.message}`);
+          return null;
+        }),
+        
+        // 4. Issues (medium priority - can skip if fails)
+        this.extractGitHubIssues(baseRepoUrl, owner, repo).catch(err => {
+          console.warn(`   ⚠️ Issues extraction failed: ${err.message}`);
+          return null;
+        }),
+        
+        // 5. Contributors (lower priority - can skip if fails)
+        this.extractGitHubContributors(baseRepoUrl, owner, repo).catch(err => {
+          console.warn(`   ⚠️ Contributors extraction failed: ${err.message}`);
+          return null;
+        }),
+        
+        // 6. Tech Stack (lower priority - can skip if fails)
+        this.extractGitHubTechStack(baseRepoUrl, owner, repo).catch(err => {
+          console.warn(`   ⚠️ Tech stack extraction failed: ${err.message}`);
+          return null;
+        }),
+      ];
+      
+      // Wait for all extractions (some may fail, that's OK)
+      const results = await Promise.allSettled(extractionPromises);
+      
+      // Collect successful results
+      for (const result of results) {
+        if (result.status === 'fulfilled' && result.value) {
+          intelligencePages.push(result.value);
+        }
+      }
+      
+      console.log(`   ✅ Successfully extracted ${intelligencePages.length}/6 GitHub intelligence pages`);
+      return intelligencePages;
+      
+    } catch (error: any) {
+      console.warn(`   ⚠️ Error in GitHub intelligence extraction: ${error.message}`);
+      return intelligencePages; // Return what we have so far
+    }
+  }
+
+  /**
+   * Extract repository metrics and overview
+   */
+  private async extractGitHubMetrics(baseRepoUrl: string, owner: string, repo: string): Promise<ScrapeResult | null> {
+    try {
+      console.log(`   📈 Extracting repository metrics and overview...`);
+      const metricsPrompt = `Visit ${baseRepoUrl} and extract comprehensive repository intelligence:
+
+REPOSITORY METRICS:
+- Number of stars ⭐
+- Number of forks 🍴
+- Number of watchers 👀
+- Number of contributors 👥
+- Number of open/closed issues
+- Number of open/closed pull requests
+- Repository size
+- Language breakdown (if shown)
+- License type
+- Last updated date
+- Created date
+
+REPOSITORY DESCRIPTION:
+- Main description/tagline
+- Repository topics/tags
+- Website link (if any)
+- Any badges or status indicators
+
+ACTIVITY INDICATORS:
+- Recent commit activity
+- Recent releases
+- Community engagement signals
+
+Format the output clearly with all metrics and descriptions.`;
+
+      const metricsTaskId = await this.createTask(metricsPrompt);
+      const metricsResult = await this.pollTask(metricsTaskId);
+      
+      if (metricsResult && metricsResult.trim().length > 0) {
+        return {
+          url: baseRepoUrl,
+          title: `${repo} - Repository Metrics & Overview`,
+          content: `REPOSITORY: ${owner}/${repo}\n\n${metricsResult.substring(0, 4000)}`,
+          metadata: {
+            description: `GitHub repository metrics, stars, forks, contributors, and activity for ${owner}/${repo}`
+          },
+          links: []
+        };
+      }
+      return null;
+    } catch (error: any) {
+      throw new Error(`Metrics extraction failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Extract README deep analysis
+   */
+  private async extractGitHubReadme(baseRepoUrl: string, owner: string, repo: string): Promise<ScrapeResult | null> {
+    try {
+      console.log(`   📖 Extracting comprehensive README analysis...`);
+      const readmePrompt = `Visit ${baseRepoUrl} and analyze the README file in detail. Extract:
+
+PROJECT OVERVIEW:
+- Project name and tagline
+- What problem does this solve?
+- Target audience/users
+- Main value proposition
+
+FEATURES & CAPABILITIES:
+- Key features (list all)
+- Technical capabilities
+- What makes it unique/different
+- Use cases and examples
+
+TECHNOLOGY STACK:
+- Programming languages used
+- Frameworks and libraries
+- Dependencies mentioned
+- Architecture or design patterns
+
+INSTALLATION & USAGE:
+- How to install/setup
+- Quick start guide
+- Usage examples
+- Configuration options
+
+COMMUNITY & CONTRIBUTION:
+- Contributing guidelines
+- Code of conduct
+- Community links (Discord, Slack, etc.)
+- How to report issues
+
+METRICS & BADGES:
+- Any badges shown (build status, coverage, etc.)
+- Version information
+- Release information
+
+Extract everything comprehensively - this is critical for understanding the project.`;
+
+      const readmeTaskId = await this.createTask(readmePrompt);
+      const readmeResult = await this.pollTask(readmeTaskId);
+      
+      if (readmeResult && readmeResult.trim().length > 0) {
+        return {
+          url: `${baseRepoUrl}#readme`,
+          title: `${repo} - README Deep Analysis`,
+          content: readmeResult.substring(0, 6000),
+          metadata: {
+            description: `Comprehensive README analysis for ${owner}/${repo}`
+          },
+          links: []
+        };
+      }
+      return null;
+    } catch (error: any) {
+      throw new Error(`README extraction failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Extract releases and changelog
+   */
+  private async extractGitHubReleases(baseRepoUrl: string, owner: string, repo: string): Promise<ScrapeResult | null> {
+    try {
+      console.log(`   🚀 Extracting releases and changelog...`);
+      const releasesPrompt = `Visit ${baseRepoUrl}/releases and extract:
+
+RECENT RELEASES:
+- Latest release version and date
+- Release notes/changelog
+- What's new in recent versions
+- Breaking changes
+- New features added
+- Bug fixes
+- Performance improvements
+
+RELEASE HISTORY:
+- Number of total releases
+- Release frequency
+- Major milestones
+- Version progression
+
+Extract release information that shows project maturity and active development.`;
+
+      const releasesTaskId = await this.createTask(releasesPrompt);
+      const releasesResult = await this.pollTask(releasesTaskId);
+      
+      if (releasesResult && releasesResult.trim().length > 0) {
+        return {
+          url: `${baseRepoUrl}/releases`,
+          title: `${repo} - Releases & Changelog`,
+          content: releasesResult.substring(0, 3000),
+          metadata: {
+            description: `Release history and changelog for ${owner}/${repo}`
+          },
+          links: []
+        };
+      }
+      return null;
+    } catch (error: any) {
+      throw new Error(`Releases extraction failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Extract issues and community engagement
+   */
+  private async extractGitHubIssues(baseRepoUrl: string, owner: string, repo: string): Promise<ScrapeResult | null> {
+    try {
+      console.log(`   💬 Extracting community engagement...`);
+      const issuesPrompt = `Visit ${baseRepoUrl}/issues and analyze community engagement:
+
+COMMUNITY METRICS:
+- Number of open issues
+- Number of closed issues
+- Issue resolution rate (if visible)
+- Recent issue activity
+
+COMMUNITY SIGNALS:
+- Types of issues (bugs, features, questions)
+- Response time indicators
+- Community participation
+- Maintainer activity
+
+FEATURE REQUESTS:
+- Popular feature requests
+- What users are asking for
+- Pain points mentioned
+
+This helps understand community needs and project direction.`;
+
+      const issuesTaskId = await this.createTask(issuesPrompt);
+      const issuesResult = await this.pollTask(issuesTaskId);
+      
+      if (issuesResult && issuesResult.trim().length > 0) {
+        return {
+          url: `${baseRepoUrl}/issues`,
+          title: `${repo} - Community Engagement`,
+          content: issuesResult.substring(0, 3000),
+          metadata: {
+            description: `Community engagement and issue analysis for ${owner}/${repo}`
+          },
+          links: []
+        };
+      }
+      return null;
+    } catch (error: any) {
+      throw new Error(`Issues extraction failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Extract contributors and team information
+   */
+  private async extractGitHubContributors(baseRepoUrl: string, owner: string, repo: string): Promise<ScrapeResult | null> {
+    try {
+      console.log(`   👥 Extracting contributor information...`);
+      const contributorsPrompt = `Visit ${baseRepoUrl}/graphs/contributors and extract:
+
+CONTRIBUTOR METRICS:
+- Total number of contributors
+- Top contributors
+- Contribution activity over time
+- Commit frequency
+- Community growth trend
+
+TEAM SIGNALS:
+- Maintainer activity
+- Community contributions
+- Project ownership
+- Active development indicators
+
+This shows project health and community involvement.`;
+
+      const contributorsTaskId = await this.createTask(contributorsPrompt);
+      const contributorsResult = await this.pollTask(contributorsTaskId);
+      
+      if (contributorsResult && contributorsResult.trim().length > 0) {
+        return {
+          url: `${baseRepoUrl}/graphs/contributors`,
+          title: `${repo} - Contributors & Team`,
+          content: contributorsResult.substring(0, 3000),
+          metadata: {
+            description: `Contributor and team information for ${owner}/${repo}`
+          },
+          links: []
+        };
+      }
+      return null;
+    } catch (error: any) {
+      throw new Error(`Contributors extraction failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Extract technology stack
+   */
+  private async extractGitHubTechStack(baseRepoUrl: string, owner: string, repo: string): Promise<ScrapeResult | null> {
+    try {
+      console.log(`   🔧 Extracting technology stack...`);
+      const techPrompt = `Visit ${baseRepoUrl} and analyze the codebase structure:
+
+TECHNOLOGY STACK:
+- Programming languages (from file extensions and language stats)
+- Frameworks and libraries (from package.json, requirements.txt, Gemfile, etc.)
+- Build tools and dependencies
+- Architecture patterns visible
+
+CODE ORGANIZATION:
+- Directory structure
+- Key files and their purposes
+- Configuration files
+- Documentation structure
+
+DEPENDENCIES:
+- External dependencies
+- Technology choices
+- Integration capabilities
+
+Extract what technologies and tools this project uses.`;
+
+      const techTaskId = await this.createTask(techPrompt);
+      const techResult = await this.pollTask(techTaskId);
+      
+      if (techResult && techResult.trim().length > 0) {
+        return {
+          url: baseRepoUrl,
+          title: `${repo} - Technology Stack`,
+          content: techResult.substring(0, 3000),
+          metadata: {
+            description: `Technology stack and code structure for ${owner}/${repo}`
+          },
+          links: []
+        };
+      }
+      return null;
+    } catch (error: any) {
+      throw new Error(`Tech stack extraction failed: ${error.message}`);
+    }
+  }
+
+  /**
    * Create a task with the Agent API with retry logic
    */
   private async createTask(prompt: string, retries: number = 3): Promise<string> {
     for (let attempt = 1; attempt <= retries; attempt++) {
       try {
         console.log(`   📤 Creating task with Browser.cash Agent API... (attempt ${attempt}/${retries})`);
-        console.log(`   📡 Endpoint: ${this.baseUrl}/v1/task/create`);
-        
-        const response = await axios.post<TaskResponse>(
-          `${this.baseUrl}/v1/task/create`,
-          {
-            agent: 'gemini',
-            prompt: prompt,
-            mode: 'text',
-            stepLimit: 20, // Higher limit for comprehensive scraping
+      console.log(`   📡 Endpoint: ${this.baseUrl}/v1/task/create`);
+      
+      const response = await axios.post<TaskResponse>(
+        `${this.baseUrl}/v1/task/create`,
+        {
+          agent: 'gemini',
+          prompt: prompt,
+          mode: 'text',
+          stepLimit: 20, // Higher limit for comprehensive scraping
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${this.agentApiKey}`,
+            'Content-Type': 'application/json',
           },
-          {
-            headers: {
-              'Authorization': `Bearer ${this.agentApiKey}`,
-              'Content-Type': 'application/json',
-            },
-            timeout: 60000, // Increased to 60 seconds for task creation
-            validateStatus: (status) => status < 500, // Don't throw on 4xx errors
+          timeout: 60000, // Increased to 60 seconds for task creation
+          validateStatus: (status) => status < 500, // Don't throw on 4xx errors
             // Add HTTPS agent configuration for better SSL handling
             httpsAgent: new (require('https').Agent)({
               rejectUnauthorized: true,
               keepAlive: true,
               keepAliveMsecs: 1000,
             }),
-          }
-        );
-
-        // Check for error responses
-        if (response.status >= 400) {
-          const errorData: any = response.data;
-          let errorMsg = `HTTP ${response.status}`;
-          if (errorData && typeof errorData === 'object') {
-            errorMsg += `: ${JSON.stringify(errorData)}`;
-          } else if (typeof errorData === 'string') {
-            errorMsg += `: ${errorData.substring(0, 200)}`;
-          }
-          throw new Error(`Failed to create task: ${errorMsg}`);
         }
+      );
 
-        if (!response.data || !response.data.taskId) {
-          console.error('   ❌ Invalid response structure:', JSON.stringify(response.data, null, 2));
-          throw new Error('No taskId in response: ' + JSON.stringify(response.data));
+      // Check for error responses
+      if (response.status >= 400) {
+        const errorData: any = response.data;
+        let errorMsg = `HTTP ${response.status}`;
+        if (errorData && typeof errorData === 'object') {
+          errorMsg += `: ${JSON.stringify(errorData)}`;
+        } else if (typeof errorData === 'string') {
+          errorMsg += `: ${errorData.substring(0, 200)}`;
         }
+        throw new Error(`Failed to create task: ${errorMsg}`);
+      }
 
-        console.log(`   ✅ Task created successfully: ${response.data.taskId}`);
-        return response.data.taskId;
-      } catch (error: any) {
+      if (!response.data || !response.data.taskId) {
+        console.error('   ❌ Invalid response structure:', JSON.stringify(response.data, null, 2));
+        throw new Error('No taskId in response: ' + JSON.stringify(response.data));
+      }
+
+      console.log(`   ✅ Task created successfully: ${response.data.taskId}`);
+      return response.data.taskId;
+    } catch (error: any) {
         console.error(`   ❌ Task creation failed (attempt ${attempt}/${retries}):`, error.message);
         console.error('   Error code:', error.code);
         
@@ -234,33 +894,33 @@ Please be comprehensive and include all important information from the page.`;
           if (error.code === 'ETIMEDOUT' || error.code === 'ECONNABORTED') {
             throw new Error(`Connection timeout: The Browser.cash API did not respond within the timeout period. The service may be slow or unavailable.`);
           }
-          
-          if (error.response) {
-            const status = error.response.status;
-            const data = error.response.data;
-            
-            // If we get HTML back, it's likely a 404 from wrong endpoint
-            if (typeof data === 'string' && data.includes('<!DOCTYPE html>')) {
+      
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+        
+        // If we get HTML back, it's likely a 404 from wrong endpoint
+        if (typeof data === 'string' && data.includes('<!DOCTYPE html>')) {
               throw new Error(`Failed to create task: Endpoint not found (404). The API endpoint may be incorrect. Expected: ${this.baseUrl}/v1/task/create. Please verify the correct endpoint in Browser.cash documentation.`);
             }
             
             // Handle authentication errors
             if (status === 401 || status === 403) {
               throw new Error(`Authentication failed (HTTP ${status}): Invalid or expired API key. Please check your AGENT_API_KEY in the .env file.`);
-            }
-            
-            // Try to extract error message from response
-            let errorMsg = `HTTP ${status}`;
-            if (typeof data === 'string') {
-              errorMsg += `: ${data.substring(0, 200)}`;
-            } else if (data && typeof data === 'object') {
-              errorMsg += `: ${JSON.stringify(data).substring(0, 200)}`;
-            }
-            
-            throw new Error(`Failed to create task: ${errorMsg}`);
-          }
+        }
+        
+        // Try to extract error message from response
+        let errorMsg = `HTTP ${status}`;
+        if (typeof data === 'string') {
+          errorMsg += `: ${data.substring(0, 200)}`;
+        } else if (data && typeof data === 'object') {
+          errorMsg += `: ${JSON.stringify(data).substring(0, 200)}`;
+        }
+        
+        throw new Error(`Failed to create task: ${errorMsg}`);
+      }
           
-          if (error.request) {
+      if (error.request) {
             throw new Error(`No response from server: The Browser.cash API at ${this.baseUrl} did not respond after ${retries} attempts. Possible causes: 1) API endpoint is incorrect, 2) Service is down, 3) Network/firewall blocking the connection. Please verify the API endpoint and check https://browser.cash for service status.`);
           }
           
@@ -316,42 +976,60 @@ Please be comprehensive and include all important information from the page.`;
         }
 
         const data = response.data;
-        const state = data.state;
-
-        // Log progress every 5 attempts or on state changes
-        if (attempts % 5 === 0 || state === 'completed' || state === 'failed' || state === 'error') {
-          const duration = data.stoppedAt 
-            ? Math.round((data.stoppedAt - data.startedAt) / 1000)
-            : Math.round((Date.now() - data.startedAt) / 1000);
-          console.log(`   📊 Polling (${attempts}/${maxAttempts}): State = "${state}", Duration = ${duration}s`);
+        // Check both 'status' (official) and 'state' (alternative) fields per docs
+        const status = data.status || data.state;
+        
+        // Handle queued/running states (continue polling)
+        if (status === 'queued' || status === 'running' || status === 'active') {
+          // Log progress every 5 attempts
+          if (attempts % 5 === 0) {
+            const duration = data.stoppedAt && data.startedAt
+              ? Math.round((data.stoppedAt - data.startedAt) / 1000)
+              : data.startedAt
+              ? Math.round((Date.now() - data.startedAt) / 1000)
+              : 0;
+            console.log(`   📊 Polling (${attempts}/${maxAttempts}): Status = "${status}", Duration = ${duration}s`);
+          }
+          // Continue polling
+        } else if (status === 'completed') {
+          // Task completed - extract result
+          console.log(`   ✅ Task completed! Extracting result...`);
           
-          // Log additional info for failed tasks
-          if (state === 'failed' || state === 'error') {
-            const failedReason = (data as any).failedReason || data.result?.answer || 'Unknown error';
-            console.error(`   ❌ Task failed: ${failedReason}`);
-          }
-        }
-
-        if (state === 'completed') {
-          if (data.result && data.result.answer) {
-            console.log(`   ✅ Task completed successfully!`);
-            return data.result.answer;
-          }
-          // Check if result is in a different format
-          if (data.result && typeof data.result === 'object') {
-            console.warn(`   ⚠️ Unexpected result format:`, JSON.stringify(data.result, null, 2));
-            // Try to extract answer from result object
-            const answer = (data.result as any).answer || (data.result as any).content || JSON.stringify(data.result);
-            if (answer) {
-              return answer;
+          // Extract result - can be in various formats per docs
+          let resultText: string | null = null;
+          
+          if (data.result) {
+            if (typeof data.result === 'string') {
+              resultText = data.result;
+            } else if (typeof data.result === 'object') {
+              // Try different possible result field names
+              resultText = data.result.answer || 
+                          data.result.content || 
+                          data.result.text ||
+                          (typeof data.result === 'object' ? JSON.stringify(data.result) : null);
             }
           }
-          throw new Error('Task completed but no result found in response');
-        }
-
-        if (state === 'failed' || state === 'error') {
-          const failedReason = (data as any).failedReason || data.result?.answer || 'Unknown error';
+          
+          if (resultText && resultText.trim().length > 0) {
+            console.log(`   ✅ Result extracted (${resultText.length} chars)`);
+            return resultText;
+          } else {
+            console.warn(`   ⚠️ Task completed but result is empty or missing`);
+            console.warn(`   📄 Full response:`, JSON.stringify(data, null, 2));
+            throw new Error('Task completed but no result found in response');
+          }
+        } else if (status === 'failed' || status === 'error') {
+          // Task failed - extract error reason
+          const failedReason = data.failedReason || 
+                              data.error || 
+                              (data.result && typeof data.result === 'object' ? data.result.answer : null) ||
+                              (data.result && typeof data.result === 'string' ? data.result : null) ||
+                              'Unknown error';
+          console.error(`   ❌ Task failed: ${failedReason}`);
           throw new Error(`Task failed: ${failedReason}`);
+        } else {
+          // Unknown status - log and continue
+          console.warn(`   ⚠️ Unknown status "${status}", continuing to poll...`);
         }
 
         // Wait before next poll
