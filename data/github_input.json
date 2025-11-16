@@ -1,0 +1,45 @@
+{
+  "company_name": "GitHub",
+  "website_url": "https://github.com",
+  "industry": "Developer Platform & Version Control",
+  "description": "GitHub is the world's leading platform for software development, collaboration, and version control, trusted by millions of developers worldwide.",
+  "target_market": "Developers, teams, and organizations building software",
+  "key_features": [
+    {
+      "feature_name": "Code Hosting & Repositories",
+      "description": "Host unlimited public and private repositories with powerful version control",
+      "importance": "high",
+      "demo_priority": 1
+    },
+    {
+      "feature_name": "Collaboration Tools",
+      "description": "Pull requests, code review, and team collaboration features",
+      "importance": "high",
+      "demo_priority": 2
+    },
+    {
+      "feature_name": "Search & Discovery",
+      "description": "Find open source projects and repositories easily",
+      "importance": "high",
+      "demo_priority": 3
+    },
+    {
+      "feature_name": "GitHub Actions",
+      "description": "Automated CI/CD workflows and deployment pipelines",
+      "importance": "high",
+      "demo_priority": 4
+    }
+  ],
+  "unique_selling_points": [
+    "World's largest developer community",
+    "Seamless collaboration workflows",
+    "Integrated CI/CD with GitHub Actions",
+    "Powerful code search and discovery"
+  ],
+  "demo_sections_to_highlight": [
+    "Homepage - explore trending repositories",
+    "Search - find popular projects",
+    "Repository page - code and collaboration features",
+    "Features - GitHub Actions and tools"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "company_name": "Shopify",
+  "website_url": "https://www.shopify.com",
+  "industry": "E-commerce Platform & SaaS",
+  "description": "Shopify is a leading e-commerce platform that enables businesses of all sizes to create online stores, sell products, and manage their business operations.",
+  "target_market": "Entrepreneurs, small businesses, and enterprises looking to establish or scale their online presence",
+  "key_features": [
+    {
+      "feature_name": "Easy Store Setup",
+      "description": "Intuitive tools to create professional online stores without coding knowledge",
+      "importance": "high",
+      "demo_priority": 1
+    },
+    {
+      "feature_name": "Customizable Themes",
+      "description": "Beautiful, responsive themes that can be customized to match brand identity",
+      "importance": "high",
+      "demo_priority": 2
+    },
+    {
+      "feature_name": "Integrated Payment Processing",
+      "description": "Built-in payment gateway and support for multiple payment providers",
+      "importance": "high",
+      "demo_priority": 3
+    },
+    {
+      "feature_name": "Inventory Management",
+      "description": "Comprehensive tools to track and manage product inventory",
+      "importance": "high",
+      "demo_priority": 4
+    },
+    {
+      "feature_name": "Marketing Tools",
+      "description": "Built-in SEO, email marketing, and social media integration",
+      "importance": "medium",
+      "demo_priority": 5
+    },
+    {
+      "feature_name": "Analytics Dashboard",
+      "description": "Real-time insights into sales, traffic, and customer behavior",
+      "importance": "medium",
+      "demo_priority": 6
+    }
+  ],
+  "unique_selling_points": [
+    "All-in-one platform for online business",
+    "Scales from startup to enterprise",
+    "Extensive app marketplace for customization",
+    "24/7 customer support"
+  ],
+  "demo_sections_to_highlight": [
+    "Homepage - value proposition and key features",
+    "Pricing page - transparent pricing tiers",
+    "Features overview - comprehensive toolset",
+    "Success stories - customer testimonials",
+    "App store - extensibility options"
+  ]
+}

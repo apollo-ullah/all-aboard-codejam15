@@ -1,0 +1,45 @@
+{
+  "company_name": "Example Store Demo",
+  "website_url": "https://demo.playwright.dev/todomvc/",
+  "industry": "Demo Application",
+  "description": "A demonstration of a simple todo application showcasing web interaction capabilities",
+  "target_market": "Users looking to organize their tasks efficiently",
+  "key_features": [
+    {
+      "feature_name": "Task Creation",
+      "description": "Easy input field to add new tasks quickly",
+      "importance": "high",
+      "demo_priority": 1
+    },
+    {
+      "feature_name": "Task Management",
+      "description": "Mark tasks as complete with simple checkboxes",
+      "importance": "high",
+      "demo_priority": 2
+    },
+    {
+      "feature_name": "Task Filtering",
+      "description": "View all, active, or completed tasks with filters",
+      "importance": "medium",
+      "demo_priority": 3
+    },
+    {
+      "feature_name": "Clean Interface",
+      "description": "Minimalist design for focused productivity",
+      "importance": "medium",
+      "demo_priority": 4
+    }
+  ],
+  "unique_selling_points": [
+    "Simple and intuitive interface",
+    "Fast and responsive",
+    "Clean minimalist design",
+    "Easy task organization"
+  ],
+  "demo_sections_to_highlight": [
+    "Main input - adding tasks",
+    "Task list - viewing todos",
+    "Completion - marking tasks done",
+    "Filters - organizing view"
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "company_name": "Amazon Canada",
+  "website_url": "https://www.amazon.ca",
+  "industry": "E-commerce & Retail",
+  "description": "Amazon.ca is Canada's premier online shopping destination offering millions of products across categories including electronics, home goods, fashion, and groceries with fast delivery options.",
+  "target_market": "Canadian consumers seeking convenient online shopping with competitive prices and fast delivery",
+  "key_features": [
+    {
+      "feature_name": "Extensive Product Catalog",
+      "description": "Millions of products across diverse categories from electronics to household essentials",
+      "importance": "high",
+      "demo_priority": 1
+    },
+    {
+      "feature_name": "Prime Membership Benefits",
+      "description": "Fast free shipping, exclusive deals, and streaming services for Prime members",
+      "importance": "high",
+      "demo_priority": 2
+    },
+    {
+      "feature_name": "User-Friendly Search",
+      "description": "Advanced search and filtering system to help customers find exactly what they need",
+      "importance": "high",
+      "demo_priority": 3
+    },
+    {
+      "feature_name": "Customer Reviews & Ratings",
+      "description": "Verified customer reviews and ratings to help shoppers make informed decisions",
+      "importance": "high",
+      "demo_priority": 4
+    },
+    {
+      "feature_name": "Personalized Recommendations",
+      "description": "AI-powered product suggestions based on browsing and purchase history",
+      "importance": "medium",
+      "demo_priority": 5
+    },
+    {
+      "feature_name": "Shopping Cart & Wishlist",
+      "description": "Easy-to-use cart system and wishlist for saving items for later",
+      "importance": "medium",
+      "demo_priority": 6
+    },
+    {
+      "feature_name": "Deals & Special Offers",
+      "description": "Daily deals, lightning deals, and special promotional offers",
+      "importance": "medium",
+      "demo_priority": 7
+    },
+    {
+      "feature_name": "Multiple Payment Options",
+      "description": "Secure checkout with various payment methods including credit cards and gift cards",
+      "importance": "high",
+      "demo_priority": 8
+    }
+  ],
+  "unique_selling_points": [
+    "Vast product selection with competitive pricing",
+    "Fast and reliable delivery network across Canada",
+    "Trusted brand with customer-centric policies",
+    "Seamless shopping experience from browse to checkout"
+  ],
+  "demo_sections_to_highlight": [
+    "Homepage - showcasing featured products and deals",
+    "Search functionality - finding products efficiently",
+    "Product detail page - detailed information and reviews",
+    "Category browsing - exploring different departments",
+    "Cart and checkout process - ease of purchase"
+  ]
+}
