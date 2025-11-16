@@ -245,8 +245,7 @@ REMEMBER: You're not just summarizing a website. You're crafting a narrative tha
           position: node.position || { x: index * 300, y: 0 }
         }));
       }
-      
-      return parsed;
+      return parsed
     } catch (error: any) {
       throw new Error(`Failed to parse storyboard JSON: ${error.message}`);
     }
