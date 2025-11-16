@@ -77,7 +77,7 @@ export default function StoryboardAssistant({
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: data.response || data.message || 'I received your message, but I need more context.',
+        content: data.response || 'I received your message, but I need more context.',
         timestamp: new Date(),
       };
 

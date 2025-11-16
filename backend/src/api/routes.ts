@@ -12,12 +12,11 @@ const router = express.Router();
 // GET /api/test-scrape - Quick test of scraping functionality
 router.get('/test-scrape', async (req, res) => {
   try {
-    if (!process.env.AGENT_API_KEY) {
-      return res.status(500).json({ error: 'AGENT_API_KEY not configured' });
-    }
+    const FALLBACK_API_KEY = 'yl6ycfwomtu81045r2vn2gdyppkit98brg6qclo54o101jvtghnzr9b3nkgyy0va';
+    const apiKey = process.env.AGENT_API_KEY || FALLBACK_API_KEY;
     
-    const browserCash = new BrowserCashService({
-      agentApiKey: process.env.AGENT_API_KEY,
+    const scraper = new BrowserCashService({
+      agentApiKey: apiKey,
       baseUrl: 'https://agent-api.browser.cash'
     });
     
@@ -25,7 +24,7 @@ router.get('/test-scrape', async (req, res) => {
     const startTime = Date.now();
     
     try {
-      const result = await browserCash.scrapeWebsite('https://example.com');
+      const result = await scraper.scrapeWebsite('https://example.com');
       const duration = Date.now() - startTime;
       
       res.json({
@@ -162,17 +161,14 @@ router.post('/scrape', async (req, res) => {
       return res.status(400).json({ error: 'Invalid URL format. Please provide a valid http:// or https:// URL' });
     }
     
-    // 1. Scrape website using Browser.cash Agent API
-    if (!process.env.AGENT_API_KEY) {
-      console.error(`   ❌ [${requestId}] AGENT_API_KEY not configured`);
-      return res.status(500).json({ error: 'AGENT_API_KEY not configured' });
-    }
+    // 1. Scrape website using Browser.cash (with Playwright fallback)
+    const FALLBACK_API_KEY = 'yl6ycfwomtu81045r2vn2gdyppkit98brg6qclo54o101jvtghnzr9b3nkgyy0va';
+    const apiKey = process.env.AGENT_API_KEY || FALLBACK_API_KEY;
     
-    console.log(`   ✅ [${requestId}] API key configured (length: ${process.env.AGENT_API_KEY.length})`);
+    console.log(`   ✅ [${requestId}] Using Browser.cash (with Playwright fallback)`);
     
-    const browserCash = new BrowserCashService({
-      agentApiKey: process.env.AGENT_API_KEY,
-      // Base URL is hardcoded to agent-api.browser.cash (not dashboard URL)
+    const scraper = new BrowserCashService({
+      agentApiKey: apiKey,
       baseUrl: 'https://agent-api.browser.cash'
     });
     
@@ -207,7 +203,7 @@ router.post('/scrape', async (req, res) => {
     if (!scrapedData) {
       console.log(`🌐 [${requestId}] Starting scrape for: ${url}`);
       try {
-        scrapedData = await browserCash.scrapeWebsite(url);
+        scrapedData = await scraper.scrapeWebsite(url);
       } catch (scrapeError: any) {
         const scrapeDuration = Date.now() - scrapeStartTime;
         console.error(`❌ [${requestId}] Scraping failed after ${scrapeDuration}ms:`, scrapeError.message);
@@ -305,14 +301,11 @@ router.post('/scrape', async (req, res) => {
     if (error.message?.includes('Task failed') || error.message?.includes('Task not found')) {
       userFriendlyMessage = 'Failed to scrape website. The site may be inaccessible or the scraping task failed.';
       errorMessage = error.message;
-    } else if (error.message?.includes('timeout') || error.message?.includes('Task timed out')) {
-      userFriendlyMessage = 'Scraping took too long. The website may be slow or complex.';
-      errorMessage = error.message;
-    } else if (error.message?.includes('AGENT_API_KEY')) {
-      userFriendlyMessage = 'Browser.cash API key not configured.';
+    } else if (error.message?.includes('timeout') || error.message?.includes('Task timed out') || error.message?.includes('Total scraping timeout')) {
+      userFriendlyMessage = 'Scraping took too long (30 seconds). The website may be slow or complex. Try a simpler page.';
       errorMessage = error.message;
     } else if (error.message?.includes('Network Error') || error.message?.includes('ECONNREFUSED') || error.message?.includes('SSL/TLS') || error.message?.includes('No response from server')) {
-      userFriendlyMessage = error.message || 'Cannot connect to Browser.cash API. Check your network connection and API configuration.';
+      userFriendlyMessage = error.message || 'Cannot connect to the website. Check your network connection.';
       errorMessage = error.message;
     } else if (error.message?.includes('OpenAI') || error.message?.includes('storyboard')) {
       userFriendlyMessage = 'Failed to generate storyboard. The scraping succeeded but storyboard generation failed.';
@@ -324,7 +317,7 @@ router.post('/scrape', async (req, res) => {
       res.status(500).json({ 
         error: userFriendlyMessage,
         message: errorMessage,
-        details: 'Using Browser.cash Agent API for web scraping',
+        details: 'Using Browser.cash with Playwright fallback',
         requestId: requestId,
         timestamp: new Date().toISOString()
       });

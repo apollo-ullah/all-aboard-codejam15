@@ -13,7 +13,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 300000, // 5 minutes for scraping (can take a while)
+  timeout: 100000, // 100 seconds timeout (backend times out at 90 seconds)
   withCredentials: false,
 });
 

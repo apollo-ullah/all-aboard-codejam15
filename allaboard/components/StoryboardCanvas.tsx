@@ -251,7 +251,7 @@ export default function StoryboardCanvas({ initialNodes, onNodesChange }: Storyb
   const lastSyncedNodes = useRef<string>('');
   
   // Sync node changes to parent component (only when nodes actually change, debounced)
-  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>();
+  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => {
     // Skip sync on initial mount
     if (isInitialMount.current) {
@@ -316,7 +316,7 @@ export default function StoryboardCanvas({ initialNodes, onNodesChange }: Storyb
   // Store ReactFlow instance to programmatically fit view
   const reactFlowInstance = useRef<ReactFlowInstance | null>(null);
   const hasFittedView = useRef(false);
-  const fitViewTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>();
+  const fitViewTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   
   // Consolidated fitView function
   const performFitView = useCallback(() => {
@@ -467,7 +467,6 @@ export default function StoryboardCanvas({ initialNodes, onNodesChange }: Storyb
         nodesDraggable={true}
         nodesConnectable={false}
         elementsSelectable={true}
-        connectionMode="loose"
         deleteKeyCode={null} // Disable delete key to prevent accidental deletions
       >
         <Background />
