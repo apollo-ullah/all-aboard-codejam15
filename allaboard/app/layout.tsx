@@ -7,25 +7,12 @@ import 'reactflow/dist/style.css'
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'All Aboard - Democratize Storytelling for Builders',
+  title: 'CORTEX',
   description: 'Drop in a GitHub repo or website URL. We analyze your work, understand what you built, and generate a presentation that does your project justice. Slides for pitches. Videos for demos.',
   generator: 'v0.app',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/cortex.png',
+    apple: '/cortex.png',
   },
 }
 

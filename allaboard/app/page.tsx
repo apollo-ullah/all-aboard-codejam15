@@ -514,15 +514,10 @@ export default function Home() {
 
       {/* Header */}
       <div className="relative z-50 border-b border-border/30 backdrop-blur-xl">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/30 flex items-center justify-center backdrop-blur-xl border border-primary/20">
-              <Sparkles className="w-4 h-4 text-primary" strokeWidth={2} />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-semibold text-foreground tracking-tight leading-tight">All Aboard</span>
-              <span className="text-[9px] text-muted-foreground leading-none">Pitch Perfect for Founders</span>
-            </div>
+        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+          <div className="flex items-center -ml-4">
+            <img src="/cortex.png" alt="CORTEX" className="w-[120px] h-[120px] object-contain" />
+            <span className="text-2xl font-bold text-foreground tracking-tight leading-tight">CORTEX</span>
           </div>
 
           {/* Mode selector */}
@@ -533,10 +528,18 @@ export default function Home() {
             >
               <CurrentModeIcon className={`w-4 h-4 ${modeConfig[mode].color}`} strokeWidth={2} />
               <span>{modeConfig[mode].label}</span>
+              <svg 
+                className={`w-4 h-4 transition-transform duration-200 ${modeMenuOpen ? 'rotate-180' : ''}`}
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </button>
 
             {modeMenuOpen && (
-              <div className="absolute top-full right-0 mt-2 w-48 glass rounded-xl overflow-hidden shadow-xl border border-border/40 z-50">
+              <div className="absolute top-full right-0 mt-2 w-48 glass rounded-xl overflow-hidden shadow-xl border border-border/40 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 {(Object.keys(modeConfig) as Mode[]).map((m) => {
                   const Icon = modeConfig[m].icon
                   return (
@@ -582,6 +585,11 @@ export default function Home() {
       {/* Main Content */}
       <div className="relative z-10 flex-1 flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-2xl space-y-4">
+
+          {/* Motto */}
+          <h1 className="text-center text-3xl font-bold tracking-tight mb-8" style={{ color: '#3E3875' }}>
+            Every product deserves a voice
+          </h1>
 
           <div className="relative w-full overflow-visible rounded-2xl">
             {/* Outer glow ring */}
@@ -741,7 +749,7 @@ export default function Home() {
                         : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
                     }`}
                   >
-                    📊 Standard
+                    Standard
                   </button>
                   <button
                     onClick={() => setAnalysisMode('competitive')}
@@ -751,7 +759,7 @@ export default function Home() {
                         : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
                     }`}
                   >
-                    🔍 Competitive
+                    Competitive
                   </button>
                   <button
                     onClick={() => setAnalysisMode('briefing')}
@@ -761,7 +769,7 @@ export default function Home() {
                         : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
                     }`}
                   >
-                    📋 Briefing
+                    Briefing
                   </button>
                   <button
                     onClick={() => setAnalysisMode('partnership')}
@@ -771,7 +779,7 @@ export default function Home() {
                         : 'text-muted-foreground hover:text-foreground hover:bg-accent/30'
                     }`}
                   >
-                    🤝 Partnership
+                    Partnership
                   </button>
                 </div>
               </div>
@@ -811,69 +819,39 @@ export default function Home() {
                    analysisMode === 'partnership' ? 'Create Pitch' : 'Generate Deck'}
                 </Button>
               </div>
-              
-              {/* Test Data Button */}
-              <div className="mt-3 text-center space-y-2">
-                <Button
-                  onClick={handleLoadTestData}
-                  variant="outline"
-                  size="sm"
-                  className="text-xs bg-background/50 backdrop-blur border-border/40 hover:bg-accent/50"
-                >
-                  🧪 Load Test Data
-                </Button>
-                <div>
-                  <Button
-                    onClick={() => {
-                      // Test with a hardcoded Gamma presentation URL
-                      // Replace this with an actual Gamma presentation URL you want to test
-                      const testUrl = prompt('Enter a Gamma presentation URL to test:', 'https://gamma.app/docs/your-presentation-id');
-                      if (testUrl) {
-                        setPresentationUrl(testUrl);
-                        setEmbedUrl(undefined);
-                        setDownloadUrl(undefined);
-                        setPdfUrl(undefined);
-                        setSlideCount(10); // Default slide count for testing
-                        setStage('presentation');
-                      }
-                    }}
-                    variant="outline"
-                    size="sm"
-                    className="text-xs bg-background/50 backdrop-blur border-border/40 hover:bg-accent/50"
-                  >
-                    🧪 Test Presentation Viewer
-                  </Button>
-                </div>
-              </div>
             </div>
           </div>
 
-          <p className="text-center text-xs text-muted-foreground/60">
-            {mode === 'speed' && '⚡ Quick presentation generation - Drop URL, get slides'}
-            {mode === 'simple' && '🎯 GitHub/Website → AI Analysis → Storyboard → Pitch Deck'}
-            {mode === 'advanced' && '🚀 Full control: Presentation style • Analysis mode • Sector targeting'}
-          </p>
-
-          {/* Value Prop */}
-          <div className="text-center space-y-2 pt-4">
-            <p className="text-sm text-white/80 font-medium">
-              Democratize storytelling for builders
-            </p>
-            <p className="text-xs text-white/60">
-              Every technical founder, student, and indie hacker should have a fair shot at showing what they built
-            </p>
-            <p className="text-xs text-white/50 mt-2">
-              Without needing to be a designer, video editor, or pitch expert
-            </p>
-            <div className="mt-3 pt-3 border-t border-white/10">
-              <p className="text-xs text-primary/90 font-semibold mb-1">
-                🚀 GitHub Repos Get Deep Intelligence:
-              </p>
-              <p className="text-xs text-white/50 leading-relaxed">
-                Stars • Forks • Contributors • Releases • Tech Stack • Community Engagement
-              </p>
-            </div>
+          {/* Test Buttons Row */}
+          <div className="flex items-center justify-center gap-3">
+            <Button
+              onClick={handleLoadTestData}
+              variant="outline"
+              size="sm"
+              className="text-xs bg-background/50 backdrop-blur border-border/40 hover:bg-accent/50"
+            >
+              Load Test Data
+            </Button>
+            <Button
+              onClick={() => {
+                const testUrl = prompt('Enter a Gamma presentation URL to test:', 'https://gamma.app/docs/your-presentation-id');
+                if (testUrl) {
+                  setPresentationUrl(testUrl);
+                  setEmbedUrl(undefined);
+                  setDownloadUrl(undefined);
+                  setPdfUrl(undefined);
+                  setSlideCount(10);
+                  setStage('presentation');
+                }
+              }}
+              variant="outline"
+              size="sm"
+              className="text-xs bg-background/50 backdrop-blur border-border/40 hover:bg-accent/50"
+            >
+              Test Presentation Viewer
+            </Button>
           </div>
+
         </div>
       </div>
 
