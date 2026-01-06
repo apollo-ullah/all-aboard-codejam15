@@ -1,4 +1,4 @@
-# All Aboard - Democratize Storytelling for Builders
+# Cortex- Democratize Storytelling for Builders
 
 ## The Mission
 
